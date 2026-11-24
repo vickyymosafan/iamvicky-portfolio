@@ -148,9 +148,9 @@ export function WelcomeScreen() {
           role="dialog"
           aria-modal="true"
           aria-label="Welcome to M. Vicky Mosafan Full-Stack & AI-Augmented Engineering Portfolio"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ y: "0%" }}
+          exit={{ y: "-100%" }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[90] flex flex-col overflow-hidden bg-background text-foreground"
         >
           {/* Upper & Lower Architectural Split Shutters */}

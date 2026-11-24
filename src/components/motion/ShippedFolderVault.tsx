@@ -13,18 +13,26 @@ import {
 import { ADDITIONAL_PROJECTS, AdditionalProject } from "@/data/portfolio";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
+import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 
 const FOLDER_FILTERS = ["All", "Full-Stack", "Trading & Data", "Utilities"] as const;
 
 /**
  * Interactive Animated Engineering Folder Vault for Additional Shipped Systems & Utilities:
  * - Starts CLOSED as a sculpted tactile 3D folder containing all 6 shipped project files.
- * - Clicking the folder opens its 3D front flap and springs all project files + category filters out.
- * - Scrolling downward past the vault collapses filters and smoothly retracts every file card back into the folder.
+ * - Clicking/tapping the folder opens its 3D front flap and springs all project files + category filters out.
+ * - Mobile-safe scroll retraction:
+ *   - NEVER collapses while the user is still scrolling down through the unpacked file cards!
+ *   - Enforces a 750ms post-open grace period so tapping + immediate touch momentum never snaps it shut.
+ *   - Only collapses filters & retracts files back into the folder once the user scrolls DOWNWARD
+ *     past the ENTIRE unpacked vault (bottom edge clears past the header at `rect.bottom <= 96`).
+ *   - Uses native `scrollend` (with debounced fallback for older browsers) to guarantee clean retraction
+ *     after fast momentum flings, and notifies Lenis via `resizeScroll()` so scroll bounds never jump.
  * - Scrolling back up from Section 02 / 03 keeps the folder CLOSED until explicitly clicked again.
  */
 export function ShippedFolderVault() {
   const { unlockAudio } = useAudioGate();
+  const { resizeScroll } = useSmoothScroll();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -34,35 +42,57 @@ export function ShippedFolderVault() {
   const vaultRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
   const isOpenRef = useRef(isOpen);
+  const openedAtRef = useRef(0);
+  const scrolledDownRef = useRef(false);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
-  }, [isOpen]);
+    const id = requestAnimationFrame(() => resizeScroll());
+    return () => cancelAnimationFrame(id);
+  }, [isOpen, activeFilter, resizeScroll]);
 
-  // Auto-retract files and close filters when scrolling downward past the folder vault.
-  // rAF-throttled so scroll events never force synchronous layout recalculation (zero INP/scroll jank).
+  // Auto-retract files and close filters ONLY after scrolling downward past the entire unpacked vault.
   // Never auto-reopens when scrolling back up (stays closed unless clicked).
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
     let rafPending = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const checkScroll = () => {
+    const evaluateRetract = (forceCheck = false) => {
       rafPending = false;
+      if (!isOpenRef.current) return;
+
+      // Mobile & desktop grace window right after clicking the folder
+      if (performance.now() - openedAtRef.current < 750) {
+        lastScrollYRef.current = window.scrollY;
+        return;
+      }
+
       const currentY = window.scrollY;
-      const scrollingDown = currentY > lastScrollYRef.current + 4;
+      const delta = currentY - lastScrollYRef.current;
+      if (delta > 6) {
+        scrolledDownRef.current = true;
+      } else if (delta < -6) {
+        scrolledDownRef.current = false;
+      }
       lastScrollYRef.current = currentY;
 
-      if (!scrollingDown || !isOpenRef.current) return;
+      if (!scrolledDownRef.current && !forceCheck) return;
 
       const el = vaultRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
 
-      if (rect.top < -80 || rect.bottom < window.innerHeight * 0.45) {
+      // ONLY close once the bottom of ALL unpacked project cards has cleared near/past the top navbar!
+      // This guarantees mobile users can scroll freely through every single unpacked file card without premature closing.
+      if (rect.bottom <= 96 && scrolledDownRef.current) {
         setIsOpen(false);
         setActiveFilter("All");
+        scrolledDownRef.current = false;
       }
     };
+
+    const hasScrollEnd = "onscrollend" in window;
 
     const onScroll = () => {
       if (!isOpenRef.current) {
@@ -71,12 +101,32 @@ export function ShippedFolderVault() {
       }
       if (!rafPending) {
         rafPending = true;
-        requestAnimationFrame(checkScroll);
+        requestAnimationFrame(() => evaluateRetract(false));
+      }
+      if (!hasScrollEnd) {
+        if (fallbackTimer !== undefined) clearTimeout(fallbackTimer);
+        fallbackTimer = setTimeout(() => evaluateRetract(true), 120);
+      }
+    };
+
+    const onScrollEnd = () => {
+      if (isOpenRef.current) {
+        evaluateRetract(true);
       }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    if (hasScrollEnd) {
+      window.addEventListener("scrollend", onScrollEnd, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (hasScrollEnd) {
+        window.removeEventListener("scrollend", onScrollEnd);
+      }
+      if (fallbackTimer !== undefined) clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const visibleFiles = useMemo(() => {
@@ -87,7 +137,14 @@ export function ShippedFolderVault() {
   const toggleFolder = () => {
     unlockAudio();
     setIsOpen((prev) => {
-      if (prev) setActiveFilter("All");
+      if (prev) {
+        setActiveFilter("All");
+        scrolledDownRef.current = false;
+      } else {
+        openedAtRef.current = performance.now();
+        lastScrollYRef.current = window.scrollY;
+        scrolledDownRef.current = false;
+      }
       return !prev;
     });
   };
@@ -96,6 +153,7 @@ export function ShippedFolderVault() {
     <div
       ref={vaultRef}
       id="shipped-vault"
+      data-vault-open={isOpen ? "true" : "false"}
       className="mx-auto mt-10 max-w-7xl px-5 sm:mt-16 sm:px-8"
     >
       <div className="relative border border-border bg-surface/75 p-6 sm:p-8 lg:p-10">
@@ -113,7 +171,7 @@ export function ShippedFolderVault() {
           </div>
           <p className="max-w-md font-mono text-xs leading-relaxed text-muted sm:text-right">
             {isOpen
-              ? "Archive unpacked — scroll down to automatically pack files back into the vault."
+              ? "Archive unpacked — browse all files freely; vault retracts automatically once you scroll past into Section 02."
               : "Click the engineering folder below to unpack all shipped repositories & MQL5 suites."}
           </p>
         </div>
@@ -141,13 +199,13 @@ export function ShippedFolderVault() {
                 )}
                 <span>~/shipped-systems</span>
               </div>
-              <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.12em] text-muted pb-1">
+              <div className="ml-auto pb-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
                 {isOpen ? "OPEN · CLICK TO CLOSE" : "PACKED · 06 FILES"}
               </div>
             </div>
 
             {/* Folder Chassis Backplate + Peeking Layered Project Sheets */}
-            <div className="relative h-44 w-full border border-border-strong bg-surface-elevated/90 shadow-2xl">
+            <div className="relative h-44 w-full border border-border-strong bg-surface-elevated/90 shadow-lg">
               {/* 3 Peeking Blueprint File Sheets inside the folder */}
               {ADDITIONAL_PROJECTS.slice(0, 3).map((proj, sheetIdx) => {
                 const restY = -6 - sheetIdx * 5;
@@ -163,7 +221,7 @@ export function ShippedFolderVault() {
                       opacity: isOpen ? 0.25 : 0.95,
                     }}
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                    className="pointer-events-none absolute inset-x-4 top-3 h-24 border border-border-strong bg-background/95 px-3 py-2 shadow-md"
+                    className="pointer-events-none absolute inset-x-4 top-3 h-24 border border-border-strong bg-background/95 px-3 py-2 shadow-sm"
                   >
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="font-semibold text-primary">{proj.fileCode}</span>
@@ -183,7 +241,7 @@ export function ShippedFolderVault() {
                 }}
                 transition={{ type: "spring", stiffness: 240, damping: 24 }}
                 style={{ transformOrigin: "50% 100%", transformStyle: "preserve-3d" }}
-                className={`absolute inset-x-0 bottom-0 z-10 flex h-34 flex-col justify-between border-t-2 p-5 shadow-xl transition-colors ${
+                className={`absolute inset-x-0 bottom-0 z-10 flex h-34 flex-col justify-between border-t-2 p-5 shadow-md transition-colors ${
                   isOpen
                     ? "border-primary bg-surface"
                     : "border-border-strong bg-surface group-hover:border-primary"
@@ -219,7 +277,7 @@ export function ShippedFolderVault() {
           </button>
 
           {/* Animated Unpacked Filter Bar + Project Files Fan-Out / Retract Container */}
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} onExitComplete={resizeScroll}>
             {isOpen ? (
               <motion.div
                 id="shipped-vault-files"
@@ -227,16 +285,17 @@ export function ShippedFolderVault() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
+                onAnimationComplete={resizeScroll}
+                transition={{ duration: 0.4, ease: ARCHITECTURAL_EASE }}
                 className="w-full overflow-hidden"
               >
                 <div className="pt-8">
-                  {/* Collapsible Category Filter Strip (closes smoothly on scroll down) */}
+                  {/* Collapsible Category Filter Strip */}
                   <motion.div
-                    initial={{ opacity: 0, y: -18, scale: 0.94 }}
+                    initial={{ opacity: 0, y: -16, scale: 0.94 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -24, scale: 0.85 }}
-                    transition={{ duration: 0.3, ease: ARCHITECTURAL_EASE }}
+                    exit={{ opacity: 0, y: -20, scale: 0.88 }}
+                    transition={{ duration: 0.28, ease: ARCHITECTURAL_EASE }}
                     className="mb-5 flex flex-wrap items-center justify-center gap-2"
                     role="tablist"
                     aria-label="Filter unpacked shipped system files"
@@ -250,9 +309,9 @@ export function ShippedFolderVault() {
                           role="tab"
                           aria-selected={active}
                           onClick={() => setActiveFilter(filter)}
-                          className={`min-h-10 px-3.5 py-1.5 font-mono text-xs font-medium cursor-pointer ${
+                          className={`min-h-10 cursor-pointer px-3.5 py-1.5 font-mono text-xs font-medium ${
                             active
-                              ? "bg-primary text-primary-foreground font-semibold"
+                              ? "bg-primary font-semibold text-primary-foreground"
                               : "border border-border bg-background text-muted hover:border-primary hover:text-foreground"
                           }`}
                         >
@@ -282,7 +341,7 @@ export function ShippedFolderVault() {
   );
 }
 
-function ProjectFileCard({
+const ProjectFileCard = React.memo(function ProjectFileCard({
   item,
   index,
 }: {
@@ -296,13 +355,12 @@ function ProjectFileCard({
       href={item.href}
       target="_blank"
       rel="noopener noreferrer"
-      layout
       initial={{
         opacity: 0,
-        y: -76,
+        y: -58,
         x: originX,
-        scale: 0.38,
-        rotate: ((index % 3) - 1) * 5,
+        scale: 0.48,
+        rotate: ((index % 3) - 1) * 4,
       }}
       animate={{
         opacity: 1,
@@ -313,16 +371,16 @@ function ProjectFileCard({
       }}
       exit={{
         opacity: 0,
-        y: -76,
+        y: -58,
         x: originX,
-        scale: 0.3,
+        scale: 0.36,
         rotate: ((index % 3) - 1) * -4,
       }}
       transition={{
         type: "spring",
-        stiffness: 230,
-        damping: 22,
-        delay: index * 0.045,
+        stiffness: 240,
+        damping: 24,
+        delay: index * 0.038,
       }}
       className="group relative flex flex-col justify-between border border-border-strong bg-background/90 p-4 hover:border-primary hover:bg-surface-elevated/80"
     >
@@ -340,7 +398,7 @@ function ProjectFileCard({
       {/* File Content */}
       <div className="mt-3 flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <h4 className="font-heading text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+          <h4 className="font-heading text-sm font-bold text-foreground transition-colors group-hover:text-primary">
             {item.name}
           </h4>
           <p className="text-xs leading-relaxed text-muted">{item.focus}</p>
@@ -352,4 +410,4 @@ function ProjectFileCard({
       </div>
     </motion.a>
   );
-}
+});

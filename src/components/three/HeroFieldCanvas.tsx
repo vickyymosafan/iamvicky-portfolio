@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
@@ -26,10 +26,10 @@ const WAVE_FRAGMENT_SHADER = /* glsl */ `
 `;
 
 /**
- * Viewport-Managed GPU-Shader WebGL Field behind Hero:
- * - Mounts WebGLRenderer ONLY when Hero is within viewport, and calls forceContextLoss() + dispose()
- *   immediately when scrolled away so page-wide simultaneous WebGL contexts stay at <= 1!
- * - Pure GLSL vertex shader wave (0ms CPU loop, 300+ FPS ready).
+ * Persistent Zero-Freeze GPU-Shader WebGL Field behind Hero:
+ * - Initializes ONCE during idle time after Hero LCP paints and NEVER destroys/recreates WebGL during scroll!
+ * - Strictly pauses/resumes rAF via IntersectionObserver & visibilitychange (0% GPU/CPU when scrolled past Hero).
+ * - Pre-compiles shaders via `compileAsync()` and uses a pure GLSL vertex shader wave (0ms CPU loop).
  */
 export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -38,7 +38,6 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
   const themeRef = useRef(theme);
   const syncThemeRef = useRef<(() => void) | null>(null);
   const resumeRef = useRef<(() => void) | null>(null);
-  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -50,24 +49,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
     syncThemeRef.current?.();
   }, [theme]);
 
-  // Mount WebGL strictly when Hero is near viewport, cleanly releasing context when scrolled past!
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.some((e) => e.isIntersecting);
-        setInView((prev) => (prev === visible ? prev : visible));
-      },
-      { rootMargin: "160px 0px" }
-    );
-    io.observe(container);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!inView) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -78,12 +60,12 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       if (cancelled || !container) return;
 
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.35);
 
       let renderer: THREE.WebGLRenderer;
       try {
         renderer = new THREE.WebGLRenderer({
-          antialias: dpr < 1.5,
+          antialias: false,
           alpha: true,
           depth: false,
           stencil: false,
@@ -105,7 +87,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       camera.position.set(0, 1.4, initW < 640 ? 11.5 : 8.2);
       camera.lookAt(0, 0, 0);
 
-      const planeGeo = new THREE.PlaneGeometry(22, 26, 28, 32);
+      const planeGeo = new THREE.PlaneGeometry(22, 26, 26, 28);
       const wireMat = new THREE.ShaderMaterial({
         vertexShader: WAVE_VERTEX_SHADER,
         fragmentShader: WAVE_FRAGMENT_SHADER,
@@ -122,7 +104,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       terrain.rotation.x = -Math.PI * 0.22;
       scene.add(terrain);
 
-      const nodeCount = 84;
+      const nodeCount = 80;
       const nodePositions = new Float32Array(nodeCount * 3);
       for (let i = 0; i < nodeCount; i++) {
         const phi = (i * 1.61803398875) % 1;
@@ -142,7 +124,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       const points = new THREE.Points(pointsGeo, pointsMat);
       scene.add(points);
 
-      const ringGeo = new THREE.TorusGeometry(1.75, 0.03, 10, 52);
+      const ringGeo = new THREE.TorusGeometry(1.75, 0.03, 10, 48);
       const ringMat = new THREE.MeshBasicMaterial({
         color: themeRef.current === "dark" ? 0xc8f53c : 0x185c37,
         transparent: true,
@@ -152,6 +134,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       ring.position.set(initW < 640 ? 0.0 : 3.0, 0.2, -1.2);
       scene.add(ring);
 
+      let isInView = true;
       let isPageVisible = !document.hidden;
       let rafId = 0;
       let simTime = 0;
@@ -171,7 +154,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
 
       const renderFrame = (ts: number) => {
         rafId = 0;
-        if (!isPageVisible) return;
+        if (!isInView || !isPageVisible) return;
 
         const dt = Math.min(0.05, (ts - lastTs) / 1000);
         lastTs = ts;
@@ -192,7 +175,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
 
       const ensureRunning = () => {
-        if (rafId === 0 && isPageVisible) {
+        if (rafId === 0 && isInView && isPageVisible) {
           lastTs = performance.now();
           rafId = requestAnimationFrame(renderFrame);
         }
@@ -209,7 +192,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
 
       const onPointerMove = (e: PointerEvent) => {
-        if (pausedRef.current) return;
+        if (pausedRef.current || !isInView) return;
         pointer.tx = ((e.clientX / window.innerWidth) * 2 - 1) * 0.45;
         pointer.ty = ((e.clientY / window.innerHeight) * 2 - 1) * 0.28;
       };
@@ -225,6 +208,21 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
       document.addEventListener("visibilitychange", onVisChange);
 
+      // Pause/resume rAF strictly via IntersectionObserver — NEVER destroys WebGL during scroll!
+      const io = new IntersectionObserver(
+        (entries) => {
+          isInView = entries.some((e) => e.isIntersecting);
+          if (isInView) {
+            ensureRunning();
+          } else if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = 0;
+          }
+        },
+        { rootMargin: "120px 0px" }
+      );
+      io.observe(container);
+
       const resize = () => {
         if (!container) return;
         const w = Math.max(1, container.clientWidth);
@@ -234,18 +232,28 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
         ring.position.x = w < 640 ? 0.2 : 3.0;
         camera.updateProjectionMatrix();
         renderer.setSize(w, h);
-        drawOnce();
+        if (isInView) drawOnce();
       };
       const ro = new ResizeObserver(resize);
       ro.observe(container);
 
-      drawOnce();
-      ensureRunning();
+      const startRendering = () => {
+        if (cancelled) return;
+        drawOnce();
+        ensureRunning();
+      };
+
+      if (typeof renderer.compileAsync === "function") {
+        void renderer.compileAsync(scene, camera).then(startRendering);
+      } else {
+        startRendering();
+      }
 
       cleanupFn = () => {
         syncThemeRef.current = null;
         resumeRef.current = null;
         if (rafId) cancelAnimationFrame(rafId);
+        io.disconnect();
         ro.disconnect();
         document.removeEventListener("visibilitychange", onVisChange);
         window.removeEventListener("pointermove", onPointerMove);
@@ -255,7 +263,6 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
         pointsMat.dispose();
         ringGeo.dispose();
         ringMat.dispose();
-        renderer.forceContextLoss();
         renderer.dispose();
         if (renderer.domElement.parentNode === container) {
           container.removeChild(renderer.domElement);
@@ -270,7 +277,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
     let idleId = 0;
     let timeoutId = 0;
     if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(initWebGL, { timeout: 140 });
+      idleId = win.requestIdleCallback(initWebGL, { timeout: 180 });
     } else {
       timeoutId = window.setTimeout(initWebGL, 40);
     }
@@ -283,7 +290,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       if (timeoutId) window.clearTimeout(timeoutId);
       cleanupFn?.();
     };
-  }, [inView]);
+  }, []);
 
   return (
     <div

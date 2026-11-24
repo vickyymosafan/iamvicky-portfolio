@@ -70,6 +70,7 @@ export function HeroSection() {
   const loopWidthRef = useRef(0);
   const tickerOffsetRef = useRef(0);
   const pausedRef = useRef(false);
+  const heroInViewRef = useRef(true);
   const resumeTickerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -79,11 +80,11 @@ export function HeroSection() {
     }
   }, [motionPaused]);
 
-  // Kinetic headline rotator + pipeline pulse (directly governed by Pause/Play toggle)
+  // Kinetic headline rotator + pipeline pulse (paused automatically when Hero scrolls off-screen!)
   useEffect(() => {
     if (motionPaused) return;
     const id = window.setInterval(() => {
-      if (document.hidden) return;
+      if (document.hidden || !heroInViewRef.current) return;
       setDisciplineIdx((prev) => (prev + 1) % KINETIC_DISCIPLINES.length);
       setPulseStepIdx((prev) => (prev + 1) % PIPELINE_PULSE_STEPS.length);
     }, 3100);
@@ -146,6 +147,7 @@ export function HeroSection() {
     const io = new IntersectionObserver(
       (entries) => {
         isVisible = entries.some((e) => e.isIntersecting);
+        heroInViewRef.current = isVisible;
         if (isVisible) ensureRunning();
         else if (rafId) {
           cancelAnimationFrame(rafId);

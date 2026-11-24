@@ -17,8 +17,8 @@
 
 /* ==========================================================================
    Semantic Color System — Zero Pink Policy, Dual Theme WCAG AA/AAA Contrast
-   Default: Architectural Obsidian (Dark)
-   Light: Warm Editorial Paper (automatically responds to OS light or toggle)
+   Default: Architectural Obsidian (Dark) across all devices unless user toggles Light
+   Light: Warm Editorial Paper (activated explicitly via Navbar theme toggle)
    ========================================================================== */
 :root {
   color-scheme: dark;
@@ -26,7 +26,7 @@
   --bg: #0b0d0f;
   --surface: #12161a;
   --surface-elevated: #181e24;
-  --surface-translucent: rgba(11, 13, 15, 0.82);
+  --surface-translucent: rgba(11, 13, 15, 0.84);
 
   --ink: #f3f5f2;
   --ink-secondary: #cfd7dc;
@@ -51,46 +51,11 @@
 
   --focus-ring: #c8f53c;
   --grid-line: rgba(243, 245, 242, 0.045);
-  --shadow-card: 0 20px 50px -24px rgba(0, 0, 0, 0.72);
+  --shadow-card: 0 14px 32px -22px rgba(0, 0, 0, 0.62);
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme: light;
-
-    --bg: #f6f4ee;
-    --surface: #ffffff;
-    --surface-elevated: #ebe8de;
-    --surface-translucent: rgba(246, 244, 238, 0.88);
-
-    --ink: #111518;
-    --ink-secondary: #252e35;
-    --ink-muted: #455159;
-
-    --border: rgba(17, 21, 24, 0.13);
-    --border-strong: rgba(17, 21, 24, 0.26);
-
-    --primary: #185c37;
-    --primary-hover: #12472a;
-    --primary-ink: #ffffff;
-    --primary-soft: rgba(24, 92, 55, 0.11);
-
-    --accent: #035e8c;
-    --accent-soft: rgba(3, 94, 140, 0.11);
-
-    --sage: #1a663e;
-    --sage-soft: rgba(26, 102, 62, 0.11);
-
-    --amber: #8a5600;
-    --amber-soft: rgba(138, 86, 0, 0.11);
-
-    --focus-ring: #185c37;
-    --grid-line: rgba(17, 21, 24, 0.055);
-    --shadow-card: 0 18px 40px -24px rgba(17, 21, 24, 0.18);
-  }
-}
-
-:root[data-theme="light"] {
+:root[data-theme="light"],
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
   color-scheme: light;
 
   --bg: #f6f4ee;
@@ -121,10 +86,11 @@
 
   --focus-ring: #185c37;
   --grid-line: rgba(17, 21, 24, 0.055);
-  --shadow-card: 0 18px 40px -24px rgba(17, 21, 24, 0.18);
+  --shadow-card: 0 14px 32px -22px rgba(17, 21, 24, 0.16);
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
   color-scheme: dark;
 }
 
@@ -174,12 +140,14 @@ body {
   transition: background-color 220ms ease, color 220ms ease;
 }
 
-/* Subtle architectural grid canvas */
+/* Subtle architectural grid canvas (isolated GPU compositor layer — zero repaint during scroll) */
 .bg-architectural-grid {
   background-image:
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 
 /* Accessible focus outlines (Modern Web Guidance: natural-interactions) */
@@ -442,6 +410,25 @@ dialog.native-modal[open] {
 
 .isolate-stage {
   contain: layout style paint;
+}
+
+/* Reduced-motion final-state safeguard for 03 -> 04 Portal-to-Theater transition */
+@media (prefers-reduced-motion: reduce) {
+  .portal-theater-layer {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+
+  .portal-inner-layer {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  .portal-bg-veil {
+    opacity: 1 !important;
+  }
 }
 
 /* Lenis recommended utility states */

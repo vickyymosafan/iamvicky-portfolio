@@ -59,9 +59,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="dark"
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <meta name="color-scheme" content="dark" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("vicky-portfolio-theme");var m=t==="light"?"light":"dark";document.documentElement.dataset.theme=m;var el=document.querySelector('meta[name="color-scheme"]');if(el)el.setAttribute("content",m);}catch(e){document.documentElement.dataset.theme="dark";}`,
+          }}
+        />
+      </head>
       <body className="antialiased bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
         <a
           href="#main-content"

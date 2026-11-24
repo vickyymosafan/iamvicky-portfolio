@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Command,
@@ -32,11 +32,18 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
   const { scrollTo } = useSmoothScroll();
   const [scrolled, setScrolled] = useState(false);
+  const scrolledRef = useRef(false);
   const [activeSection, setActiveSection] = useState<string>("hero");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      const next = window.scrollY > 24;
+      if (next !== scrolledRef.current) {
+        scrolledRef.current = next;
+        setScrolled(next);
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -76,7 +83,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-border bg-[var(--surface-translucent)] backdrop-blur-md py-2.5"
+          ? "border-b border-border bg-[var(--surface-translucent)] backdrop-blur-sm py-2.5"
           : "border-b border-transparent bg-transparent py-4"
       }`}
     >

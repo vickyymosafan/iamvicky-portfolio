@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FeaturedProject } from "@/data/portfolio";
 import { AudioGateProvider } from "@/components/providers/AudioGateProvider";
@@ -35,15 +35,15 @@ export function PortfolioShell() {
   const [activeProject, setActiveProject] = useState<FeaturedProject | null>(null);
   const [dialogLoaded, setDialogLoaded] = useState(false);
 
-  const openCommand = () => {
+  const openCommand = useCallback(() => {
     setCommandLoaded(true);
     setCommandOpen(true);
-  };
+  }, []);
 
-  const inspectProject = (project: FeaturedProject) => {
+  const inspectProject = useCallback((project: FeaturedProject) => {
     setDialogLoaded(true);
     setActiveProject(project);
-  };
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

@@ -25,11 +25,18 @@ const ThemeContext = createContext<ThemeContextValue>({
 const STORAGE_KEY = "vicky-portfolio-theme";
 const THEME_EVENT = "vicky-portfolio-theme-change";
 
-function getClientThemeSnapshot(): ThemeMode {
+function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return "dark";
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return stored === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function getClientThemeSnapshot(): ThemeMode {
+  return readStoredTheme();
 }
 
 function getServerThemeSnapshot(): ThemeMode {
@@ -38,18 +45,23 @@ function getServerThemeSnapshot(): ThemeMode {
 
 function subscribeTheme(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
-  const media = window.matchMedia("(prefers-color-scheme: light)");
   const onChange = () => callback();
 
-  media.addEventListener("change", onChange);
   window.addEventListener("storage", onChange);
   window.addEventListener(THEME_EVENT, onChange);
 
   return () => {
-    media.removeEventListener("change", onChange);
     window.removeEventListener("storage", onChange);
     window.removeEventListener(THEME_EVENT, onChange);
   };
+}
+
+function applyThemeToDocument(next: ThemeMode) {
+  document.documentElement.dataset.theme = next;
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+  if (meta) {
+    meta.content = next;
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -59,20 +71,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getServerThemeSnapshot
   );
 
-  // Sync explicit user override to <html data-theme> without overriding OS preference
-  // when no explicit user choice is stored (preserving dual-theme media emulation).
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") {
-      document.documentElement.dataset.theme = stored;
-    } else {
-      delete document.documentElement.dataset.theme;
-    }
+    applyThemeToDocument(theme);
   }, [theme]);
 
   const setTheme = useCallback((next: ThemeMode) => {
-    document.documentElement.dataset.theme = next;
-    window.localStorage.setItem(STORAGE_KEY, next);
+    applyThemeToDocument(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Storage blocked in restricted browsing mode — theme still applies live to document
+    }
     window.dispatchEvent(new Event(THEME_EVENT));
   }, []);
 

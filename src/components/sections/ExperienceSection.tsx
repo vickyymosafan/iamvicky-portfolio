@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll } from "framer-motion";
 import { Briefcase, ExternalLink, Github, Star } from "lucide-react";
-import { EXPERIENCES } from "@/data/portfolio";
+import { EXPERIENCES, ExperienceItem } from "@/data/portfolio";
 import { EditorialReveal, SectionHeader } from "@/components/motion/MotionPrimitives";
 
 // Code-split Three.js diorama canvas with exact height skeleton (0 CLS)
@@ -26,7 +26,7 @@ export function ExperienceSection() {
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const [activeChapter, setActiveChapter] = useState(0);
 
-  // Direct 1:1 scroll progress synced to Lenis smooth scroll (zero double-spring lag)
+  // Direct 1:1 scroll progress synced to Lenis smooth scroll via Motion frame.setup
   const { scrollYProgress: spineScaleY } = useScroll({
     target: timelineRef,
     offset: ["start 75%", "end 65%"],
@@ -44,7 +44,9 @@ export function ExperienceSection() {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
         if (visible[0]) {
           const idx = Number((visible[0].target as HTMLElement).dataset.chapterIndex);
-          if (!Number.isNaN(idx)) setActiveChapter(idx);
+          if (!Number.isNaN(idx)) {
+            setActiveChapter((prev) => (prev === idx ? prev : idx));
+          }
         }
       },
       { rootMargin: "-26% 0px -42% 0px", threshold: [0.15, 0.4, 0.7] }
@@ -52,6 +54,14 @@ export function ExperienceSection() {
 
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  const handleSelectChapter = useCallback((idx: number) => {
+    setActiveChapter((prev) => (prev === idx ? prev : idx));
+  }, []);
+
+  const registerItemRef = useCallback((idx: number, el: HTMLLIElement | null) => {
+    itemRefs.current[idx] = el;
   }, []);
 
   const currentExp = EXPERIENCES[activeChapter] ?? EXPERIENCES[0];
@@ -78,7 +88,7 @@ export function ExperienceSection() {
               />
 
               {/* Quick Chapter Selector + Highlights */}
-              <div className="border border-border bg-surface/85 p-4 space-y-3">
+              <div className="space-y-3 border border-border bg-surface/85 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                     <Star className="h-3.5 w-3.5" aria-hidden="true" />
@@ -89,9 +99,9 @@ export function ExperienceSection() {
                       <button
                         key={exp.id}
                         type="button"
-                        onClick={() => setActiveChapter(idx)}
+                        onClick={() => handleSelectChapter(idx)}
                         aria-label={`Preview 3D chapter ${idx + 1}: ${exp.company}`}
-                        className={`h-8 w-8 font-mono text-[11px] font-bold cursor-pointer ${
+                        className={`h-8 w-8 cursor-pointer font-mono text-[11px] font-bold ${
                           activeChapter === idx
                             ? "bg-primary text-primary-foreground"
                             : "border border-border bg-surface-elevated text-muted hover:text-foreground"
@@ -113,142 +123,27 @@ export function ExperienceSection() {
 
           {/* Right Vertical Scroll-Driven 3D-Lifted Timeline */}
           <div ref={timelineRef} className="relative lg:col-span-8">
-            {/* Background Rail */}
             <div
               aria-hidden="true"
               className="absolute top-2 bottom-2 left-4 w-px bg-border sm:left-5"
             />
-            {/* Scroll-Illuminated Progress Spine */}
             <motion.div
               aria-hidden="true"
               style={{ scaleY: spineScaleY }}
-              className="absolute top-2 bottom-2 left-4 w-[2px] origin-top bg-primary sm:left-5"
+              className="absolute top-2 bottom-2 left-4 w-[2px] origin-top bg-primary will-change-transform sm:left-5"
             />
 
             <ol className="space-y-7 pl-11 sm:pl-14">
-              {EXPERIENCES.map((exp, idx) => {
-                const isActive = idx === activeChapter;
-                return (
-                  <li
-                    key={exp.id}
-                    ref={(el) => {
-                      itemRefs.current[idx] = el;
-                    }}
-                    data-chapter-index={idx}
-                    onMouseEnter={() => setActiveChapter(idx)}
-                    className="relative"
-                    style={{ perspective: 1000 }}
-                  >
-                    {/* Timeline Node Dot */}
-                    <span
-                      aria-hidden="true"
-                      className={`absolute top-6 -left-[35px] flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors sm:-left-[43px] ${
-                        isActive
-                          ? "border-primary bg-primary shadow-[0_0_12px_var(--primary)]"
-                          : "border-primary/60 bg-background"
-                      }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          isActive ? "bg-primary-foreground" : "bg-primary"
-                        }`}
-                      />
-                    </span>
-
-                    <EditorialReveal delay={idx * 0.04}>
-                      <article
-                        className={`border bg-surface/92 p-5 transition-all duration-300 sm:p-6 ${
-                          isActive
-                            ? "border-primary/75 shadow-2xl -translate-y-0.5"
-                            : "border-border hover:border-border-strong"
-                        }`}
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono text-[11px] font-bold text-primary">
-                                {`0${idx + 1} //`}
-                              </span>
-                              <Briefcase
-                                className="h-4 w-4 text-primary"
-                                aria-hidden="true"
-                              />
-                              <h3 className="font-heading text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                                {exp.role}
-                              </h3>
-                            </div>
-                            <p className="mt-1 font-medium text-ink-secondary">
-                              {exp.company}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-start sm:items-end">
-                            <span className="bg-primary-soft px-2.5 py-1 font-mono text-xs font-semibold text-primary">
-                              {exp.period}
-                            </span>
-                            <span className="mt-1 font-mono text-[11px] text-muted">
-                              {exp.locationOrMode}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="mt-4 text-sm leading-relaxed text-ink-secondary">
-                          {exp.summary}
-                        </p>
-
-                        <ul className="mt-4 space-y-2 border-t border-border pt-4">
-                          {exp.highlights.map((point) => (
-                            <li
-                              key={point}
-                              className="flex items-start gap-2.5 text-sm leading-relaxed text-muted"
-                            >
-                              <span
-                                aria-hidden="true"
-                                className="mt-2 h-1.5 w-1.5 shrink-0 bg-primary"
-                              />
-                              <span>{point}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                          <div className="flex flex-wrap gap-1.5">
-                            {exp.stack.map((tech) => (
-                              <span
-                                key={tech}
-                                className="border border-border bg-surface-elevated px-2.5 py-1 font-mono text-[11px] text-foreground"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-
-                          {exp.links.length > 0 ? (
-                            <div className="flex flex-wrap items-center gap-2">
-                              {exp.links.map((link) => (
-                                <a
-                                  key={link.href}
-                                  href={link.href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex min-h-10 items-center gap-1.5 border border-border bg-background px-3 py-1.5 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                                >
-                                  {link.kind === "github" ? (
-                                    <Github className="h-3.5 w-3.5" aria-hidden="true" />
-                                  ) : (
-                                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                                  )}
-                                  <span>{link.label}</span>
-                                </a>
-                              ))}
-                            </div>
-                          ) : null}
-                        </div>
-                      </article>
-                    </EditorialReveal>
-                  </li>
-                );
-              })}
+              {EXPERIENCES.map((exp, idx) => (
+                <ExperienceTimelineCard
+                  key={exp.id}
+                  exp={exp}
+                  idx={idx}
+                  isActive={idx === activeChapter}
+                  onSelect={handleSelectChapter}
+                  registerRef={registerItemRef}
+                />
+              ))}
             </ol>
           </div>
         </div>
@@ -256,3 +151,124 @@ export function ExperienceSection() {
     </section>
   );
 }
+
+const ExperienceTimelineCard = React.memo(function ExperienceTimelineCard({
+  exp,
+  idx,
+  isActive,
+  onSelect,
+  registerRef,
+}: {
+  exp: ExperienceItem;
+  idx: number;
+  isActive: boolean;
+  onSelect: (idx: number) => void;
+  registerRef: (idx: number, el: HTMLLIElement | null) => void;
+}) {
+  return (
+    <li
+      ref={(el) => registerRef(idx, el)}
+      data-chapter-index={idx}
+      onMouseEnter={() => onSelect(idx)}
+      className="relative"
+      style={{ perspective: 1000 }}
+    >
+      <span
+        aria-hidden="true"
+        className={`absolute top-6 -left-[35px] flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors sm:-left-[43px] ${
+          isActive
+            ? "border-primary bg-primary shadow-[0_0_10px_var(--primary)]"
+            : "border-primary/60 bg-background"
+        }`}
+      >
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            isActive ? "bg-primary-foreground" : "bg-primary"
+          }`}
+        />
+      </span>
+
+      <EditorialReveal delay={idx * 0.04}>
+        <article
+          className={`border bg-surface/92 p-5 transition-colors duration-200 sm:p-6 ${
+            isActive
+              ? "border-primary/75"
+              : "border-border hover:border-border-strong"
+          }`}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-primary">
+                  {`0${idx + 1} //`}
+                </span>
+                <Briefcase className="h-4 w-4 text-primary" aria-hidden="true" />
+                <h3 className="font-heading text-lg font-bold tracking-tight text-foreground sm:text-xl">
+                  {exp.role}
+                </h3>
+              </div>
+              <p className="mt-1 font-medium text-ink-secondary">{exp.company}</p>
+            </div>
+
+            <div className="flex flex-col items-start sm:items-end">
+              <span className="bg-primary-soft px-2.5 py-1 font-mono text-xs font-semibold text-primary">
+                {exp.period}
+              </span>
+              <span className="mt-1 font-mono text-[11px] text-muted">
+                {exp.locationOrMode}
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-relaxed text-ink-secondary">{exp.summary}</p>
+
+          <ul className="mt-4 space-y-2 border-t border-border pt-4">
+            {exp.highlights.map((point) => (
+              <li
+                key={point}
+                className="flex items-start gap-2.5 text-sm leading-relaxed text-muted"
+              >
+                <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 bg-primary" />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+            <div className="flex flex-wrap gap-1.5">
+              {exp.stack.map((tech) => (
+                <span
+                  key={tech}
+                  className="border border-border bg-surface-elevated px-2.5 py-1 font-mono text-[11px] text-foreground"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            {exp.links.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {exp.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-10 items-center gap-1.5 border border-border bg-background px-3 py-1.5 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  >
+                    {link.kind === "github" ? (
+                      <Github className="h-3.5 w-3.5" aria-hidden="true" />
+                    ) : (
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
+                    <span>{link.label}</span>
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </article>
+      </EditorialReveal>
+    </li>
+  );
+});

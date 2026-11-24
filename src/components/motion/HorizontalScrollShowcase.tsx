@@ -5,13 +5,14 @@ import dynamic from "next/dynamic";
 import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Github, Layers } from "lucide-react";
 import { FeaturedProject } from "@/data/portfolio";
-import type { CardSlotHandle } from "@/components/three/ProjectCardsThreeLayer";
+import type { CardPointerState } from "@/components/three/architecturalLights";
+import type { CardSlotRegistration } from "@/components/three/WorkCardsWebGLCanvas";
 
-// Code-split Three.js scissor canvas so initial Hero load never downloads Three.js upfront
-const ProjectCardsThreeLayer = dynamic(
+// Code-split Three.js direct-swapchain scissor canvas so initial Hero LCP never downloads Three.js upfront
+const WorkCardsWebGLCanvas = dynamic(
   () =>
-    import("@/components/three/ProjectCardsThreeLayer").then(
-      (m) => m.ProjectCardsThreeLayer
+    import("@/components/three/WorkCardsWebGLCanvas").then(
+      (m) => m.WorkCardsWebGLCanvas
     ),
   { ssr: false }
 );
@@ -31,9 +32,11 @@ const CATEGORIES = [
 
 /**
  * Compact 3D Interactive Horizontal-on-Vertical Scroll Showcase (Zero Arrow Buttons):
- * - Direct 1:1 scrollYProgress mapping synced with Lenis (eliminates double-smoothing latency at 120-300Hz!).
- * - Direct DOM ref hover tilt (zero React state updates on high-frequency pointermove!).
- * - Powered by a single off-screen-pausing Three.js WebGL scissor layer.
+ * - ZERO React re-renders during scrolling! Counter HUD, active title, and active card borders
+ *   update directly via DOM refs inside `useMotionValueEvent(scrollYProgress)`.
+ * - Direct 1:1 GPU-composited `x` transform synced to Lenis via Motion `frame.setup` (0-frame lag).
+ * - Powered by ONE direct-swapchain WebGL scissor canvas (`WorkCardsWebGLCanvas`) computing slot
+ *   positions directly from `x.get()` (ZERO `ctx2d.drawImage` GPU stalls, ZERO per-frame `getBoundingClientRect()`).
  */
 export function HorizontalScrollShowcase({
   projects,
@@ -41,13 +44,19 @@ export function HorizontalScrollShowcase({
 }: HorizontalScrollShowcaseProps) {
   const [activeCategory, setActiveCategory] =
     useState<(typeof CATEGORIES)[number]>("All");
-  const [activeIndex, setActiveIndex] = useState(0);
   const [maxTranslate, setMaxTranslate] = useState(0);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const slotsRef = useRef<Map<string, CardSlotHandle>>(new Map());
+  const slotsRef = useRef<Map<string, CardSlotRegistration>>(new Map());
+
+  // Direct DOM refs for zero-render HUD updates during scroll
+  const topCounterRef = useRef<HTMLSpanElement>(null);
+  const hudCounterRef = useRef<HTMLSpanElement>(null);
+  const hudTitleRef = useRef<HTMLSpanElement>(null);
+  const cardArticleRefs = useRef<(HTMLElement | null)[]>([]);
+  const activeIndexRef = useRef(0);
 
   const filteredProjects = useMemo(() => {
     if (activeCategory === "All") return projects;
@@ -58,6 +67,23 @@ export function HorizontalScrollShowcase({
     () => filteredProjects.map((p) => p.id),
     [filteredProjects]
   );
+
+  const filteredProjectsRef = useRef(filteredProjects);
+  useEffect(() => {
+    filteredProjectsRef.current = filteredProjects;
+    activeIndexRef.current = 0;
+
+    const totalStr = String(filteredProjects.length).padStart(2, "0");
+    if (topCounterRef.current) topCounterRef.current.textContent = `01 / ${totalStr}`;
+    if (hudCounterRef.current) hudCounterRef.current.textContent = "01";
+    if (hudTitleRef.current) {
+      hudTitleRef.current.textContent = filteredProjects[0]?.title ?? "";
+    }
+    cardArticleRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      el.dataset.active = idx === 0 ? "true" : "false";
+    });
+  }, [filteredProjects]);
 
   useEffect(() => {
     const measure = () => {
@@ -85,22 +111,44 @@ export function HorizontalScrollShowcase({
     offset: ["start start", "end end"],
   });
 
-  // Direct 1:1 GPU transform synced to Lenis smooth scroll — zero double-spring lag at 300 FPS!
+  // Direct 1:1 GPU transform synced to Lenis smooth scroll via Motion `frame.setup`!
   const x = useTransform(scrollYProgress, [0, 1], [0, -maxTranslate]);
   const progressScaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
+  // Zero-re-render active card indicator & HUD updates directly via DOM refs!
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const list = filteredProjectsRef.current;
+    const count = list.length;
+    if (count === 0) return;
+
     const idx = Math.min(
-      Math.max(0, filteredProjects.length - 1),
-      Math.max(0, Math.round(latest * Math.max(1, filteredProjects.length - 1)))
+      Math.max(0, count - 1),
+      Math.max(0, Math.round(latest * Math.max(1, count - 1)))
     );
-    setActiveIndex((prev) => (prev === idx ? prev : idx));
+
+    if (idx === activeIndexRef.current) return;
+
+    const prevEl = cardArticleRefs.current[activeIndexRef.current];
+    if (prevEl) prevEl.dataset.active = "false";
+
+    activeIndexRef.current = idx;
+
+    const nextEl = cardArticleRefs.current[idx];
+    if (nextEl) nextEl.dataset.active = "true";
+
+    const idxStr = String(idx + 1).padStart(2, "0");
+    const totalStr = String(count).padStart(2, "0");
+    if (topCounterRef.current) topCounterRef.current.textContent = `${idxStr} / ${totalStr}`;
+    if (hudCounterRef.current) hudCounterRef.current.textContent = idxStr;
+    if (hudTitleRef.current) hudTitleRef.current.textContent = list[idx]?.title ?? "";
   });
 
   const trackHeightVh = useMemo(() => {
     if (filteredProjects.length <= 1) return 105;
     return Math.max(190, Math.round(115 + filteredProjects.length * 40));
   }, [filteredProjects.length]);
+
+  const totalPadded = String(filteredProjects.length).padStart(2, "0");
 
   return (
     <div className="space-y-4">
@@ -120,11 +168,8 @@ export function HorizontalScrollShowcase({
                   type="button"
                   role="tab"
                   aria-selected={isSelected}
-                  onClick={() => {
-                    setActiveCategory(category);
-                    setActiveIndex(0);
-                  }}
-                  className={`relative px-3.5 py-2 font-mono text-xs font-medium transition-colors cursor-pointer ${
+                  onClick={() => setActiveCategory(category)}
+                  className={`relative cursor-pointer px-3.5 py-2 font-mono text-xs font-medium transition-colors ${
                     isSelected
                       ? "bg-primary font-semibold text-primary-foreground"
                       : "border border-border bg-surface text-muted hover:border-border-strong hover:text-foreground"
@@ -137,9 +182,11 @@ export function HorizontalScrollShowcase({
           </div>
 
           <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            <span className="font-bold text-primary tabular-nums">
-              {String(activeIndex + 1).padStart(2, "0")} /{" "}
-              {String(filteredProjects.length).padStart(2, "0")}
+            <span
+              ref={topCounterRef}
+              className="font-bold text-primary tabular-nums"
+            >
+              {`01 / ${totalPadded}`}
             </span>
             <span className="hidden h-3 w-px bg-border sm:inline-block" aria-hidden="true" />
             <span className="hidden sm:inline">
@@ -161,28 +208,32 @@ export function HorizontalScrollShowcase({
         >
           {/* Minimal Floating Architectural HUD */}
           <div className="relative z-10 mx-auto mb-5 flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-sm font-bold text-primary tabular-nums">
-                {String(activeIndex + 1).padStart(2, "0")}
-                <span className="font-normal text-muted">
-                  {" "}
-                  / {String(filteredProjects.length).padStart(2, "0")}
-                </span>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="shrink-0 font-mono text-sm font-bold text-primary tabular-nums">
+                <span ref={hudCounterRef}>01</span>
+                <span className="font-normal text-muted">{` / ${totalPadded}`}</span>
               </span>
-              <span className="h-4 w-px bg-border" aria-hidden="true" />
-              <span className="truncate font-heading text-sm font-semibold text-foreground sm:text-base">
-                {filteredProjects[activeIndex]?.title}
+              <span className="h-4 w-px shrink-0 bg-border" aria-hidden="true" />
+              <span
+                ref={hudTitleRef}
+                className="truncate font-heading text-sm font-semibold text-foreground sm:text-base"
+              >
+                {filteredProjects[0]?.title ?? ""}
               </span>
             </div>
 
-            <span className="hidden font-mono text-[11px] uppercase tracking-[0.16em] text-muted md:inline">
+            <span className="hidden shrink-0 font-mono text-[11px] uppercase tracking-[0.16em] text-muted md:inline">
               Interactive 3D · Hover card to orbit
             </span>
           </div>
 
-          {/* Horizontal Translating Card Track + Shared Off-Screen-Pausing 3D Scissor Layer */}
+          {/* Horizontal Translating Card Track + Direct-Swapchain Zero-Stall WebGL Scissor Layer */}
           <div className="relative z-10 w-full overflow-hidden">
-            <ProjectCardsThreeLayer slotsRef={slotsRef} projectIds={projectIds} />
+            <WorkCardsWebGLCanvas
+              slotsRef={slotsRef}
+              projectIds={projectIds}
+              xMotionValue={x}
+            />
             <motion.div
               ref={trackRef}
               style={{ x }}
@@ -192,9 +243,13 @@ export function HorizontalScrollShowcase({
                 <Compact3DProjectCard
                   key={project.id}
                   project={project}
-                  isActive={idx === activeIndex}
+                  index={idx}
+                  initialActive={idx === 0}
                   onInspectProject={onInspectProject}
                   slotsRef={slotsRef}
+                  registerArticleRef={(el) => {
+                    cardArticleRefs.current[idx] = el;
+                  }}
                 />
               ))}
             </motion.div>
@@ -205,7 +260,7 @@ export function HorizontalScrollShowcase({
             <div className="h-[3px] w-full overflow-hidden bg-surface-elevated">
               <motion.div
                 style={{ scaleX: progressScaleX }}
-                className="h-full origin-left bg-primary"
+                className="h-full origin-left bg-primary will-change-transform"
               />
             </div>
             <div className="mt-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
@@ -213,7 +268,7 @@ export function HorizontalScrollShowcase({
               <span className="hidden sm:inline">
                 Scroll continuously to transition into Shipped Archive ↓
               </span>
-              <span>{`0${filteredProjects.length} // End of Rail`}</span>
+              <span>{`${totalPadded} // End of Rail`}</span>
             </div>
           </div>
         </div>
@@ -222,21 +277,29 @@ export function HorizontalScrollShowcase({
   );
 }
 
-function Compact3DProjectCard({
+const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
   project,
-  isActive,
+  initialActive,
   onInspectProject,
   slotsRef,
+  registerArticleRef,
 }: {
   project: FeaturedProject;
-  isActive: boolean;
+  index: number;
+  initialActive: boolean;
   onInspectProject: (project: FeaturedProject) => void;
-  slotsRef: React.MutableRefObject<Map<string, CardSlotHandle>>;
+  slotsRef: React.MutableRefObject<Map<string, CardSlotRegistration>>;
+  registerArticleRef: (el: HTMLElement | null) => void;
 }) {
   const articleRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
-  const pointerRef = useRef({ x: 0, y: 0, hovered: false });
+  const pointerRef = useRef<CardPointerState>({ x: 0, y: 0, hovered: false });
+
+  useEffect(() => {
+    registerArticleRef(articleRef.current);
+    return () => registerArticleRef(null);
+  }, [registerArticleRef]);
 
   useEffect(() => {
     const map = slotsRef.current;
@@ -250,20 +313,11 @@ function Compact3DProjectCard({
     };
   }, [project.id, slotsRef]);
 
-  // Keep rest depth synced when active card changes
-  useEffect(() => {
-    if (articleRef.current && !pointerRef.current.hovered) {
-      articleRef.current.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(${
-        isActive ? "8px" : "0px"
-      })`;
-    }
-  }, [isActive]);
-
   const handlePointerEnter = (e: React.PointerEvent<HTMLElement>) => {
     rectRef.current = e.currentTarget.getBoundingClientRect();
   };
 
-  // Pure DOM ref transform — ZERO React re-renders during 1000Hz gaming-mouse pointermove!
+  // Pure DOM ref transform — ZERO React re-renders during high-frequency pointermove!
   const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
     const rect = rectRef.current ?? e.currentTarget.getBoundingClientRect();
     rectRef.current = rect;
@@ -272,9 +326,9 @@ function Compact3DProjectCard({
     pointerRef.current = { x: nx, y: ny, hovered: true };
 
     if (articleRef.current) {
-      articleRef.current.style.transform = `rotateX(${(-ny * 5.5).toFixed(2)}deg) rotateY(${(
-        nx * 6.5
-      ).toFixed(2)}deg) translateZ(${isActive ? "8px" : "0px"})`;
+      articleRef.current.style.transform = `rotateX(${(-ny * 5.2).toFixed(2)}deg) rotateY(${(
+        nx * 6.2
+      ).toFixed(2)}deg)`;
     }
   };
 
@@ -282,9 +336,7 @@ function Compact3DProjectCard({
     rectRef.current = null;
     pointerRef.current = { x: 0, y: 0, hovered: false };
     if (articleRef.current) {
-      articleRef.current.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(${
-        isActive ? "8px" : "0px"
-      })`;
+      articleRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
   };
 
@@ -292,27 +344,25 @@ function Compact3DProjectCard({
     <div
       style={{ perspective: 1000 }}
       className="w-[300px] shrink-0 snap-start sm:w-[335px] lg:w-[356px]"
-      data-active={isActive ? "true" : "false"}
     >
       <article
         ref={articleRef}
+        data-active={initialActive ? "true" : "false"}
         onPointerEnter={handlePointerEnter}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         style={{
-          transform: `rotateX(0deg) rotateY(0deg) translateZ(${isActive ? "8px" : "0px"})`,
+          transform: "rotateX(0deg) rotateY(0deg)",
           transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease",
         }}
-        className={`group relative flex h-full flex-col justify-between border bg-surface/95 shadow-xl ${
-          isActive ? "border-primary/70" : "border-border hover:border-border-strong"
-        }`}
+        className="group relative flex h-full flex-col justify-between border border-border bg-surface/95 hover:border-border-strong data-[active=true]:border-primary/70"
       >
         <div className="flex items-center justify-between border-b border-border bg-surface-elevated/80 px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em]">
           <span className="font-bold text-primary">{`${project.index} // ${project.category}`}</span>
           <span className="text-muted">{project.year}</span>
         </div>
 
-        {/* Interactive 3D Three.js Stage Slot */}
+        {/* Interactive 3D Three.js Stage Slot (Rendered via direct-swapchain WorkCardsWebGLCanvas) */}
         <div className="relative border-b border-border bg-surface-elevated/35">
           <div
             ref={stageRef}
@@ -380,7 +430,7 @@ function Compact3DProjectCard({
             <button
               type="button"
               onClick={() => onInspectProject(project)}
-              className="inline-flex min-h-10 items-center gap-1.5 bg-primary px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary-hover cursor-pointer"
+              className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 bg-primary px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary-hover"
             >
               <Layers className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Inspect</span>
@@ -413,4 +463,4 @@ function Compact3DProjectCard({
       </article>
     </div>
   );
-}
+});
