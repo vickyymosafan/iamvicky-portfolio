@@ -1,109 +1,437 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Modern Web Guidance: Typed custom properties for smooth scroll fade masks
+   ========================================================================== */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* ==========================================================================
+   Semantic Color System — Zero Pink Policy, Dual Theme WCAG AA/AAA Contrast
+   Default: Architectural Obsidian (Dark)
+   Light: Warm Editorial Paper (automatically responds to OS light or toggle)
+   ========================================================================== */
 :root {
-  /* Gen Z / "Code Signal" Palette */
-  --background: #000000; /* True Black */
-  --surface: #0a0a0a; /* Deep Black */
-  --foreground: #ffffff; /* Stark White */
+  color-scheme: dark;
 
-  --primary: #ccff00; /* Acid Lime */
-  --primary-foreground: #000000;
+  --bg: #0b0d0f;
+  --surface: #12161a;
+  --surface-elevated: #181e24;
+  --surface-translucent: rgba(11, 13, 15, 0.82);
 
-  --secondary: #1a1a1a; /* Dark Gray */
-  --secondary-foreground: #ffffff;
+  --ink: #f3f5f2;
+  --ink-secondary: #cfd7dc;
+  --ink-muted: #9aa7b0;
 
-  --muted: #525252;
-  --accent: #0ea5e9; /* Electric Blue for accents */
+  --border: rgba(243, 245, 242, 0.12);
+  --border-strong: rgba(243, 245, 242, 0.24);
+
+  --primary: #c8f53c;
+  --primary-hover: #d8fa6a;
+  --primary-ink: #0b0d0f;
+  --primary-soft: rgba(200, 245, 60, 0.12);
+
+  --accent: #56ccf2;
+  --accent-soft: rgba(86, 204, 242, 0.14);
+
+  --sage: #4ade80;
+  --sage-soft: rgba(74, 222, 128, 0.14);
+
+  --amber: #f5b942;
+  --amber-soft: rgba(245, 185, 66, 0.14);
+
+  --focus-ring: #c8f53c;
+  --grid-line: rgba(243, 245, 242, 0.045);
+  --shadow-card: 0 20px 50px -24px rgba(0, 0, 0, 0.72);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-elevated: #ebe8de;
+    --surface-translucent: rgba(246, 244, 238, 0.88);
+
+    --ink: #111518;
+    --ink-secondary: #252e35;
+    --ink-muted: #455159;
+
+    --border: rgba(17, 21, 24, 0.13);
+    --border-strong: rgba(17, 21, 24, 0.26);
+
+    --primary: #185c37;
+    --primary-hover: #12472a;
+    --primary-ink: #ffffff;
+    --primary-soft: rgba(24, 92, 55, 0.11);
+
+    --accent: #035e8c;
+    --accent-soft: rgba(3, 94, 140, 0.11);
+
+    --sage: #1a663e;
+    --sage-soft: rgba(26, 102, 62, 0.11);
+
+    --amber: #8a5600;
+    --amber-soft: rgba(138, 86, 0, 0.11);
+
+    --focus-ring: #185c37;
+    --grid-line: rgba(17, 21, 24, 0.055);
+    --shadow-card: 0 18px 40px -24px rgba(17, 21, 24, 0.18);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f6f4ee;
+  --surface: #ffffff;
+  --surface-elevated: #ebe8de;
+  --surface-translucent: rgba(246, 244, 238, 0.88);
+
+  --ink: #111518;
+  --ink-secondary: #252e35;
+  --ink-muted: #455159;
+
+  --border: rgba(17, 21, 24, 0.13);
+  --border-strong: rgba(17, 21, 24, 0.26);
+
+  --primary: #185c37;
+  --primary-hover: #12472a;
+  --primary-ink: #ffffff;
+  --primary-soft: rgba(24, 92, 55, 0.11);
+
+  --accent: #035e8c;
+  --accent-soft: rgba(3, 94, 140, 0.11);
+
+  --sage: #1a663e;
+  --sage-soft: rgba(26, 102, 62, 0.11);
+
+  --amber: #8a5600;
+  --amber-soft: rgba(138, 86, 0, 0.11);
+
+  --focus-ring: #185c37;
+  --grid-line: rgba(17, 21, 24, 0.055);
+  --shadow-card: 0 18px 40px -24px rgba(17, 21, 24, 0.18);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--bg);
   --color-surface: var(--surface);
-  --color-foreground: var(--foreground);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-foreground: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-muted: var(--ink-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-ink);
+  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
 
-  --font-heading: var(--font-space-grotesk);
-  --font-body: var(--font-inter);
+  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
 
-  --animate-marquee: marquee 25s linear infinite;
-  --animate-float: float 6s ease-in-out infinite;
-
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
-  }
+/* ==========================================================================
+   Base & Layout Integrity
+   NOTE: overflow-x: clip preserves position: sticky for horizontal scroll tracks!
+   ========================================================================== */
+html {
+  background-color: var(--bg);
+  color: var(--ink);
+  overflow-x: clip;
+  scroll-padding-top: 5.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body), sans-serif;
-  overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow-x: clip;
+  min-height: 100dvh;
+  text-rendering: optimizeLegibility;
+  transition: background-color 220ms ease, color 220ms ease;
 }
 
-/* Utilities */
-.bg-noise {
+/* Subtle architectural grid canvas */
+.bg-architectural-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Accessible focus outlines (Modern Web Guidance: natural-interactions) */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 0.375rem;
+}
+
+/* Interactive tactile press states */
+:where(button, a) {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Card action triggers keep full WCAG contrast at rest and elevate on hover/focus */
+.reveal-on-interact {
+  opacity: 1;
+}
+.group:hover .reveal-on-interact,
+.group:focus-within .reveal-on-interact {
+  border-color: var(--border-strong);
+}
+
+/* ==========================================================================
+   Modern Web Guidance: Native CSS Scroll Progress Bar (scroll-progress-indicator)
+   Declared inside @media (prefers-reduced-motion: no-preference) & @supports
+   with animation-timeline AFTER animation shorthand.
+   ========================================================================== */
+.scroll-progress-bar {
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    @keyframes root-scroll-grow {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    .scroll-progress-bar {
+      animation: root-scroll-grow auto linear;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* ==========================================================================
+   Modern Web Guidance: Horizontal Scrollability Fade Hints
+   Uses @property --fade-start/--fade-end + scroll(self inline) + IO fallback
+   ========================================================================== */
+.horizontal-snap-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  --fade-size: 2.25rem;
+  --fade-dir: right;
+  --fade-start-pos: 0;
+  --fade-end-pos: 100%;
+  scroll-padding-inline: var(--fade-size);
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 /
+      var(--fade-start) 100% no-repeat no-clip,
+    linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 /
+      var(--fade-end) 100% no-repeat no-clip;
+}
+
+@supports (animation-timeline: scroll(self inline)) {
+  .horizontal-snap-track {
+    animation:
+      reveal-fade-start linear both,
+      hide-fade-end linear both;
+    animation-timeline: scroll(self inline);
+    animation-range:
+      0 var(--fade-size),
+      calc(100% - var(--fade-size)) 100%;
+  }
+}
+
+@supports not (animation-timeline: scroll(self inline)) {
+  .horizontal-snap-track {
+    transition:
+      --fade-start 0.2s ease,
+      --fade-end 0.2s ease;
+  }
+  .horizontal-snap-track.more-start {
+    --fade-start: var(--fade-size);
+  }
+  .horizontal-snap-track.more-end {
+    --fade-end: var(--fade-size);
+  }
+}
+
+@keyframes reveal-fade-start {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes hide-fade-end {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+/* ==========================================================================
+   Modern Web Guidance: Opt-in Marquee Motion (prefers-reduced-motion safe)
+   ========================================================================== */
+@keyframes capability-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-track {
+    animation: capability-marquee 38s linear infinite;
+  }
+  .marquee-track[data-paused="true"],
+  .marquee-track:hover,
+  .marquee-track:focus-within {
+    animation-play-state: paused;
+  }
+}
+
+/* ==========================================================================
+   Modern Web Guidance: Native <dialog> Modals (Top Layer, Scroll Containment)
+   Scoping display to dialog[open], overscroll-behavior on BOTH dialog & backdrop.
+   ========================================================================== */
+dialog.native-modal {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  width: min(calc(100vw - 1.5rem), 54rem);
+  max-width: 54rem;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  overflow: visible;
+}
+
+dialog.native-modal.native-modal-sm {
+  width: min(calc(100vw - 1.5rem), 38rem);
+  max-width: 38rem;
+}
+
+dialog.native-modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+dialog.native-modal:modal {
+  overscroll-behavior: contain;
+}
+
+dialog.native-modal::backdrop {
+  background: rgba(7, 10, 12, 0.72);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+dialog.native-modal {
+  opacity: 0;
+  translate: 0 10px;
+  transition:
+    display,
+    overlay,
+    opacity ease-out,
+    translate ease-out;
+  transition-duration: 220ms;
+  transition-behavior: allow-discrete;
+}
+
+dialog.native-modal[open] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@starting-style {
+  dialog.native-modal[open] {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.native-modal,
+  dialog.native-modal[open] {
+    translate: none;
+    transition-duration: 0.08s;
+  }
+  @starting-style {
+    dialog.native-modal[open] {
+      translate: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   Spotlight Card Surface (Compositor-safe CSS custom property pointer glow)
+   ========================================================================== */
+.surface-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-card-interactive {
   position: relative;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 
-.bg-noise::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  z-index: 50;
-  opacity: 0.4;
-  mix-blend-mode: overlay;
+.surface-card-interactive:hover {
+  border-color: var(--border-strong);
 }
 
-.glass-panel {
-  background: rgba(18, 18, 18, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Lenis recommended utility states */
+html.lenis,
+html.lenis body {
+  height: auto;
 }
 
-.text-glow {
-  text-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
-.neo-brutal-border {
-  border: 2px solid var(--secondary);
-  box-shadow: 4px 4px 0px var(--primary);
-  transition: all 0.2s ease;
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
-.neo-brutal-border:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px var(--primary);
-}
-
-.stroke-text {
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
-}
-
-.stroke-text-bold {
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.8);
+.lenis.lenis-stopped {
+  overflow: clip;
 }

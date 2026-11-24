@@ -1,0 +1,73 @@
+{
+  "voice": "en-US-AndrewMultilingualNeural",
+  "rate": "+10%",
+  "audioSrc": "/audio/ai-stack-explainer-vo.mp3",
+  "totalDuration": 84.07,
+  "beats": [
+    {
+      "id": "hook",
+      "title": "AI-Augmented Engineering",
+      "start": 0.08,
+      "text": "Beyond raw chat prompting lies AI-Augmented Engineering: deterministic architecture, accelerated by autonomous coding agents.",
+      "end": 7.625
+    },
+    {
+      "id": "prd-skills",
+      "title": "Deterministic PRDs & Agent Skills",
+      "start": 7.625,
+      "text": "Every build begins with Deterministic PRDs \u2014 locking ERDs, OpenAPI contracts, and RBAC rules \u2014 steered by twenty-one modular Agent Skills from disciplined prompt engineering.",
+      "end": 19.045
+    },
+    {
+      "id": "agents-mcp",
+      "title": "Claude Code, Google Antigravity & MCP",
+      "start": 19.045,
+      "text": "Claude Code and Google Antigravity execute in parallel, governed by custom TypeScript MCP servers I built \u2014 forty-three tools enforcing task DAGs, exclusive file locks, and real browser evidence gates.",
+      "end": 32.545
+    },
+    {
+      "id": "hybrid-rag",
+      "title": "Hybrid & Agentic RAG",
+      "start": 32.545,
+      "text": "Hybrid and Agentic RAG fuses Supabase pgvector semantic search with BM25 lexical reranking via Weighted Reciprocal Rank Fusion \u2014 achieving ninety-one point six seven percent recall, one point zero MRR, six hundred ninety-four millisecond Redis responses, and a self-critic grounding loop.",
+      "end": 51.443
+    },
+    {
+      "id": "fullstack-matrix",
+      "title": "Full-Stack Production Matrix",
+      "start": 51.443,
+      "text": "Production layers span React nineteen, Next.js sixteen, Vue, Tailwind four, and Framer Motion \u2014 backed by Node, NestJS, Express, Hono, and Laravel on PostgreSQL, Prisma, Neon, Redis BullMQ, and offline Dexie \u2014 across TypeScript, Python, PHP, Kotlin, and MQL5.",
+      "end": 72.284
+    },
+    {
+      "id": "qa-ship",
+      "title": "Verification & Deployment",
+      "start": 72.284,
+      "text": "Verified by Jest, Supertest, and thirteen-viewport Playwright audits, then shipped via GitHub Actions to Vercel and Cloudflare Workers. Engineered to ship \u2014 verified to last.",
+      "end": 84.07
+    }
+  ],
+  "cues": {
+    "aiAugmented": 2.261,
+    "deterministic": 3.58,
+    "openApi": 12.17,
+    "agentSkills": 6.773,
+    "claudeCode": 19.045,
+    "antigravity": 20.284,
+    "mcp": 24.352,
+    "fortyThree": 26.159,
+    "hybridRag": 32.545,
+    "pgvector": 35.898,
+    "bm25": 37.489,
+    "recall91": 42.966,
+    "redis": 48.432,
+    "selfCritic": 49.682,
+    "react": 52.557,
+    "nestjs": 59.523,
+    "postgresql": 62.477,
+    "typescript": 67.977,
+    "playwright": 75.5,
+    "cloudflare": 79.193
+  },
+  "wordCount": 169
+}
