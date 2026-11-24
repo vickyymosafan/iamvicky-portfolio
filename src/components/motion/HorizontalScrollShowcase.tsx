@@ -1,19 +1,20 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import dynamic from "next/dynamic";
+import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Github, Layers } from "lucide-react";
 import { FeaturedProject } from "@/data/portfolio";
-import {
-  CardSlotHandle,
-  ProjectCardsThreeLayer,
-} from "@/components/three/ProjectCardsThreeLayer";
+import type { CardSlotHandle } from "@/components/three/ProjectCardsThreeLayer";
+
+// Code-split Three.js scissor canvas so initial Hero load never downloads Three.js upfront
+const ProjectCardsThreeLayer = dynamic(
+  () =>
+    import("@/components/three/ProjectCardsThreeLayer").then(
+      (m) => m.ProjectCardsThreeLayer
+    ),
+  { ssr: false }
+);
 
 interface HorizontalScrollShowcaseProps {
   projects: FeaturedProject[];
@@ -30,11 +31,9 @@ const CATEGORIES = [
 
 /**
  * Compact 3D Interactive Horizontal-on-Vertical Scroll Showcase (Zero Arrow Buttons):
- * - All projects laid out side-by-side in sleek compact 3D cards.
- * - Vertical scroll down glides cards smoothly left-to-right until the last card settles,
- *   then releases smoothly into the next section.
- * - Vertical scroll up glides smoothly backwards from the last card back to the first card.
- * - Powered by a single shared Three.js WebGL scissor layer for interactive 3D project models.
+ * - Direct 1:1 scrollYProgress mapping synced with Lenis (eliminates double-smoothing latency at 120-300Hz!).
+ * - Direct DOM ref hover tilt (zero React state updates on high-frequency pointermove!).
+ * - Powered by a single off-screen-pausing Three.js WebGL scissor layer.
  */
 export function HorizontalScrollShowcase({
   projects,
@@ -60,7 +59,6 @@ export function HorizontalScrollShowcase({
     [filteredProjects]
   );
 
-  // Measure horizontal overflow dynamically on resize and filter changes
   useEffect(() => {
     const measure = () => {
       const viewport = stickyRef.current;
@@ -74,7 +72,7 @@ export function HorizontalScrollShowcase({
     const ro = new ResizeObserver(measure);
     if (stickyRef.current) ro.observe(stickyRef.current);
     if (trackRef.current) ro.observe(trackRef.current);
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", measure, { passive: true });
 
     return () => {
       ro.disconnect();
@@ -87,32 +85,26 @@ export function HorizontalScrollShowcase({
     offset: ["start start", "end end"],
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 150,
-    damping: 28,
-    mass: 0.24,
-  });
-
-  const x = useTransform(smoothProgress, [0, 1], [0, -maxTranslate]);
-  const progressScaleX = useTransform(smoothProgress, [0, 1], [0, 1]);
+  // Direct 1:1 GPU transform synced to Lenis smooth scroll — zero double-spring lag at 300 FPS!
+  const x = useTransform(scrollYProgress, [0, 1], [0, -maxTranslate]);
+  const progressScaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const idx = Math.min(
       Math.max(0, filteredProjects.length - 1),
       Math.max(0, Math.round(latest * Math.max(1, filteredProjects.length - 1)))
     );
-    setActiveIndex(idx);
+    setActiveIndex((prev) => (prev === idx ? prev : idx));
   });
 
-  // Dynamic vertical scroll distance proportional to actual horizontal distance (SSR-deterministic)
   const trackHeightVh = useMemo(() => {
     if (filteredProjects.length <= 1) return 105;
-    return Math.max(190, Math.round(115 + filteredProjects.length * 42));
+    return Math.max(190, Math.round(115 + filteredProjects.length * 40));
   }, [filteredProjects.length]);
 
   return (
     <div className="space-y-4">
-      {/* Compact Architectural Category Filter Bar (No Arrow Buttons, No Grid Toggle) */}
+      {/* Compact Architectural Category Filter Bar (Zero Arrow Buttons) */}
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-3.5">
           <div
@@ -134,7 +126,7 @@ export function HorizontalScrollShowcase({
                   }}
                   className={`relative px-3.5 py-2 font-mono text-xs font-medium transition-colors cursor-pointer ${
                     isSelected
-                      ? "bg-primary text-primary-foreground font-semibold"
+                      ? "bg-primary font-semibold text-primary-foreground"
                       : "border border-border bg-surface text-muted hover:border-border-strong hover:text-foreground"
                   }`}
                 >
@@ -157,7 +149,7 @@ export function HorizontalScrollShowcase({
         </div>
       </div>
 
-      {/* Pinned Vertical-to-Horizontal 3D Stage (always mounts ref={sectionRef} for SSR & useScroll stability) */}
+      {/* Pinned Vertical-to-Horizontal 3D Stage */}
       <div
         ref={sectionRef}
         style={{ height: `${trackHeightVh}vh` }}
@@ -172,7 +164,7 @@ export function HorizontalScrollShowcase({
             <div className="flex items-center gap-3">
               <span className="font-mono text-sm font-bold text-primary tabular-nums">
                 {String(activeIndex + 1).padStart(2, "0")}
-                <span className="text-muted font-normal">
+                <span className="font-normal text-muted">
                   {" "}
                   / {String(filteredProjects.length).padStart(2, "0")}
                 </span>
@@ -188,12 +180,9 @@ export function HorizontalScrollShowcase({
             </span>
           </div>
 
-          {/* Horizontal Translating Card Track + Tightly Scoped Shared 3D Scissor Layer */}
-          <div className="relative z-10 w-full overflow-x-clip">
-            <ProjectCardsThreeLayer
-              slotsRef={slotsRef}
-              projectIds={projectIds}
-            />
+          {/* Horizontal Translating Card Track + Shared Off-Screen-Pausing 3D Scissor Layer */}
+          <div className="relative z-10 w-full overflow-hidden">
+            <ProjectCardsThreeLayer slotsRef={slotsRef} projectIds={projectIds} />
             <motion.div
               ref={trackRef}
               style={{ x }}
@@ -211,7 +200,7 @@ export function HorizontalScrollShowcase({
             </motion.div>
           </div>
 
-          {/* Precision Continuous Scroll Progress Bar (Zero Arrow Buttons) */}
+          {/* Continuous Scroll Progress Bar */}
           <div className="relative z-10 mx-auto mt-7 w-full max-w-7xl px-5 sm:px-8">
             <div className="h-[3px] w-full overflow-hidden bg-surface-elevated">
               <motion.div
@@ -221,7 +210,9 @@ export function HorizontalScrollShowcase({
             </div>
             <div className="mt-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
               <span>{"01 // Start of Rail"}</span>
-              <span className="hidden sm:inline">Scroll continuously to transition into Shipped Archive ↓</span>
+              <span className="hidden sm:inline">
+                Scroll continuously to transition into Shipped Archive ↓
+              </span>
               <span>{`0${filteredProjects.length} // End of Rail`}</span>
             </div>
           </div>
@@ -242,9 +233,10 @@ function Compact3DProjectCard({
   onInspectProject: (project: FeaturedProject) => void;
   slotsRef: React.MutableRefObject<Map<string, CardSlotHandle>>;
 }) {
+  const articleRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const pointerRef = useRef({ x: 0, y: 0, hovered: false });
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
   useEffect(() => {
     const map = slotsRef.current;
@@ -258,17 +250,42 @@ function Compact3DProjectCard({
     };
   }, [project.id, slotsRef]);
 
+  // Keep rest depth synced when active card changes
+  useEffect(() => {
+    if (articleRef.current && !pointerRef.current.hovered) {
+      articleRef.current.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(${
+        isActive ? "8px" : "0px"
+      })`;
+    }
+  }, [isActive]);
+
+  const handlePointerEnter = (e: React.PointerEvent<HTMLElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+  };
+
+  // Pure DOM ref transform — ZERO React re-renders during 1000Hz gaming-mouse pointermove!
   const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = rectRef.current ?? e.currentTarget.getBoundingClientRect();
+    rectRef.current = rect;
     const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
     pointerRef.current = { x: nx, y: ny, hovered: true };
-    setTilt({ rx: -ny * 5.5, ry: nx * 6.5 });
+
+    if (articleRef.current) {
+      articleRef.current.style.transform = `rotateX(${(-ny * 5.5).toFixed(2)}deg) rotateY(${(
+        nx * 6.5
+      ).toFixed(2)}deg) translateZ(${isActive ? "8px" : "0px"})`;
+    }
   };
 
   const handlePointerLeave = () => {
+    rectRef.current = null;
     pointerRef.current = { x: 0, y: 0, hovered: false };
-    setTilt({ rx: 0, ry: 0 });
+    if (articleRef.current) {
+      articleRef.current.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(${
+        isActive ? "8px" : "0px"
+      })`;
+    }
   };
 
   return (
@@ -278,29 +295,24 @@ function Compact3DProjectCard({
       data-active={isActive ? "true" : "false"}
     >
       <article
+        ref={articleRef}
+        onPointerEnter={handlePointerEnter}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         style={{
-          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateZ(${
-            isActive ? "8px" : "0px"
-          })`,
-          transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease",
+          transform: `rotateX(0deg) rotateY(0deg) translateZ(${isActive ? "8px" : "0px"})`,
+          transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease",
         }}
         className={`group relative flex h-full flex-col justify-between border bg-surface/95 shadow-xl ${
-          isActive
-            ? "border-primary/70"
-            : "border-border hover:border-border-strong"
+          isActive ? "border-primary/70" : "border-border hover:border-border-strong"
         }`}
       >
-        {/* Top Compact Architectural Index Strip (outside 3D scissor slot for zero overlap) */}
         <div className="flex items-center justify-between border-b border-border bg-surface-elevated/80 px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em]">
-          <span className="font-bold text-primary">
-            {`${project.index} // ${project.category}`}
-          </span>
+          <span className="font-bold text-primary">{`${project.index} // ${project.category}`}</span>
           <span className="text-muted">{project.year}</span>
         </div>
 
-        {/* Interactive 3D Three.js Stage Slot (compact 144px height) */}
+        {/* Interactive 3D Three.js Stage Slot */}
         <div className="relative border-b border-border bg-surface-elevated/35">
           <div
             ref={stageRef}
@@ -308,7 +320,6 @@ function Compact3DProjectCard({
             aria-label={`Interactive 3D model representing ${project.title}`}
             className="relative h-[144px] w-full overflow-hidden"
           >
-            {/* Subtle radial depth backdrop behind the WebGL scissor canvas */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"
@@ -324,17 +335,15 @@ function Compact3DProjectCard({
         <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
           <div className="space-y-3">
             <div>
-              <h3 className="font-heading text-lg font-bold leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
+              <h3 className="font-heading text-lg font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
                 {project.title}
               </h3>
-              <p className="mt-0.5 font-mono text-[11px] text-muted">
+              <p className="mt-0.5 truncate font-mono text-[11px] text-muted">
                 {project.subtitle}
               </p>
             </div>
 
-            <p className="text-xs leading-relaxed text-ink-secondary">
-              {project.summary}
-            </p>
+            <p className="text-xs leading-relaxed text-ink-secondary">{project.summary}</p>
 
             {/* Compact 3-Metric Hairline Strip */}
             <div className="grid grid-cols-3 border border-border bg-surface-elevated/40">
@@ -348,14 +357,13 @@ function Compact3DProjectCard({
                   <div className="font-heading text-sm font-bold text-foreground tabular-nums">
                     {metric.value}
                   </div>
-                  <div className="font-mono text-[11px] text-muted leading-tight">
+                  <div className="font-mono text-[11px] leading-tight text-muted">
                     {metric.label}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Compact Tech Tags (max 4 to keep card tight & scannable) */}
             <div className="flex flex-wrap gap-1.5">
               {project.tech.slice(0, 4).map((t) => (
                 <span
@@ -368,7 +376,6 @@ function Compact3DProjectCard({
             </div>
           </div>
 
-          {/* Compact Action Footer */}
           <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3.5">
             <button
               type="button"
@@ -396,7 +403,7 @@ function Compact3DProjectCard({
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   )}
                   <span className="hidden sm:inline">
-                    {link.kind === "live" ? "Live" : "Code"}
+                    {link.kind === "live" ? "Live" : "GitHub"}
                   </span>
                 </a>
               ))}

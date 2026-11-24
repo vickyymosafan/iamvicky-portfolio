@@ -1,256 +1,176 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import React, { useState } from "react";
+import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+
+interface WorldPortalTransitionProps {
+  renderTheater: (portalReady: boolean) => React.ReactNode;
+}
+
+const CORRIDOR_RINGS = [
+  { id: 0, baseScale: 0.42, color: "rgba(200, 245, 60, 0.52)", depth: 0 },
+  { id: 1, baseScale: 0.56, color: "rgba(86, 204, 242, 0.40)", depth: 1 },
+  { id: 2, baseScale: 0.72, color: "rgba(86, 204, 242, 0.34)", depth: 2 },
+  { id: 3, baseScale: 0.90, color: "rgba(200, 245, 60, 0.44)", depth: 3 },
+  { id: 4, baseScale: 1.12, color: "rgba(86, 204, 242, 0.30)", depth: 4 },
+  { id: 5, baseScale: 1.38, color: "rgba(86, 204, 242, 0.24)", depth: 5 },
+] as const;
 
 /**
- * Special Smooth Dimensional Scroll Portal Transition ("Inner World → Outer World")
- * between Section 03 (3D Experience Timeline) and Section 04 (Bang-Motion Stack Theater).
- *
- * Scrubbed smoothly 1:1 via Lenis + Framer Motion spring + Three.js architectural depth corridor:
- * - 0.00–0.38: Inside the obsidian Inner World chamber approaching the dimensional aperture.
- * - 0.38–0.78: Smooth camera dive through the glowing aperture (scale expansion + corridor warp).
- * - 0.78–1.00: Emerging smoothly into the expansive Outer World Cinema Theater with zero stutter.
+ * Seamless Direct-to-Video Dimensional Scroll Portal ("03 → 04 // INNER WORLD TO OUTER WORLD"):
+ * - Houses the live 16:9 Bang-Motion Video Theater directly INSIDE the expanding portal aperture!
+ * - Pure 100% GPU-composited 3D CSS architectural corridor (0 extra WebGL contexts, 0 VRAM cost, 300+ FPS!).
+ * - Zero hard page breaks or seams between Section 03 and Section 04's video theater:
+ *   - 0.00–0.40: Inner obsidian architectural depth corridor approaches the glowing dimensional aperture.
+ *   - 0.20–0.80: Corridor rings fly smoothly outward past camera while the real Bang-Motion Theater expands
+ *     directly into native 100% scale over the page background.
+ *   - 0.80–1.00: Theater settles cleanly at 100% scale and immediately auto-plays with US Female Voice Over!
+ * - Anchors `id="stack"` right at the settled Outer World floor so clicking Navbar "Stack & Bio" lands straight on the full video.
  */
-export function WorldPortalTransition() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasHostRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef(0);
-  const [outerReached, setOuterReached] = useState(false);
+export function WorldPortalTransition({ renderTheater }: WorldPortalTransitionProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [innerVisible, setInnerVisible] = useState(true);
+  const [theaterVisible, setTheaterVisible] = useState(false);
+  const [theaterInteractive, setTheaterInteractive] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 115,
-    damping: 26,
-    mass: 0.3,
-  });
-
-  useMotionValueEvent(smoothProgress, "change", (val) => {
-    progressRef.current = val;
-    setOuterReached((prev) => {
-      const next = val >= 0.62;
+  useMotionValueEvent(scrollYProgress, "change", (val) => {
+    setInnerVisible((prev) => {
+      const next = val < 0.42;
       return prev === next ? prev : next;
     });
+    setTheaterVisible((prev) => {
+      const next = val >= 0.16;
+      return prev === next ? prev : next;
+    });
+    setTheaterInteractive((prev) => {
+      const next = val >= 0.55;
+      return prev === next ? prev : next;
+    });
+    if (val >= 0.72) {
+      setPortalReady((prev) => (prev ? prev : true));
+    }
   });
 
-  // Compositor-only smooth DOM portal framing transforms
-  const frameScale = useTransform(smoothProgress, [0, 0.55, 0.88, 1], [1, 2.35, 7.5, 11]);
-  const innerTitleOpacity = useTransform(smoothProgress, [0, 0.25, 0.45], [1, 1, 0]);
-  const innerTitleScale = useTransform(smoothProgress, [0, 0.45], [1, 1.35]);
+  // 100% GPU compositor transforms — finish settling by 0.74 so even Navbar -78px anchor offset lands at 100% crisp Theater!
+  const tunnelScale = useTransform(scrollYProgress, [0, 0.74], [1, 3.4]);
+  const tunnelRotate = useTransform(scrollYProgress, [0, 0.74], [0, 12]);
+  const tunnelOpacity = useTransform(scrollYProgress, [0, 0.48, 0.72], [1, 0.85, 0]);
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.72], [0.45, 0.9, 0]);
+  const bgVeilOpacity = useTransform(scrollYProgress, [0.38, 0.72], [0, 1]);
 
-  const horizonGlowOpacity = useTransform(smoothProgress, [0.35, 0.65, 0.92, 1], [0.15, 0.85, 0.35, 0]);
-  const outerRevealOpacity = useTransform(smoothProgress, [0.58, 0.82, 1], [0, 1, 1]);
-  const outerRevealY = useTransform(smoothProgress, [0.58, 0.9], [28, 0]);
+  const innerTitleOpacity = useTransform(scrollYProgress, [0, 0.2, 0.38], [1, 1, 0]);
+  const innerTitleY = useTransform(scrollYProgress, [0, 0.38], [0, -40]);
+  const innerTitleScale = useTransform(scrollYProgress, [0, 0.38], [1, 1.12]);
 
-  // Lightweight Three.js depth tunnel synced directly to smoothProgress (zero scroll stutter)
-  useEffect(() => {
-    const host = canvasHostRef.current;
-    if (!host) return;
-
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true,
-        preserveDrawingBuffer: true,
-        powerPreference: "high-performance",
-      });
-    } catch {
-      return;
-    }
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
-    renderer.setSize(host.clientWidth, host.clientHeight);
-    renderer.setClearColor(0x070a0d, 1);
-    host.appendChild(renderer.domElement);
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x070a0d, 0.042);
-
-    const camera = new THREE.PerspectiveCamera(
-      54,
-      Math.max(1, host.clientWidth) / Math.max(1, host.clientHeight),
-      0.1,
-      90
-    );
-    camera.position.set(0, 0, 12);
-
-    // Architectural concentric portal frames receding along -Z (Inner World corridor)
-    const ringCount = 14;
-    const rings: THREE.LineSegments[] = [];
-    const ringGeos: THREE.EdgesGeometry[] = [];
-    const ringMats: THREE.LineBasicMaterial[] = [];
-
-    for (let i = 0; i < ringCount; i++) {
-      const box = new THREE.BoxGeometry(7.2, 4.2, 0.08);
-      const edges = new THREE.EdgesGeometry(box);
-      box.dispose();
-      const mat = new THREE.LineBasicMaterial({
-        color: i % 3 === 0 ? 0xc8f53c : 0x56ccf2,
-        transparent: true,
-        opacity: 0.25 + (i / ringCount) * 0.45,
-      });
-      const seg = new THREE.LineSegments(edges, mat);
-      seg.position.z = 8 - i * 2.4;
-      scene.add(seg);
-      rings.push(seg);
-      ringGeos.push(edges);
-      ringMats.push(mat);
-    }
-
-    // Outer-World luminous portal aperture ring at far end of tunnel
-    const portalGeo = new THREE.RingGeometry(1.4, 1.56, 64);
-    const portalMat = new THREE.MeshBasicMaterial({
-      color: 0xc8f53c,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.85,
-    });
-    const portalRing = new THREE.Mesh(portalGeo, portalMat);
-    portalRing.position.z = -24;
-    scene.add(portalRing);
-
-    // Deterministic outer-world starlight particles
-    const starCount = 160;
-    const starPos = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-      const angle = i * 2.3999632;
-      const rad = 2.6 + ((i * 7) % 100) * 0.14;
-      starPos[i * 3] = Math.cos(angle) * rad;
-      starPos[i * 3 + 1] = Math.sin(angle) * rad * 0.65;
-      starPos[i * 3 + 2] = 6 - (i / starCount) * 44;
-    }
-    const starsGeo = new THREE.BufferGeometry();
-    starsGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-    const starsMat = new THREE.PointsMaterial({
-      color: 0x56ccf2,
-      size: 0.09,
-      transparent: true,
-      opacity: 0.72,
-    });
-    const stars = new THREE.Points(starsGeo, starsMat);
-    scene.add(stars);
-
-    const resize = () => {
-      if (!host) return;
-      const w = Math.max(1, host.clientWidth);
-      const h = Math.max(1, host.clientHeight);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    const ro = new ResizeObserver(resize);
-    ro.observe(host);
-
-    let rafId = 0;
-    const renderFrame = () => {
-      const p = progressRef.current;
-
-      // Smoothly fly camera through the inner architectural corridor into the outer expanse
-      camera.position.z = 12 - p * 34;
-      camera.rotation.z = p * 0.16;
-
-      portalRing.scale.setScalar(1 + Math.pow(p, 2.2) * 5.2);
-      portalMat.opacity = Math.max(0.05, 0.88 - Math.max(0, p - 0.68) * 2.4);
-
-      rings.forEach((r, i) => {
-        r.rotation.z = (i * 0.025) + p * 0.25;
-      });
-      stars.rotation.z = -p * 0.22;
-
-      renderer.render(scene, camera);
-      rafId = requestAnimationFrame(renderFrame);
-    };
-
-    rafId = requestAnimationFrame(renderFrame);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      ro.disconnect();
-      ringGeos.forEach((g) => g.dispose());
-      ringMats.forEach((m) => m.dispose());
-      portalGeo.dispose();
-      portalMat.dispose();
-      starsGeo.dispose();
-      starsMat.dispose();
-      renderer.dispose();
-      if (renderer.domElement.parentNode === host) {
-        host.removeChild(renderer.domElement);
-      }
-    };
-  }, []);
+  // Direct continuous morph from Portal Aperture -> Full 100% Cinema Theater!
+  const theaterScale = useTransform(scrollYProgress, [0.16, 0.72, 1], [0.74, 1, 1]);
+  const theaterY = useTransform(scrollYProgress, [0.16, 0.72, 1], [44, 0, 0]);
+  const theaterOpacity = useTransform(scrollYProgress, [0.16, 0.46, 0.7], [0.15, 0.92, 1]);
 
   return (
     <div
       ref={containerRef}
-      aria-label="Dimensional portal transition from Experience Timeline to AI-Augmented Stack Theater"
-      className="relative h-[165vh] w-full bg-[#070a0d]"
+      aria-label="Seamless Inner-to-Outer World portal emerging directly into AI-Augmented Stack Explainer Theater"
+      className="relative h-[180vh] w-full bg-[#070a0d]"
     >
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-[#070a0d] text-white">
-        {/* Three.js Inner→Outer Corridor WebGL Layer */}
-        <div ref={canvasHostRef} aria-hidden="true" className="absolute inset-0" />
+      {/* Direct Navigation Anchor (#stack) positioned right at the settled full-scale Theater! */}
+      <div
+        id="stack"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-screen"
+        aria-hidden="true"
+      />
 
-        {/* Atmospheric Horizon Veil during Portal Breach */}
+      <div className="sticky top-0 flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#070a0d]">
+        {/* Layer 1: Pure GPU-Composited 3D Concentric Architectural Portal Corridor (300+ FPS, 0 WebGL cost) */}
         <motion.div
           aria-hidden="true"
-          style={{ opacity: horizonGlowOpacity }}
-          className="pointer-events-none absolute inset-0"
+          style={{
+            scale: tunnelScale,
+            rotate: tunnelRotate,
+            opacity: tunnelOpacity,
+          }}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center will-change-transform"
         >
-          <div
-            className="h-full w-full"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 50%, rgba(200,245,60,0.34) 0%, rgba(86,204,242,0.18) 38%, transparent 72%)",
-            }}
-          />
+          {/* Ambient radial horizon pulse */}
+          <motion.div
+            style={{ opacity: glowOpacity }}
+            className="absolute inset-0"
+          >
+            <div
+              className="h-full w-full"
+              style={{
+                background:
+                  "radial-gradient(circle at 50% 50%, rgba(200,245,60,0.22) 0%, rgba(86,204,242,0.12) 32%, rgba(7,10,13,0) 68%)",
+              }}
+            />
+          </motion.div>
+
+          {/* Receding concentric architectural wireframe portal gates */}
+          {CORRIDOR_RINGS.map((ring) => (
+            <div
+              key={ring.id}
+              style={{
+                width: "68vw",
+                maxWidth: "56rem",
+                height: "46vh",
+                borderColor: ring.color,
+                transform: `scale(${ring.baseScale}) rotate(${ring.depth * 1.6}deg)`,
+              }}
+              className="absolute border"
+            />
+          ))}
         </motion.div>
 
-        {/* Expanding Architectural Aperture Frame */}
+        {/* Layer 2: Seamless Theme-Aware Outer World Background Veil */}
         <motion.div
           aria-hidden="true"
-          style={{ scale: frameScale }}
-          className="pointer-events-none absolute h-[54vh] w-[72vw] max-w-4xl border border-[#c8f53c]/50 shadow-[0_0_80px_rgba(200,245,60,0.18)]"
+          style={{ opacity: bgVeilOpacity }}
+          className="pointer-events-none absolute inset-0 bg-background"
         />
 
-        {/* Phase 1 Label: Leaving Inner World */}
-        <motion.div
-          style={{ opacity: innerTitleOpacity, scale: innerTitleScale }}
-          className="relative z-10 max-w-2xl px-6 text-center"
-        >
-          <div className="inline-flex items-center gap-2 border border-white/20 bg-black/55 px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c8f53c] backdrop-blur-md">
-            <span>03 → 04 // INNER WORLD TO OUTER WORLD</span>
-          </div>
-          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl">
-            Stepping Beyond Execution Into the AI-Augmented Architecture
-          </h2>
-          <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-zinc-300">
-            Keep scrolling smoothly to breach the aperture ↓
-          </p>
-        </motion.div>
-
-        {/* Phase 2 Label: Rendered only once portal approaches Outer World (prevents zero-opacity contrast flags) */}
-        {outerReached ? (
+        {/* Layer 3: Inner World Entry Typography (unmounts cleanly before Theater locks in) */}
+        {innerVisible ? (
           <motion.div
-            style={{ opacity: outerRevealOpacity, y: outerRevealY }}
-            className="pointer-events-none absolute inset-x-0 bottom-14 z-10 px-6 text-center"
+            style={{
+              opacity: innerTitleOpacity,
+              y: innerTitleY,
+              scale: innerTitleScale,
+            }}
+            className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center will-change-transform"
           >
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.24em] text-[#c8f53c]">
-              OUTER WORLD REACHED // INITIALIZING BANG-MOTION EXPLAINER FILM
+            <div className="inline-flex items-center gap-2 border border-white/25 bg-[#070a0d]/85 px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c8f53c]">
+              <span>03 → 04 // INNER WORLD TO OUTER WORLD</span>
+            </div>
+            <h2 className="mt-4 max-w-3xl font-heading text-3xl font-bold tracking-tight text-white sm:text-5xl">
+              Stepping Directly Into the AI-Augmented Architecture Film
+            </h2>
+            <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-zinc-200">
+              Keep scrolling smoothly — aperture expands live into theater ↓
             </p>
-            <p className="mt-1.5 font-heading text-lg font-medium text-zinc-100 sm:text-xl">
-              Technical Stack &amp; AI-Augmented Engineering — English Voice Over Ready
-            </p>
+          </motion.div>
+        ) : null}
+
+        {/* Layer 4: LIVE 16:9 Bang-Motion Video Theater Morphing Seamlessly out of the Portal!
+            Mounts smoothly when portal opens (scrollYProgress >= 0.16), saving initial DOM/GSAP work
+            and ensuring zero hidden-heading or zero-opacity contrast issues at scrollY = 0. */}
+        {theaterVisible ? (
+          <motion.div
+            style={{
+              scale: theaterScale,
+              y: theaterY,
+              opacity: theaterOpacity,
+            }}
+            className={`relative z-30 flex w-full flex-col justify-center pt-24 pb-4 will-change-transform ${
+              theaterInteractive ? "pointer-events-auto" : "pointer-events-none"
+            }`}
+          >
+            {renderTheater(portalReady)}
           </motion.div>
         ) : null}
       </div>

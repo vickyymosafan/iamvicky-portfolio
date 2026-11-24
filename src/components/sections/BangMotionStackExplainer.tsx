@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import {
   ArrowDown,
-  FileText,
   Pause,
   Play,
   RotateCcw,
@@ -13,55 +12,14 @@ import {
 } from "lucide-react";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
+import { EXPLAINER_TOTAL_DURATION, VO_BEATS } from "@/data/voBeats";
 
 const STAGE_W = 1920;
 const STAGE_H = 1080;
-const TOTAL_DURATION = 84.07;
+const TOTAL_DURATION = EXPLAINER_TOTAL_DURATION;
 
-const VO_BEATS = [
-  {
-    id: "hook",
-    start: 0.08,
-    end: 7.625,
-    label: "01 // AI-Augmented Core",
-    text: "Beyond raw chat prompting lies AI-Augmented Engineering: deterministic architecture, accelerated by autonomous coding agents.",
-  },
-  {
-    id: "prd-skills",
-    start: 7.625,
-    end: 19.045,
-    label: "02 // Deterministic PRDs & Agent Skills",
-    text: "Every build begins with Deterministic PRDs — locking ERDs, OpenAPI contracts, and RBAC rules — steered by twenty-one modular Agent Skills from disciplined prompt engineering.",
-  },
-  {
-    id: "agents-mcp",
-    start: 19.045,
-    end: 32.545,
-    label: "03 // Claude Code · Antigravity · MCP",
-    text: "Claude Code and Google Antigravity execute in parallel, governed by custom TypeScript MCP servers I built — forty-three tools enforcing task DAGs, exclusive file locks, and real browser evidence gates.",
-  },
-  {
-    id: "hybrid-rag",
-    start: 32.545,
-    end: 51.443,
-    label: "04 // Hybrid & Agentic RAG",
-    text: "Hybrid and Agentic RAG fuses Supabase pgvector semantic search with BM25 lexical reranking via Weighted Reciprocal Rank Fusion — achieving ninety-one point six seven percent recall, one point zero MRR, six hundred ninety-four millisecond Redis responses, and a self-critic grounding loop.",
-  },
-  {
-    id: "fullstack-matrix",
-    start: 51.443,
-    end: 72.284,
-    label: "05 // Full-Stack Production Matrix",
-    text: "Production layers span React nineteen, Next.js sixteen, Vue, Tailwind four, and Framer Motion — backed by Node, NestJS, Express, Hono, and Laravel on PostgreSQL, Prisma, Neon, Redis BullMQ, and offline Dexie — across TypeScript, Python, PHP, Kotlin, and MQL5.",
-  },
-  {
-    id: "qa-ship",
-    start: 72.284,
-    end: 84.07,
-    label: "06 // Autonomous QA & Edge Ship",
-    text: "Verified by Jest, Supertest, and thirteen-viewport Playwright audits, then shipped via GitHub Actions to Vercel and Cloudflare Workers. Engineered to ship — verified to last.",
-  },
-] as const;
+// Pre-baked tiny 128x128 static noise SVG tile — 100% GPU compositor, ZERO per-frame <feTurbulence> CPU rasterization!
+const STATIC_GRAIN_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")`;
 
 const VIEWPORT_PROFILES = [
   "320", "360", "375", "390", "414", "430",
@@ -75,18 +33,24 @@ function formatClock(sec: number): string {
   return `${String(m).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
 }
 
+interface BangMotionStackExplainerProps {
+  portalReady?: boolean;
+}
+
 /**
- * Bang-Motion Cinematic 16:9 Explainer Film (GSAP 3.15 + Real English Neural Voice Over):
- * - Follows Bang-Motion anti-PPT laws:
- *   - 1920x1080 deterministic stage scaled via translate(-50%,-50%) scale(s).
- *   - Single camera rig (#bm-world) with motivated transitions (shutter wipe, 3D push-through, directional whip).
- *   - Zero Math.random() / Date.now(); deterministic living grain, directional SVG feGaussianBlur, tabular-nums counters.
- *   - Dark Obsidian <-> Warm Architectural Ivory surface contrast behind precision wipe.
- *   - Synced to real edge-tts English Voice Over (/audio/ai-stack-explainer-vo.mp3).
- * - Auto-plays when arriving in the Outer World via IntersectionObserver.
- * - Auto-scrolls smoothly to #education-credentials upon video completion.
+ * Ultra-Smooth 120–300 FPS Bang-Motion Cinematic 16:9 Explainer Film:
+ * - ZERO React state updates per frame (progress bar, scrubber, and clock update directly via DOM refs!).
+ * - ZERO full-screen <feTurbulence> or animated <feGaussianBlur> filter rasterization — 100% GPU compositor!
+ * - GSAP configured with force3D: true, autoSleep: 60, lagSmoothing(500, 33).
+ * - Synced to expressive American English female neural Voice Over (en-US-AvaNeural).
+ * - Showcases Craftrig MCP (vickyymosafan/mcp-craftrig), BuildFlow ERP, Claude Code, Google Antigravity,
+ *   Deterministic PRDs, 21 Agent Skills, Hybrid & Agentic RAG, and Full-Stack Production Architecture.
+ * - Auto-plays smoothly as soon as the seamless 03→04 portal locks into the Outer World Theater.
+ * - Auto-scrolls cleanly to #education-credentials upon completion.
  */
-export function BangMotionStackExplainer() {
+export function BangMotionStackExplainer({
+  portalReady = false,
+}: BangMotionStackExplainerProps) {
   const { scrollTo } = useSmoothScroll();
   const { unlockAudio } = useAudioGate();
 
@@ -95,6 +59,8 @@ export function BangMotionStackExplainer() {
   const worldRef = useRef<HTMLDivElement>(null);
   const grainRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const clockRef = useRef<HTMLSpanElement>(null);
 
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const hasAutoPlayedRef = useRef(false);
@@ -103,22 +69,25 @@ export function BangMotionStackExplainer() {
   const userPausedRef = useRef(false);
   const blobUrlRef = useRef<string | null>(null);
   const audioLoadedRef = useRef(false);
+  const lastWholeSecRef = useRef(-1);
+  const lastBeatIdxRef = useRef(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [needsAudioGesture, setNeedsAudioGesture] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const [activeBeatIdx, setActiveBeatIdx] = useState(0);
 
-  // Lazy-load English Voice-Over MP3 into an in-memory Blob URL when approaching Section 04
-  // (modern-web-guidance: lazy-load-video-and-audio IntersectionObserver strategy + zero Range aborts on seek)
+  // Lazy-load English Female Voice-Over MP3 into in-memory Blob URL (zero Range aborts on seek)
   const ensureAudioLoaded = useCallback(async () => {
     if (audioLoadedRef.current || !audioRef.current) return;
     audioLoadedRef.current = true;
     try {
       const res = await fetch("/audio/ai-stack-explainer-vo.mp3");
-      if (!res.ok) return;
+      if (!res.ok) {
+        audioLoadedRef.current = false;
+        return;
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       blobUrlRef.current = url;
@@ -140,7 +109,7 @@ export function BangMotionStackExplainer() {
           loader.disconnect();
         }
       },
-      { rootMargin: "420px 0px" }
+      { rootMargin: "640px 0px" }
     );
     loader.observe(box);
     return () => {
@@ -152,7 +121,7 @@ export function BangMotionStackExplainer() {
     };
   }, [ensureAudioLoaded]);
 
-  // Scale 1920x1080 internal stage crisply to fit any container width (Bang-Motion fit())
+  // Scale 1920x1080 internal stage crisply to fit container width/height
   useEffect(() => {
     const box = viewportBoxRef.current;
     const stage = stageRef.current;
@@ -160,17 +129,13 @@ export function BangMotionStackExplainer() {
 
     const fit = () => {
       const scale = Math.min(box.clientWidth / STAGE_W, box.clientHeight / STAGE_H);
-      stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      stage.style.transform = `translate3d(-50%, -50%, 0) scale(${scale})`;
     };
 
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(box);
-    window.addEventListener("resize", fit);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", fit);
-    };
+    return () => ro.disconnect();
   }, []);
 
   const startPlayback = useCallback(
@@ -198,12 +163,8 @@ export function BangMotionStackExplainer() {
           audioRef.current.muted = isMuted;
           audioRef.current
             .play()
-            .then(() => {
-              setNeedsAudioGesture(false);
-            })
-            .catch(() => {
-              setNeedsAudioGesture(true);
-            });
+            .then(() => setNeedsAudioGesture(false))
+            .catch(() => setNeedsAudioGesture(true));
         };
 
         if (!blobUrlRef.current) {
@@ -216,39 +177,60 @@ export function BangMotionStackExplainer() {
     [isMuted, ensureAudioLoaded]
   );
 
-  // Build deterministic GSAP Bang-Motion Master Timeline
+  // Build deterministic zero-lag GPU-composited GSAP Master Timeline
   useEffect(() => {
     const stage = stageRef.current;
     const world = worldRef.current;
     if (!stage || !world) return;
 
+    // Context7 GSAP performance config: GPU layer promotion + battery-saving autoSleep + smooth lag compensation
+    gsap.config({ force3D: true, autoSleep: 60, nullTargetWarn: false });
+    gsap.ticker.lagSmoothing(500, 33);
+
     const q = (sel: string) => stage.querySelector<HTMLElement | SVGElement>(sel);
     const qa = (sel: string) => Array.from(stage.querySelectorAll<HTMLElement | SVGElement>(sel));
 
-    const blurXNode = stage.querySelector<SVGFEGaussianBlurElement>("#bm-blur-x-node");
-    const blurYNode = stage.querySelector<SVGFEGaussianBlurElement>("#bm-blur-y-node");
+    // Cache DOM refs ONCE outside onUpdate (zero querySelector per frame!)
+    const orbitRingEl = q("#bm-bg-orbit");
+    const mcpNumEl = q("#bm-mcp-count");
+    const recallEl = q("#bm-recall-val");
+    const redisEl = q("#bm-redis-val");
 
-    // Camera state driven strictly by GSAP timeline (pure function of tl.time())
     const CAM = { s: 1, fx: STAGE_W / 2, fy: STAGE_H / 2 };
+    let lastGrainStep = -1;
+
     const applyCam = (t: number) => {
-      const breath = 1 + 0.008 * Math.sin(t * 0.85);
+      const breath = 1 + 0.006 * Math.sin(t * 0.85);
       const s = CAM.s * breath;
       let tx = STAGE_W / 2 - CAM.fx * s;
       let ty = STAGE_H / 2 - CAM.fy * s;
       tx = Math.min(0, Math.max(STAGE_W - STAGE_W * s, tx));
       ty = Math.min(0, Math.max(STAGE_H - STAGE_H * s, ty));
-      world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${s})`;
+      world.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
 
-      // Deterministic living film grain (12 fps stepped jump from t, zero Math.random)
-      if (grainRef.current) {
-        const k = Math.floor(t * 12);
-        grainRef.current.style.transform = `translate3d(${((k * 37) % 60) - 30}px, ${((k * 61) % 60) - 30}px, 0)`;
+      // Lightweight stepped static-tile grain drift (8 fps, GPU translate3d only — zero filter rasterization!)
+      const k = Math.floor(t * 8);
+      if (k !== lastGrainStep && grainRef.current) {
+        lastGrainStep = k;
+        grainRef.current.style.transform = `translate3d(${((k * 37) % 64) - 32}px, ${((k * 61) % 64) - 32}px, 0)`;
       }
 
-      // Deterministic background geometry drift
-      const orbitRing = q("#bm-bg-orbit");
-      if (orbitRing) {
-        orbitRing.style.transform = `rotate(${t * 5.2}deg)`;
+      if (orbitRingEl) {
+        orbitRingEl.style.transform = `rotate3d(0, 0, 1, ${(t * 5.0).toFixed(2)}deg)`;
+      }
+    };
+
+    const syncHudRefs = (t: number) => {
+      if (progressBarRef.current) {
+        const ratio = Math.min(1, Math.max(0, t / TOTAL_DURATION));
+        progressBarRef.current.style.transform = `scaleX(${ratio.toFixed(4)})`;
+      }
+      const wholeSec = Math.floor(t);
+      if (wholeSec !== lastWholeSecRef.current) {
+        lastWholeSecRef.current = wholeSec;
+        if (clockRef.current) {
+          clockRef.current.textContent = `${formatClock(t)} / ${formatClock(TOTAL_DURATION)}`;
+        }
       }
     };
 
@@ -257,15 +239,19 @@ export function BangMotionStackExplainer() {
       onUpdate: () => {
         const t = tl.time();
         applyCam(t);
-        setCurrentTime(t);
+        syncHudRefs(t);
 
+        // Only trigger React state update when crossing one of the 6 beat boundaries (0 per-frame renders!)
         const idx = VO_BEATS.findIndex((b) => t >= b.start && t < b.end);
-        if (idx !== -1) setActiveBeatIdx(idx);
+        if (idx !== -1 && idx !== lastBeatIdxRef.current) {
+          lastBeatIdxRef.current = idx;
+          setActiveBeatIdx(idx);
+        }
 
-        // Keep English VO audio tightly locked within 180ms of GSAP timeline
+        // Keep American Female VO tightly locked to GSAP timeline
         const audio = audioRef.current;
         if (audio && !audio.paused && !tl.paused()) {
-          if (Math.abs(audio.currentTime - t) > 0.22) {
+          if (Math.abs(audio.currentTime - t) > 0.24) {
             audio.currentTime = t;
           }
         }
@@ -289,394 +275,347 @@ export function BangMotionStackExplainer() {
       tl.to(CAM, { s, fx, fy, duration: dur, ease }, at);
     };
 
-    const setMotionBlurX = (at: number, fromVal: number, toVal: number, dur: number) => {
-      const obj = { v: fromVal };
-      tl.to(
-        obj,
-        {
-          v: toVal,
-          duration: dur,
-          ease: toVal === 0 ? "power3.out" : "power2.in",
-          onUpdate: () => {
-            if (blurXNode) blurXNode.setAttribute("stdDeviation", `${obj.v.toFixed(1)} 0`);
-          },
-        },
-        at
-      );
-    };
-
-    const setMotionBlurY = (at: number, fromVal: number, toVal: number, dur: number) => {
-      const obj = { v: fromVal };
-      tl.to(
-        obj,
-        {
-          v: toVal,
-          duration: dur,
-          ease: toVal === 0 ? "power3.out" : "power2.in",
-          onUpdate: () => {
-            if (blurYNode) blurYNode.setAttribute("stdDeviation", `0 ${obj.v.toFixed(1)}`);
-          },
-        },
-        at
-      );
-    };
-
-    // Reset all instrument views cleanly at t = 0
-    tl.set(CAM, { s: 1.06, fx: 960, fy: 540 }, 0);
+    // Reset all views cleanly at t = 0
+    tl.set(CAM, { s: 1.05, fx: 960, fy: 540 }, 0);
     tl.set(["#bm-v2", "#bm-v3", "#bm-v4", "#bm-v5", "#bm-v6"], { autoAlpha: 0 }, 0);
     tl.set("#bm-v1", { autoAlpha: 1 }, 0);
     tl.set("#bm-wipe", { scaleX: 0, transformOrigin: "0% 50%" }, 0);
 
     // =========================================================================
-    // VIEW 1 (0.00s – 7.62s): HOOK — AI-AUGMENTED ENGINEERING CORE (Obsidian)
+    // VIEW 1 (0.00s – 7.76s): HOOK — AI-AUGMENTED ENGINEERING CORE (Obsidian)
     // =========================================================================
-    shot(0, 1.4, 1.0, 960, 540, "power3.out");
+    shot(0, 1.35, 1.0, 960, 540, "power3.out");
     tl.fromTo(
       "#bm-v1-kicker",
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      0.15
+      { opacity: 0, y: 36 },
+      { opacity: 1, y: 0, duration: 0.65, ease: "power4.out" },
+      0.12
     );
+    // Pure GPU directional velocity entry (skewY/scaleY snap — zero CPU filter blur!)
     tl.fromTo(
       "#bm-v1-title-1",
-      { opacity: 0, y: 80, filter: "url(#bm-blur-y)" },
-      { opacity: 1, y: 0, duration: 0.85, ease: "power4.out", clearProps: "filter" },
-      0.45
+      { opacity: 0, y: 76, scaleY: 1.18 },
+      { opacity: 1, y: 0, scaleY: 1, duration: 0.78, ease: "power4.out" },
+      0.42
     );
-    setMotionBlurY(0.45, 22, 0, 0.75);
 
-    // Highlight box draws around "AI-Augmented Engineering" right when narrator speaks it (2.26s)
+    // Highlight box draws right when narrator speaks "AI-Augmented Engineering" (1.86s)
     tl.fromTo(
       "#bm-v1-title-2",
-      { opacity: 0, x: -70, filter: "url(#bm-blur-x)" },
-      { opacity: 1, x: 0, duration: 0.85, ease: "power4.out", clearProps: "filter" },
-      2.1
+      { opacity: 0, x: -72, skewX: -8, scaleX: 1.08 },
+      { opacity: 1, x: 0, skewX: 0, scaleX: 1, duration: 0.78, ease: "power4.out" },
+      1.75
     );
-    setMotionBlurX(2.1, 28, 0, 0.75);
     tl.fromTo(
       "#bm-v1-box-stroke",
       { strokeDashoffset: 1900 },
-      { strokeDashoffset: 0, duration: 0.9, ease: "power3.out" },
-      2.25
+      { strokeDashoffset: 0, duration: 0.85, ease: "power3.out" },
+      1.86
     );
 
-    // Deterministic architecture conduit activates at 3.58s
+    // Deterministic architecture conduit activates right at 3.34s
     tl.fromTo(
       "#bm-v1-rail",
       { scaleX: 0, transformOrigin: "0% 50%" },
-      { scaleX: 1, duration: 1.0, ease: "power3.out" },
-      3.55
+      { scaleX: 1, duration: 0.95, ease: "power3.out" },
+      3.3
     );
     tl.fromTo(
       qa("#bm-v1-nodes .bm-pill"),
-      { opacity: 0, y: 36, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.16, ease: "back.out(1.6)" },
-      4.1
+      { opacity: 0, y: 32, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.14, ease: "back.out(1.6)" },
+      3.95
     );
-    shot(4.8, 2.4, 1.09, 980, 560, "sine.inOut");
+    shot(4.8, 2.5, 1.08, 980, 555, "sine.inOut");
 
-    // Precision Shutter Wipe Transition (Obsidian → Warm Blueprint Ivory) at 7.35s
-    tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#c8f53c" }, 7.25);
-    tl.to("#bm-wipe", { scaleX: 1, duration: 0.34, ease: "power3.in" }, 7.25);
-    tl.set("#bm-v1", { autoAlpha: 0 }, 7.59);
-    tl.set("#bm-v2", { autoAlpha: 1 }, 7.59);
-    tl.set(CAM, { s: 1.24, fx: 620, fy: 460 }, 7.59);
-    tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 7.6);
-    tl.to("#bm-wipe", { scaleX: 0, duration: 0.42, ease: "power3.out" }, 7.6);
+    // Precision Shutter Wipe Transition (Obsidian → Warm Blueprint Ivory) at 7.42s
+    tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#c8f53c" }, 7.38);
+    tl.to("#bm-wipe", { scaleX: 1, duration: 0.34, ease: "power3.in" }, 7.38);
+    tl.set("#bm-v1", { autoAlpha: 0 }, 7.73);
+    tl.set("#bm-v2", { autoAlpha: 1 }, 7.73);
+    tl.set(CAM, { s: 1.22, fx: 620, fy: 460 }, 7.73);
+    tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 7.74);
+    tl.to("#bm-wipe", { scaleX: 0, duration: 0.4, ease: "power3.out" }, 7.74);
 
     // =========================================================================
-    // VIEW 2 (7.62s – 19.04s): DETERMINISTIC PRDs & 21 AGENT SKILLS (Ivory Blueprint)
+    // VIEW 2 (7.76s – 22.64s): DETERMINISTIC PRDs · BUILDFLOW ERP · 21 AGENT SKILLS
     // =========================================================================
-    shot(7.62, 1.3, 1.15, 620, 480, "power2.out");
+    shot(7.76, 1.25, 1.14, 620, 480, "power2.out");
     tl.fromTo(
       "#bm-v2-head",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.75, ease: "power4.out" },
-      7.75
+      { opacity: 0, y: 44 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
+      7.85
     );
-    // Blueprint SVG contract schematic draws dynamically
     tl.fromTo(
       qa("#bm-v2-blueprint path, #bm-v2-blueprint rect"),
       { strokeDashoffset: 900, opacity: 0 },
-      { strokeDashoffset: 0, opacity: 1, duration: 1.1, stagger: 0.14, ease: "power2.out" },
-      8.6
+      { strokeDashoffset: 0, opacity: 1, duration: 1.05, stagger: 0.14, ease: "power2.out" },
+      9.2
     );
-    // Contract locks (ERD, OpenAPI, RBAC) slam cleanly into place right at 11.4–13.5s
+    // Contract locks (ERD, OpenAPI, BuildFlow 12 Modules) land at 12.2–16.0s
     tl.fromTo(
       qa("#bm-v2-locks .bm-lock"),
-      { opacity: 0, scale: 0.75, y: 30 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.55, stagger: 0.32, ease: "back.out(1.7)" },
-      11.2
+      { opacity: 0, scale: 0.8, y: 28 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.55, stagger: 0.45, ease: "back.out(1.7)" },
+      12.3
     );
 
-    // Camera pans right to welcome 21 Modular Agent Skills (Prompt Engineering)
-    shot(13.6, 1.5, 1.14, 1340, 560, "power2.inOut");
+    // Camera glides right to 21 Modular Agent Skills right as narrator speaks it (18.2–19.5s)
+    shot(17.6, 1.4, 1.14, 1340, 560, "power2.inOut");
     tl.fromTo(
       "#bm-v2-skills-panel",
-      { opacity: 0, x: 90 },
-      { opacity: 1, x: 0, duration: 0.75, ease: "power4.out" },
-      14.1
+      { opacity: 0, x: 84 },
+      { opacity: 1, x: 0, duration: 0.72, ease: "power4.out" },
+      18.1
     );
     tl.fromTo(
       qa("#bm-v2-skill-chips .bm-chip"),
-      { opacity: 0, scale: 0.7 },
-      { opacity: 1, scale: 1, duration: 0.35, stagger: 0.08, ease: "back.out(1.8)" },
-      14.7
+      { opacity: 0, scale: 0.76 },
+      { opacity: 1, scale: 1, duration: 0.34, stagger: 0.08, ease: "back.out(1.7)" },
+      18.9
     );
-    // Pull back to wide HOME so full Deterministic Blueprint is visible
-    shot(16.6, 1.3, 1.0, 960, 540, "power2.inOut");
+    shot(20.6, 1.25, 1.0, 960, 540, "power2.inOut");
 
-    // 3D Motivated Push-Through Dive into Obsidian Command Core (18.6s → 19.04s)
-    shot(18.55, 0.48, 2.05, 960, 540, "power2.in");
-    tl.to("#bm-v2", { autoAlpha: 0, duration: 0.2 }, 18.85);
-    tl.set("#bm-v3", { autoAlpha: 1 }, 19.03);
-    tl.set(CAM, { s: 1.4, fx: 960, fy: 540 }, 19.03);
-    shot(19.04, 0.95, 1.0, 960, 540, "power3.out");
+    // 3D Motivated Push-Through Dive into Obsidian Multi-Agent Core (22.2s → 22.64s)
+    shot(22.18, 0.46, 2.0, 960, 540, "power2.in");
+    tl.to("#bm-v2", { autoAlpha: 0, duration: 0.2 }, 22.44);
+    tl.set("#bm-v3", { autoAlpha: 1 }, 22.63);
+    tl.set(CAM, { s: 1.38, fx: 960, fy: 540 }, 22.63);
+    shot(22.64, 0.92, 1.0, 960, 540, "power3.out");
 
     // =========================================================================
-    // VIEW 3 (19.04s – 32.54s): CLAUDE CODE · GOOGLE ANTIGRAVITY · 43+ MCP TOOLS
+    // VIEW 3 (22.64s – 39.88s): CLAUDE CODE · ANTIGRAVITY · CRAFTRIG MCP (45+ TOOLS)
     // =========================================================================
     tl.fromTo(
       "#bm-v3-claude",
-      { opacity: 0, x: -110, rotateY: -22 },
-      { opacity: 1, x: 0, rotateY: 0, duration: 0.8, ease: "power4.out" },
-      19.05
+      { opacity: 0, x: -100, rotateY: -20 },
+      { opacity: 1, x: 0, rotateY: 0, duration: 0.78, ease: "power4.out" },
+      22.64
     );
     tl.fromTo(
       "#bm-v3-antigravity",
-      { opacity: 0, x: 110, rotateY: 22 },
-      { opacity: 1, x: 0, rotateY: 0, duration: 0.8, ease: "power4.out" },
-      20.25
+      { opacity: 0, x: 100, rotateY: 20 },
+      { opacity: 1, x: 0, rotateY: 0, duration: 0.78, ease: "power4.out" },
+      23.95
     );
 
-    // Parallel execution conduits flow down into custom TypeScript MCP Servers
     tl.fromTo(
       qa("#bm-v3-conduits path"),
       { strokeDashoffset: 680 },
-      { strokeDashoffset: 0, duration: 1.2, stagger: 0.2, ease: "power2.out" },
-      21.6
+      { strokeDashoffset: 0, duration: 1.15, stagger: 0.2, ease: "power2.out" },
+      26.2
     );
 
-    // Custom TypeScript MCP Hub rises right at 24.3s ("MCP servers")
-    shot(23.8, 1.2, 1.12, 960, 680, "power2.inOut");
+    // Craftrig MCP Core rises right when narrator says "Craftrig MCP" (29.86s)
+    shot(29.2, 1.15, 1.12, 960, 680, "power2.inOut");
     tl.fromTo(
       "#bm-v3-mcp-core",
-      { opacity: 0, y: 75, scale: 0.88 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power4.out" },
-      24.25
+      { opacity: 0, y: 72, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "power4.out" },
+      29.65
     );
 
-    // Deterministic tabular-nums counter 0 → 43+ MCP Tools right at 26.15s
     const mcpCounter = { v: 0 };
-    const mcpNumEl = q("#bm-mcp-count");
+    let lastMcpInt = -1;
     tl.to(
       mcpCounter,
       {
-        v: 43,
-        duration: 1.4,
+        v: 45,
+        duration: 1.35,
         ease: "power2.out",
         onUpdate: () => {
-          if (mcpNumEl) mcpNumEl.textContent = `${Math.round(mcpCounter.v)}+`;
+          const val = Math.round(mcpCounter.v);
+          if (val !== lastMcpInt && mcpNumEl) {
+            lastMcpInt = val;
+            mcpNumEl.textContent = `${val}+`;
+          }
         },
       },
-      26.0
+      30.4
     );
 
-    // Task DAG, File Locks, Evidence Gates ignite sequentially
+    // Topological DAGs, Exclusive File Locks, Evidence Gates ignite right at 34.8s
     tl.fromTo(
       qa("#bm-v3-gates .bm-gate"),
-      { opacity: 0, y: 36 },
-      { opacity: 1, y: 0, duration: 0.55, stagger: 0.45, ease: "power3.out" },
-      27.5
+      { opacity: 0, y: 34 },
+      { opacity: 1, y: 0, duration: 0.52, stagger: 0.52, ease: "power3.out" },
+      34.6
     );
-    shot(30.4, 1.4, 1.0, 960, 540, "power2.inOut");
+    shot(37.6, 1.4, 1.0, 960, 540, "power2.inOut");
 
-    // Directional Whip-Pan Transition (View 3 → View 4) at 32.25s
-    tl.to("#bm-v3", { x: -180, autoAlpha: 0, filter: "url(#bm-blur-x)", duration: 0.3, ease: "power2.in" }, 32.24);
-    setMotionBlurX(32.24, 0, 32, 0.28);
-    tl.set("#bm-v4", { autoAlpha: 1, x: 180, filter: "url(#bm-blur-x)" }, 32.54);
-    tl.to("#bm-v4", { x: 0, duration: 0.48, ease: "power3.out", clearProps: "filter" }, 32.54);
-    setMotionBlurX(32.54, 30, 0, 0.45);
+    // GPU-Composited Directional Whip-Pan (View 3 → View 4) at 39.55s (zero SVG blur!)
+    tl.to("#bm-v3", { x: -160, skewX: -6, autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 39.56);
+    tl.set("#bm-v4", { autoAlpha: 1, x: 160, skewX: 6 }, 39.87);
+    tl.to("#bm-v4", { x: 0, skewX: 0, duration: 0.48, ease: "power3.out" }, 39.87);
 
     // =========================================================================
-    // VIEW 4 (32.54s – 51.44s): HYBRID & AGENTIC RAG TELEMETRY ENGINE
+    // VIEW 4 (39.88s – 57.92s): HYBRID & AGENTIC RAG TELEMETRY ENGINE
     // =========================================================================
     tl.fromTo(
       "#bm-v4-head",
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      32.7
+      { opacity: 0, y: 38 },
+      { opacity: 1, y: 0, duration: 0.65, ease: "power4.out" },
+      40.0
     );
-    // Supabase pgvector & BM25 pipelines arrive on exact cues (35.89s & 37.48s)
     tl.fromTo(
       "#bm-v4-pgvector",
-      { opacity: 0, x: -90 },
-      { opacity: 1, x: 0, duration: 0.7, ease: "power4.out" },
-      35.7
+      { opacity: 0, x: -84 },
+      { opacity: 1, x: 0, duration: 0.68, ease: "power4.out" },
+      42.45
     );
     tl.fromTo(
       "#bm-v4-bm25",
-      { opacity: 0, x: -90 },
-      { opacity: 1, x: 0, duration: 0.7, ease: "power4.out" },
-      37.3
+      { opacity: 0, x: -84 },
+      { opacity: 1, x: 0, duration: 0.68, ease: "power4.out" },
+      43.85
     );
-    // Weighted RRF Fusion lines connect & pulse
     tl.fromTo(
       qa("#bm-v4-fusion-paths path"),
       { strokeDashoffset: 600 },
-      { strokeDashoffset: 0, duration: 1.0, stagger: 0.15, ease: "power2.out" },
-      38.9
+      { strokeDashoffset: 0, duration: 0.95, stagger: 0.14, ease: "power2.out" },
+      45.8
     );
     tl.fromTo(
       "#bm-v4-wrrf",
-      { opacity: 0, scale: 0.75 },
-      { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.6)" },
-      39.6
+      { opacity: 0, scale: 0.78 },
+      { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.6)" },
+      46.4
     );
 
-    // Camera focuses right onto Telemetry Odometer: 75.00% → 91.67% Recall & MRR 1.00 (42.96s)
-    shot(42.2, 1.1, 1.16, 1340, 480, "power2.inOut");
+    // Camera focuses right onto Telemetry Odometer: 75.00% → 91.67% Recall (48.66s)
+    shot(47.9, 1.05, 1.15, 1340, 480, "power2.inOut");
     tl.fromTo(
       "#bm-v4-metrics",
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" },
-      42.6
+      { opacity: 0, y: 38 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+      48.2
     );
     const recallObj = { v: 75.0 };
-    const recallEl = q("#bm-recall-val");
     tl.to(
       recallObj,
       {
         v: 91.67,
-        duration: 1.6,
+        duration: 1.55,
         ease: "power2.out",
         onUpdate: () => {
           if (recallEl) recallEl.textContent = `${recallObj.v.toFixed(2)}%`;
         },
       },
-      42.95
+      48.6
     );
 
-    // Redis Cache 18.3s → 694ms Speedometer sweep right at 47.4–48.8s
+    // Redis Cache 18.3s → 694ms Speedometer sweep right at 53.5–55.0s
     const redisObj = { v: 18300 };
-    const redisEl = q("#bm-redis-val");
     tl.to(
       redisObj,
       {
         v: 694,
-        duration: 1.4,
+        duration: 1.35,
         ease: "power3.out",
         onUpdate: () => {
           if (redisEl) redisEl.textContent = `${Math.round(redisObj.v)}ms`;
         },
       },
-      47.6
+      53.6
     );
     tl.fromTo(
       "#bm-redis-bar",
       { scaleX: 1, transformOrigin: "0% 50%" },
-      { scaleX: 0.08, duration: 1.4, ease: "power3.out" },
-      47.6
+      { scaleX: 0.08, duration: 1.35, ease: "power3.out" },
+      53.6
     );
 
-    // Multi-Hop Self-Critic Grounding Loop ignites at 49.4s
-    shot(49.0, 1.0, 1.0, 960, 540, "power2.inOut");
+    // Multi-Hop Self-Critic Grounding Loop ignites right at 55.9s
+    shot(55.4, 0.95, 1.0, 960, 540, "power2.inOut");
     tl.fromTo(
       "#bm-v4-critic",
-      { opacity: 0, y: 36 },
-      { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" },
-      49.45
+      { opacity: 0, y: 34 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+      55.9
     );
 
-    // Precision Shutter Wipe Transition (View 4 → View 5 Full-Stack Matrix) at 51.15s
-    tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#56ccf2" }, 51.12);
-    tl.to("#bm-wipe", { scaleX: 1, duration: 0.3, ease: "power3.in" }, 51.12);
-    tl.set("#bm-v4", { autoAlpha: 0 }, 51.43);
-    tl.set("#bm-v5", { autoAlpha: 1 }, 51.43);
-    tl.set(CAM, { s: 1.15, fx: 540, fy: 420 }, 51.43);
-    tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 51.44);
-    tl.to("#bm-wipe", { scaleX: 0, duration: 0.38, ease: "power3.out" }, 51.44);
+    // Precision Shutter Wipe Transition (View 4 → View 5 Full-Stack Matrix) at 57.58s
+    tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#56ccf2" }, 57.58);
+    tl.to("#bm-wipe", { scaleX: 1, duration: 0.3, ease: "power3.in" }, 57.58);
+    tl.set("#bm-v4", { autoAlpha: 0 }, 57.9);
+    tl.set("#bm-v5", { autoAlpha: 1 }, 57.9);
+    tl.set(CAM, { s: 1.14, fx: 540, fy: 420 }, 57.9);
+    tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 57.92);
+    tl.to("#bm-wipe", { scaleX: 0, duration: 0.36, ease: "power3.out" }, 57.92);
 
     // =========================================================================
-    // VIEW 5 (51.44s – 72.28s): FULL-STACK PRODUCTION MATRIX (4 Connected Layers)
+    // VIEW 5 (57.92s – 80.96s): FULL-STACK PRODUCTION MATRIX (4 Connected Layers)
     // =========================================================================
-    // Tier 1: Frontend (52.55s)
     tl.fromTo(
       "#bm-stack-fe",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      52.1
+      { opacity: 0, y: 46 },
+      { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
+      58.7
     );
-    // Camera pans right to Tier 2: Backend & APIs (59.52s)
-    shot(58.5, 1.2, 1.15, 1380, 420, "power2.inOut");
+    shot(64.6, 1.15, 1.14, 1380, 420, "power2.inOut");
     tl.fromTo(
       "#bm-stack-be",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      59.0
+      { opacity: 0, y: 46 },
+      { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
+      65.2
     );
-    // Camera pans down-left to Tier 3: Database, Vector & Cache (62.47s)
-    shot(62.0, 1.2, 1.15, 540, 760, "power2.inOut");
+    shot(68.4, 1.15, 1.14, 540, 760, "power2.inOut");
     tl.fromTo(
       "#bm-stack-db",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      62.3
+      { opacity: 0, y: 46 },
+      { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
+      68.9
     );
-    // Camera pans down-right to Tier 4: Polyglot Languages (67.97s)
-    shot(67.2, 1.2, 1.15, 1380, 760, "power2.inOut");
+    shot(75.0, 1.15, 1.14, 1380, 760, "power2.inOut");
     tl.fromTo(
       "#bm-stack-lang",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" },
-      67.6
+      { opacity: 0, y: 46 },
+      { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
+      75.6
     );
-    // Pull wide so all 4 full-stack layers glow as one connected architectural blueprint
-    shot(70.2, 1.3, 1.0, 960, 540, "power2.inOut");
+    shot(78.6, 1.35, 1.0, 960, 540, "power2.inOut");
 
-    // Motivated Push-Through into Verification & Global Edge Ship (71.95s → 72.28s)
-    tl.to("#bm-v5", { scale: 0.92, autoAlpha: 0, duration: 0.34, ease: "power2.in" }, 71.94);
-    tl.set("#bm-v6", { autoAlpha: 1, scale: 1.08 }, 72.28);
-    tl.to("#bm-v6", { scale: 1, duration: 0.65, ease: "power3.out" }, 72.28);
+    // Motivated Push-Through into Verification & Global Edge Ship (80.62s → 80.96s)
+    tl.to("#bm-v5", { scale: 0.92, autoAlpha: 0, duration: 0.32, ease: "power2.in" }, 80.62);
+    tl.set("#bm-v6", { autoAlpha: 1, scale: 1.08 }, 80.95);
+    tl.to("#bm-v6", { scale: 1, duration: 0.6, ease: "power3.out" }, 80.95);
 
     // =========================================================================
-    // VIEW 6 (72.28s – 84.07s): AUTOMATED QA (13-VP PLAYWRIGHT) & EDGE SHIP FINALE
+    // VIEW 6 (80.96s – 94.75s): CRAFTRIG 13-VP PLAYWRIGHT QA & GRAND FINALE
     // =========================================================================
     tl.fromTo(
       "#bm-v6-tests",
-      { opacity: 0, y: 40 },
+      { opacity: 0, y: 38 },
       { opacity: 1, y: 0, duration: 0.65, ease: "power4.out" },
-      72.55
+      81.2
     );
-    // All 13 Playwright viewport audit cells light green sequentially right at 75.5s
     tl.fromTo(
       qa("#bm-v6-viewports .bm-vp"),
       { opacity: 0.15, scale: 0.82 },
-      { opacity: 1, scale: 1, duration: 0.25, stagger: 0.12, ease: "back.out(1.7)" },
-      75.2
+      { opacity: 1, scale: 1, duration: 0.24, stagger: 0.11, ease: "back.out(1.7)" },
+      84.8
     );
-    // Deployment target nodes (GitHub Actions → Vercel · Cloudflare Workers · Hostinger)
     tl.fromTo(
       "#bm-v6-deploy",
-      { opacity: 0, y: 36 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
-      78.2
+      { opacity: 0, y: 34 },
+      { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" },
+      87.8
     );
-    // Grand Finale Statement (80.5s – 84.07s) with continuous slow push-in (never frozen)
     tl.fromTo(
       "#bm-v6-finale",
-      { opacity: 0, y: 42 },
-      { opacity: 1, y: 0, duration: 0.85, ease: "power4.out" },
-      80.5
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" },
+      90.6
     );
-    shot(80.6, 3.4, 1.06, 960, 560, "sine.inOut");
+    shot(90.8, 3.8, 1.06, 960, 560, "sine.inOut");
     tl.to({}, { duration: 0.01 }, TOTAL_DURATION);
 
     tlRef.current = tl;
-    // Park on a rich, crisp poster frame (t = 5.0s) before auto-play triggers on viewport entry
-    // so neither initial SSR/reduced-motion nor idle views ever show a blank dark screen.
-    tl.pause(5.0, true);
-    applyCam(5.0);
+    // Crisp poster frame at t = 5.2s so paused/idle preview always looks sharp
+    tl.pause(5.2, true);
+    applyCam(5.2);
+    syncHudRefs(5.2);
 
     return () => {
       tl.kill();
@@ -684,40 +623,53 @@ export function BangMotionStackExplainer() {
     };
   }, [scrollTo]);
 
-  // Auto-Play automatically when user arrives in the Outer World Theater via scroll!
+  // Trigger smooth automatic playback immediately when 03→04 Portal delivers the Outer World Theater!
+  useEffect(() => {
+    if (!portalReady || hasAutoPlayedRef.current || userPausedRef.current) return;
+    hasAutoPlayedRef.current = true;
+    const id = requestAnimationFrame(() => {
+      startPlayback(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [portalReady, startPlayback]);
+
+  // Pause cleanly when scrolling away from the theater or switching browser tabs
   useEffect(() => {
     const target = viewportBoxRef.current;
     if (!target) return;
+
+    const pauseAll = () => {
+      const tl = tlRef.current;
+      const audio = audioRef.current;
+      if (tl && !tl.paused()) {
+        tl.pause();
+        setIsPlaying(false);
+      }
+      if (audio && !audio.paused) audio.pause();
+    };
+
+    const onVisChange = () => {
+      if (document.hidden) pauseAll();
+    };
+    document.addEventListener("visibilitychange", onVisChange);
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.45) {
-          if (!hasAutoPlayedRef.current && !userPausedRef.current) {
-            hasAutoPlayedRef.current = true;
-            startPlayback(true);
-          }
-        } else if (!entry.isIntersecting) {
-          // Pause audio cleanly if user scrolls completely out of the theater
-          const tl = tlRef.current;
-          const audio = audioRef.current;
-          if (tl && !tl.paused()) {
-            tl.pause();
-            setIsPlaying(false);
-          }
-          if (audio && !audio.paused) {
-            audio.pause();
-          }
+        if (!entry.isIntersecting) {
+          pauseAll();
         }
       },
-      { threshold: [0.1, 0.45, 0.75] }
+      { threshold: [0.05] }
     );
 
     observer.observe(target);
-    return () => observer.disconnect();
-  }, [startPlayback]);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisChange);
+    };
+  }, []);
 
   const handleTogglePlay = () => {
     unlockAudio();
@@ -772,11 +724,13 @@ export function BangMotionStackExplainer() {
     }
   };
 
-  const handleSeekBeat = (startSec: number) => {
+  const handleSeekBeat = (startSec: number, idx: number) => {
     unlockAudio();
     const tl = tlRef.current;
     const audio = audioRef.current;
     if (!tl) return;
+    lastBeatIdxRef.current = idx;
+    setActiveBeatIdx(idx);
     tl.time(startSec);
     if (audio) audio.currentTime = startSec;
     if (tl.paused()) {
@@ -784,19 +738,18 @@ export function BangMotionStackExplainer() {
     }
   };
 
-  const progressPct = Math.min(100, (currentTime / TOTAL_DURATION) * 100);
   const currentBeat = VO_BEATS[activeBeatIdx] ?? VO_BEATS[0];
 
   return (
-    <div className="space-y-4">
-      {/* Header Bar above Cinema Frame */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2.5 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+    <div className="mx-auto w-full max-w-6xl space-y-3 px-4 sm:px-6 lg:px-8">
+      {/* Compact Header Bar above Cinema Frame */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-primary sm:text-xs">
             <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-            <span>04 / Technical Stack &amp; AI-Augmented Engineering Film</span>
+            <span>04 / AI-Augmented Engineering &amp; Technical Stack Film</span>
           </div>
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] leading-[1.06]">
+          <h2 className="font-heading text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-3xl leading-tight">
             How AI-Augmented Software Engineering Works
           </h2>
         </div>
@@ -804,40 +757,45 @@ export function BangMotionStackExplainer() {
         <button
           type="button"
           onClick={() => scrollTo("#education-credentials", -84)}
-          className="inline-flex min-h-11 items-center gap-2 border border-border-strong bg-surface px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-foreground hover:border-primary hover:text-primary cursor-pointer"
+          className="inline-flex min-h-10 items-center gap-2 border border-border-strong bg-surface px-3.5 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:border-primary hover:text-primary cursor-pointer"
         >
           <span>Skip to Education &amp; Certs</span>
           <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
 
-      {/* Synced English Neural Voice-Over Audio Element (WCAG 1.4.2 + lazy-load-video-and-audio) */}
+      {/* Synced American English Female Voice-Over Audio Element */}
       <audio
         ref={audioRef}
         preload="none"
-        aria-label="English voice-over narration explaining AI-Augmented Engineering and Technical Stack"
+        aria-label="American English female voice-over narration explaining AI-Augmented Engineering and Technical Stack"
       />
 
-      {/* Widescreen 16:9 Bang-Motion Deterministic Stage */}
-      <div className="relative overflow-hidden border border-border-strong bg-[#080b0f] shadow-2xl">
-        {/* One-Click Voice-Over Unlock Pill (only shown if browser blocked unmuted autoplay prior to user click) */}
+      {/* Widescreen 16:9 Cinema Frame — Responsively bounded so it ALWAYS clears the Navbar & fits cleanly inside 100dvh! */}
+      <div
+        className="isolate-stage relative mx-auto w-full overflow-hidden border border-border-strong bg-[#080b0f] shadow-2xl"
+        style={{
+          maxWidth: "min(100%, calc((100dvh - 280px) * 16 / 9))",
+        }}
+      >
+        {/* One-Click Voice-Over Unlock Pill */}
         {needsAudioGesture && !isMuted ? (
-          <div className="absolute top-4 right-4 z-40">
+          <div className="absolute top-3 right-3 z-40">
             <button
               type="button"
               onClick={handleUnlockAudioClick}
-              className="inline-flex min-h-11 items-center gap-2 bg-[#c8f53c] px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#080b0f] shadow-xl hover:bg-[#d8fa6a] cursor-pointer"
+              className="inline-flex min-h-10 items-center gap-2 bg-[#c8f53c] px-3.5 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#080b0f] shadow-xl hover:bg-[#d8fa6a] cursor-pointer"
             >
               <Volume2 className="h-4 w-4" aria-hidden="true" />
-              <span>Enable English Voice Over</span>
+              <span>Enable Voice Over</span>
             </button>
           </div>
         ) : null}
 
         {/* Completion Auto-Scroll Notice */}
         {isCompleted ? (
-          <div className="absolute inset-x-0 bottom-5 z-40 flex justify-center px-4">
-            <div className="inline-flex items-center gap-3 border border-[#c8f53c] bg-[#080b0f]/95 px-5 py-2.5 font-mono text-xs font-semibold text-[#c8f53c] shadow-2xl">
+          <div className="absolute inset-x-0 bottom-4 z-40 flex justify-center px-4">
+            <div className="inline-flex items-center gap-3 border border-[#c8f53c] bg-[#080b0f]/95 px-4 py-2 font-mono text-xs font-semibold text-[#c8f53c] shadow-2xl">
               <span>Film Complete — Scrolling to Education &amp; Google AI Certifications ↓</span>
             </div>
           </div>
@@ -847,7 +805,7 @@ export function BangMotionStackExplainer() {
           ref={viewportBoxRef}
           className="relative aspect-video w-full overflow-hidden bg-[#080b0f]"
         >
-          {/* Fixed 1920x1080 Bang-Motion Stage scaled cleanly */}
+          {/* Fixed 1920x1080 GPU-Composited Bang-Motion Stage */}
           <div
             ref={stageRef}
             style={{
@@ -856,33 +814,13 @@ export function BangMotionStackExplainer() {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) scale(0.5)",
+              transform: "translate3d(-50%, -50%, 0) scale(0.5)",
               transformOrigin: "center center",
+              willChange: "transform",
             }}
             className="overflow-hidden bg-[#080b0f] text-[#f3f5f2] select-none"
           >
-            {/* Shared SVG Directional Motion Blur & Grain Filters (wide -70%/240% region per Bang-Motion §2) */}
-            <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
-              <defs>
-                <filter id="bm-blur-x" x="-70%" y="-70%" width="240%" height="240%">
-                  <feGaussianBlur id="bm-blur-x-node" in="SourceGraphic" stdDeviation="0 0" />
-                </filter>
-                <filter id="bm-blur-y" x="-70%" y="-70%" width="240%" height="240%">
-                  <feGaussianBlur id="bm-blur-y-node" in="SourceGraphic" stdDeviation="0 0" />
-                </filter>
-                <filter id="bm-grain-filter" x="0" y="0" width="100%" height="100%">
-                  <feTurbulence
-                    type="fractalNoise"
-                    baseFrequency="0.78"
-                    numOctaves="2"
-                    stitchTiles="stitch"
-                  />
-                  <feColorMatrix type="saturate" values="0" />
-                </filter>
-              </defs>
-            </svg>
-
-            {/* Continuous Camera Rig (#bm-world) */}
+            {/* Continuous GPU Camera Rig (#bm-world) */}
             <div
               ref={worldRef}
               style={{
@@ -892,17 +830,17 @@ export function BangMotionStackExplainer() {
                 willChange: "transform",
               }}
             >
-              {/* Multi-Layer Architectural Living Background (Never Flat) */}
+              {/* Multi-Layer Architectural Living Background */}
               <div
                 aria-hidden="true"
                 style={{
                   position: "absolute",
                   inset: -240,
                   background:
-                    "radial-gradient(68% 46% at 50% 106%, rgba(200,245,60,0.22), rgba(86,204,242,0.08) 48%, transparent 72%), linear-gradient(180deg, #05070a 0%, #090d12 58%, #0e151d 100%)",
+                    "radial-gradient(68% 46% at 50% 106%, rgba(200,245,60,0.20), rgba(86,204,242,0.08) 48%, transparent 72%), linear-gradient(180deg, #05070a 0%, #090d12 58%, #0e151d 100%)",
                 }}
               />
-              {/* Slowly Rotating Architectural Blueprint Compass (Background Motion §7c #6) */}
+              {/* Slowly Rotating Architectural Blueprint Compass */}
               <svg
                 id="bm-bg-orbit"
                 viewBox="0 0 1920 1080"
@@ -913,6 +851,7 @@ export function BangMotionStackExplainer() {
                   height: 1080,
                   opacity: 0.14,
                   transformOrigin: "960px 540px",
+                  willChange: "transform",
                 }}
               >
                 <circle cx="960" cy="540" r="460" fill="none" stroke="#c8f53c" strokeWidth="1.5" strokeDasharray="10 14" />
@@ -921,9 +860,7 @@ export function BangMotionStackExplainer() {
                 <line x1="960" y1="0" x2="960" y2="1080" stroke="#f3f5f2" strokeWidth="1" opacity="0.25" />
               </svg>
 
-              {/* ============================================================
-                  VIEW 1: HOOK — AI-AUGMENTED ENGINEERING THESIS (0s – 7.6s)
-                  ============================================================ */}
+              {/* VIEW 1: HOOK — AI-AUGMENTED ENGINEERING CORE */}
               <div
                 id="bm-v1"
                 style={{ position: "absolute", inset: 0 }}
@@ -978,12 +915,12 @@ export function BangMotionStackExplainer() {
                 />
 
                 <div id="bm-v1-nodes" className="mt-10 flex items-center gap-8">
-                  {["Deterministic PRDs", "Custom MCP Servers", "Autonomous Agents", "Verified Delivery"].map(
+                  {["Deterministic PRDs", "Craftrig MCP", "Autonomous Agents", "Verified Delivery"].map(
                     (item) => (
                       <div
                         key={item}
                         style={{ fontSize: 32 }}
-                        className="bm-pill border border-white/20 bg-[#121820]/90 px-7 py-3.5 font-mono font-semibold text-[#f3f5f2]"
+                        className="bm-pill border border-white/20 bg-[#121820]/95 px-7 py-3.5 font-mono font-semibold text-[#f3f5f2]"
                       >
                         {item}
                       </div>
@@ -992,9 +929,7 @@ export function BangMotionStackExplainer() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  VIEW 2: WARM ARCHITECTURAL IVORY — DETERMINISTIC PRDs & 21 AGENT SKILLS
-                  ============================================================ */}
+              {/* VIEW 2: WARM ARCHITECTURAL IVORY — DETERMINISTIC PRDs · BUILDFLOW ERP · 21 AGENT SKILLS */}
               <div
                 id="bm-v2"
                 style={{
@@ -1011,35 +946,34 @@ export function BangMotionStackExplainer() {
                     <div style={{ fontSize: 32, letterSpacing: "0.18em" }} className="font-mono font-bold uppercase text-[#185c37]">
                       PHASE 01 // SPECIFICATION LOCK
                     </div>
-                    <div style={{ fontSize: 82, lineHeight: 1.05 }} className="mt-2 font-heading font-bold tracking-tight text-[#0e151a]">
+                    <div style={{ fontSize: 78, lineHeight: 1.05 }} className="mt-2 font-heading font-bold tracking-tight text-[#0e151a]">
                       Deterministic PRDs &amp; 21 Agent Skills
                     </div>
                   </div>
-                  <div style={{ fontSize: 34 }} className="bg-[#185c37] px-6 py-3 font-mono font-bold text-white">
-                    ZERO PROMPT DRIFT
+                  <div style={{ fontSize: 32 }} className="bg-[#185c37] px-6 py-3 font-mono font-bold text-white">
+                    BUILDFLOW ERP · 12 MODULES
                   </div>
                 </div>
 
                 <div className="grid grid-cols-12 gap-12 pt-4">
-                  {/* Left 6 Cols: Live Drawing Blueprint Contract */}
                   <div className="col-span-6 space-y-6">
                     <svg
                       id="bm-v2-blueprint"
                       viewBox="0 0 760 360"
-                      className="w-full border-2 border-[#0e151a]/20 bg-white/80 p-4"
+                      className="w-full border-2 border-[#0e151a]/20 bg-white/85 p-4"
                     >
                       <rect x="20" y="20" width="720" height="320" fill="none" stroke="#185c37" strokeWidth="3" strokeDasharray="900" />
                       <path d="M20 95 L740 95" stroke="#0e151a" strokeWidth="2" strokeDasharray="900" />
                       <path d="M260 95 L260 340" stroke="#035e8c" strokeWidth="2" strokeDasharray="900" />
                       <path d="M510 95 L510 340" stroke="#035e8c" strokeWidth="2" strokeDasharray="900" />
-                      <text x="44" y="68" fill="#185c37" fontSize="30" fontFamily="monospace" fontWeight="700">
-                        BLUEPRINT.SPEC.YAML — MACHINE READABLE
+                      <text x="44" y="68" fill="#185c37" fontSize="28" fontFamily="monospace" fontWeight="700">
+                        FULLSTACK_BUILDFLOW-ERP.BLUEPRINT.YAML
                       </text>
                       <text x="44" y="160" fill="#0e151a" fontSize="28" fontFamily="monospace" fontWeight="700">
                         RELATIONAL ERD
                       </text>
                       <text x="44" y="210" fill="#455159" fontSize="24" fontFamily="monospace">
-                        12 Modules
+                        12 Vertical Slices
                       </text>
                       <text x="284" y="160" fill="#035e8c" fontSize="28" fontFamily="monospace" fontWeight="700">
                         OPENAPI 3.1
@@ -1051,7 +985,7 @@ export function BangMotionStackExplainer() {
                         RBAC MATRIX
                       </text>
                       <text x="534" y="210" fill="#455159" fontSize="24" fontFamily="monospace">
-                        Threat Model
+                        Outbox &amp; 3-Way
                       </text>
                     </svg>
 
@@ -1059,7 +993,7 @@ export function BangMotionStackExplainer() {
                       {[
                         { tag: "ERD LOCKED", sub: "Schema Invariants" },
                         { tag: "OPENAPI", sub: "End-to-End Types" },
-                        { tag: "RBAC GATE", sub: "Least Privilege" },
+                        { tag: "BUILDFLOW", sub: "12 ERP Modules" },
                       ].map((lock) => (
                         <div
                           key={lock.tag}
@@ -1076,7 +1010,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Right 6 Cols: Agent Skills Prompt Engineering */}
                   <div id="bm-v2-skills-panel" className="col-span-6 border-2 border-[#0e151a]/25 bg-[#0f161c] p-9 text-white">
                     <div className="flex items-center justify-between border-b border-white/15 pb-5">
                       <span style={{ fontSize: 34 }} className="font-heading font-bold text-[#c8f53c]">
@@ -1111,9 +1044,7 @@ export function BangMotionStackExplainer() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  VIEW 3: CLAUDE CODE · GOOGLE ANTIGRAVITY · CUSTOM MCP (43+ TOOLS)
-                  ============================================================ */}
+              {/* VIEW 3: CLAUDE CODE · GOOGLE ANTIGRAVITY · CRAFTRIG MCP (vickyymosafan/mcp-craftrig) */}
               <div
                 id="bm-v3"
                 style={{ position: "absolute", inset: 0, padding: "86px 110px", perspective: 1400 }}
@@ -1122,16 +1053,15 @@ export function BangMotionStackExplainer() {
                   <div style={{ fontSize: 32, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#56ccf2]">
                     PHASE 02 // PARALLEL MULTI-AGENT ORCHESTRATION
                   </div>
-                  <div style={{ fontSize: 32 }} className="font-mono font-bold text-[#c8f53c]">
-                    TOOL-ENFORCED EXECUTION
+                  <div style={{ fontSize: 30 }} className="font-mono font-bold text-[#c8f53c]">
+                    GITHUB: VICKYYMOSAFAN/MCP-CRAFTRIG
                   </div>
                 </div>
 
-                {/* Top Parallel Agent Engines */}
                 <div className="grid grid-cols-2 gap-16">
                   <div
                     id="bm-v3-claude"
-                    className="border-2 border-[#c8f53c]/70 bg-[#10161c]/95 p-8 shadow-[0_0_50px_rgba(200,245,60,0.14)]"
+                    className="border-2 border-[#c8f53c]/70 bg-[#10161c]/95 p-8"
                   >
                     <div style={{ fontSize: 28 }} className="font-mono font-bold uppercase text-[#c8f53c]">
                       AGENT ENGINE A
@@ -1146,7 +1076,7 @@ export function BangMotionStackExplainer() {
 
                   <div
                     id="bm-v3-antigravity"
-                    className="border-2 border-[#56ccf2]/70 bg-[#10161c]/95 p-8 shadow-[0_0_50px_rgba(86,204,242,0.14)]"
+                    className="border-2 border-[#56ccf2]/70 bg-[#10161c]/95 p-8"
                   >
                     <div style={{ fontSize: 28 }} className="font-mono font-bold uppercase text-[#56ccf2]">
                       AGENT ENGINE B
@@ -1160,7 +1090,6 @@ export function BangMotionStackExplainer() {
                   </div>
                 </div>
 
-                {/* Animated Conduits Connecting Both Agents into Custom MCP Server */}
                 <svg id="bm-v3-conduits" viewBox="0 0 1700 130" className="my-2 h-[115px] w-full">
                   <path
                     d="M 420 0 C 420 75, 850 55, 850 130"
@@ -1180,7 +1109,6 @@ export function BangMotionStackExplainer() {
                   />
                 </svg>
 
-                {/* Custom TypeScript MCP Server Hub */}
                 <div
                   id="bm-v3-mcp-core"
                   className="border-2 border-white/25 bg-[#0e141b]/95 p-9"
@@ -1188,19 +1116,19 @@ export function BangMotionStackExplainer() {
                   <div className="flex items-center justify-between border-b border-white/15 pb-6">
                     <div>
                       <div style={{ fontSize: 30 }} className="font-mono uppercase tracking-[0.16em] text-[#f5b942]">
-                        CUSTOM TYPESCRIPT MCP SERVER DEVELOPMENT
+                        CUSTOM TYPESCRIPT MCP SERVER DEVELOPMENT · SDK v2
                       </div>
                       <div style={{ fontSize: 56 }} className="mt-1 font-heading font-bold text-white">
-                        Principal Agentic Harness &amp; Three.js Visual QA
+                        Craftrig MCP &amp; Three.js Visual QA
                       </div>
                     </div>
                     <div className="bg-[#c8f53c] px-8 py-4 text-center text-[#080b0f]">
                       <div
                         id="bm-mcp-count"
                         style={{ fontSize: 72, lineHeight: 1 }}
-                        className="font-heading font-extrabold tabular-nums min-w-[3.2ch]"
+                        className="min-w-[3.2ch] font-heading font-extrabold tabular-nums"
                       >
-                        43+
+                        45+
                       </div>
                       <div style={{ fontSize: 24 }} className="font-mono font-bold uppercase">
                         MCP TOOLS
@@ -1210,9 +1138,9 @@ export function BangMotionStackExplainer() {
 
                   <div id="bm-v3-gates" className="mt-7 grid grid-cols-3 gap-6">
                     {[
-                      { title: "Task DAG Planner", detail: "Dependency-ordered parallel workstreams", accent: "#c8f53c" },
-                      { title: "Exclusive File Locks", detail: "Zero concurrent overwrite collisions", accent: "#56ccf2" },
-                      { title: "Evidence Quality Gates", detail: "Playwright + WebGL proof required", accent: "#4ade80" },
+                      { title: "Topological DAG", detail: "Kahn algorithm & critical-path waves", accent: "#c8f53c" },
+                      { title: "Exclusive File Locks", detail: "Path write locks + stale recovery", accent: "#56ccf2" },
+                      { title: "Evidence Quality Gates", detail: "SQLite WAL + Playwright proof", accent: "#4ade80" },
                     ].map((g) => (
                       <div
                         key={g.title}
@@ -1231,9 +1159,7 @@ export function BangMotionStackExplainer() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  VIEW 4: HYBRID & AGENTIC RAG TELEMETRY INSTRUMENT (32.5s – 51.4s)
-                  ============================================================ */}
+              {/* VIEW 4: HYBRID & AGENTIC RAG TELEMETRY ENGINE */}
               <div id="bm-v4" style={{ position: "absolute", inset: 0, padding: "84px 108px" }}>
                 <div id="bm-v4-head" className="mb-8 flex items-end justify-between border-b border-white/15 pb-5">
                   <div>
@@ -1250,7 +1176,6 @@ export function BangMotionStackExplainer() {
                 </div>
 
                 <div className="grid grid-cols-12 items-center gap-8">
-                  {/* Left 4 Cols: Dual Retrieval Sources */}
                   <div className="col-span-4 space-y-6">
                     <div id="bm-v4-pgvector" className="border-2 border-[#56ccf2]/70 bg-[#101820] p-7">
                       <div style={{ fontSize: 26 }} className="font-mono font-bold text-[#56ccf2]">
@@ -1277,7 +1202,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Middle 3 Cols: Weighted RRF Fusion Core */}
                   <div className="col-span-3 flex flex-col items-center">
                     <svg id="bm-v4-fusion-paths" viewBox="0 0 380 120" className="w-full">
                       <path d="M 0 20 C 120 20, 140 60, 380 60" fill="none" stroke="#56ccf2" strokeWidth="5" strokeDasharray="600" strokeDashoffset="600" />
@@ -1299,7 +1223,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Right 5 Cols: Benchmarked Proof Odometers */}
                   <div id="bm-v4-metrics" className="col-span-5 space-y-6">
                     <div className="grid grid-cols-2 gap-5">
                       <div className="border border-white/20 bg-[#0e151c] p-6">
@@ -1309,7 +1232,7 @@ export function BangMotionStackExplainer() {
                         <div
                           id="bm-recall-val"
                           style={{ fontSize: 72, lineHeight: 1.05 }}
-                          className="mt-2 font-heading font-extrabold text-[#c8f53c] tabular-nums min-w-[6ch]"
+                          className="mt-2 min-w-[6ch] font-heading font-extrabold text-[#c8f53c] tabular-nums"
                         >
                           91.67%
                         </div>
@@ -1334,7 +1257,6 @@ export function BangMotionStackExplainer() {
                       </div>
                     </div>
 
-                    {/* Redis Speedup Bar */}
                     <div className="border border-white/20 bg-[#0e151c] p-6">
                       <div className="flex items-baseline justify-between">
                         <span style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#f5b942]">
@@ -1343,7 +1265,7 @@ export function BangMotionStackExplainer() {
                         <span
                           id="bm-redis-val"
                           style={{ fontSize: 52 }}
-                          className="font-heading font-extrabold text-white tabular-nums min-w-[5.5ch] text-right"
+                          className="min-w-[5.5ch] text-right font-heading font-extrabold text-white tabular-nums"
                         >
                           694ms
                         </span>
@@ -1359,7 +1281,6 @@ export function BangMotionStackExplainer() {
                   </div>
                 </div>
 
-                {/* Bottom Self-Critic Grounding Loop Strip */}
                 <div
                   id="bm-v4-critic"
                   className="mt-8 flex items-center justify-between border-2 border-[#4ade80]/60 bg-[#0e1815] px-8 py-5"
@@ -1373,9 +1294,7 @@ export function BangMotionStackExplainer() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  VIEW 5: FULL-STACK PRODUCTION MATRIX (51.4s – 72.3s)
-                  ============================================================ */}
+              {/* VIEW 5: FULL-STACK PRODUCTION MATRIX */}
               <div id="bm-v5" style={{ position: "absolute", inset: 0, padding: "74px 96px" }}>
                 <div className="mb-8 flex items-end justify-between border-b border-white/15 pb-4">
                   <div>
@@ -1392,7 +1311,6 @@ export function BangMotionStackExplainer() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-8">
-                  {/* Frontend */}
                   <div id="bm-stack-fe" className="border-2 border-[#c8f53c]/60 bg-[#0f151b]/95 p-7">
                     <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#c8f53c]">
                       01 // FRONTEND ARCHITECTURE
@@ -1408,7 +1326,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Backend */}
                   <div id="bm-stack-be" className="border-2 border-[#56ccf2]/60 bg-[#0f151b]/95 p-7">
                     <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#56ccf2]">
                       02 // BACKEND &amp; EDGE APIS
@@ -1424,7 +1341,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Database & Vector */}
                   <div id="bm-stack-db" className="border-2 border-[#4ade80]/60 bg-[#0f151b]/95 p-7">
                     <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#4ade80]">
                       03 // DATABASE, VECTOR &amp; CACHE
@@ -1440,7 +1356,6 @@ export function BangMotionStackExplainer() {
                     </div>
                   </div>
 
-                  {/* Polyglot Languages */}
                   <div id="bm-stack-lang" className="border-2 border-[#f5b942]/60 bg-[#0f151b]/95 p-7">
                     <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#f5b942]">
                       04 // POLYGLOT LANGUAGES
@@ -1458,25 +1373,22 @@ export function BangMotionStackExplainer() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  VIEW 6: AUTOMATED QA (13-VP PLAYWRIGHT) & GRAND FINALE (72.3s – 84.1s)
-                  ============================================================ */}
+              {/* VIEW 6: CRAFTRIG 13-VP PLAYWRIGHT QA & GRAND FINALE */}
               <div id="bm-v6" style={{ position: "absolute", inset: 0, padding: "86px 110px" }}>
                 <div id="bm-v6-tests" className="flex items-end justify-between border-b border-white/15 pb-6">
                   <div>
                     <div style={{ fontSize: 30, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#4ade80]">
-                      PHASE 05 // AUTONOMOUS VERIFICATION &amp; EDGE SHIP
+                      PHASE 05 // CRAFTRIG VERIFICATION &amp; EDGE SHIP
                     </div>
-                    <div style={{ fontSize: 70, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
-                      Jest · Supertest · 13-Viewport Playwright QA
+                    <div style={{ fontSize: 68, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
+                      Jest · Supertest · Craftrig 13-Viewport QA
                     </div>
                   </div>
                   <div style={{ fontSize: 32 }} className="bg-[#4ade80] px-6 py-2.5 font-mono font-bold text-[#080b0f]">
-                    GATE PASS
+                    50/50 PASS
                   </div>
                 </div>
 
-                {/* Live 13-Viewport Verification Matrix */}
                 <div
                   id="bm-v6-viewports"
                   className="mt-9 grid gap-3"
@@ -1497,7 +1409,6 @@ export function BangMotionStackExplainer() {
                   ))}
                 </div>
 
-                {/* Deployment Strip */}
                 <div id="bm-v6-deploy" className="mt-8 grid grid-cols-4 gap-6">
                   {["GitHub Actions CI/CD", "Vercel Edge", "Cloudflare Workers", "Hostinger & Railway"].map(
                     (dep) => (
@@ -1512,7 +1423,6 @@ export function BangMotionStackExplainer() {
                   )}
                 </div>
 
-                {/* Grand Finale Statement */}
                 <div id="bm-v6-finale" className="mt-12 text-center">
                   <div style={{ fontSize: 92, lineHeight: 1.05 }} className="font-heading font-bold tracking-tight text-white">
                     Engineered to ship.{" "}
@@ -1525,7 +1435,7 @@ export function BangMotionStackExplainer() {
               </div>
             </div>
 
-            {/* Precision Precision Shutter Wipe Blade */}
+            {/* GPU Precision Shutter Wipe Blade */}
             <div
               id="bm-wipe"
               aria-hidden="true"
@@ -1535,25 +1445,27 @@ export function BangMotionStackExplainer() {
                 backgroundColor: "#c8f53c",
                 zIndex: 30,
                 pointerEvents: "none",
+                willChange: "transform",
               }}
             />
 
-            {/* Deterministic Living Film Grain Overlay */}
+            {/* Ultra-Lightweight Static-Tile Film Grain Overlay (GPU translate3d, ZERO SVG filter recompute!) */}
             <div
               ref={grainRef}
               aria-hidden="true"
               style={{
                 position: "absolute",
-                inset: -60,
+                inset: -64,
                 pointerEvents: "none",
-                filter: "url(#bm-grain-filter)",
-                opacity: 0.14,
-                mixBlendMode: "overlay",
+                backgroundImage: STATIC_GRAIN_BG,
+                backgroundRepeat: "repeat",
+                opacity: 0.055,
                 zIndex: 35,
+                willChange: "transform",
               }}
             />
 
-            {/* Subtle Edge Vignette outside Camera Rig */}
+            {/* Edge Vignette outside Camera Rig */}
             <div
               aria-hidden="true"
               style={{
@@ -1561,7 +1473,7 @@ export function BangMotionStackExplainer() {
                 inset: 0,
                 pointerEvents: "none",
                 background:
-                  "radial-gradient(92% 90% at 50% 50%, transparent 62%, rgba(5,7,10,0.48) 100%)",
+                  "radial-gradient(92% 90% at 50% 50%, transparent 62%, rgba(5,7,10,0.45) 100%)",
                 zIndex: 36,
               }}
             />
@@ -1569,15 +1481,15 @@ export function BangMotionStackExplainer() {
         </div>
       </div>
 
-      {/* Discreet Below-Frame Cinema Controls & WCAG 1.4.2 Audio Control Bar */}
-      <div className="border border-border bg-surface p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Slim Below-Frame Cinema Controls & Chapter Scrubber (Zero Per-Frame React Renders) */}
+      <div className="border border-border bg-surface/95 p-3 sm:p-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleTogglePlay}
               data-testid="bang-motion-play-toggle"
-              className="inline-flex min-h-11 items-center gap-2 bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary-hover cursor-pointer"
+              className="inline-flex min-h-10 items-center gap-2 bg-primary px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary-hover cursor-pointer"
             >
               {isPlaying ? (
                 <>
@@ -1595,18 +1507,18 @@ export function BangMotionStackExplainer() {
             <button
               type="button"
               onClick={handleToggleMute}
-              aria-label={isMuted ? "Unmute English voice over" : "Mute English voice over"}
-              className="inline-flex min-h-11 items-center gap-2 border border-border-strong bg-surface-elevated px-3.5 py-2 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary cursor-pointer"
+              aria-label={isMuted ? "Unmute American English voice over" : "Mute American English voice over"}
+              className="inline-flex min-h-10 items-center gap-1.5 border border-border-strong bg-surface-elevated px-3 py-1.5 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary cursor-pointer"
             >
               {isMuted ? (
                 <>
                   <VolumeX className="h-3.5 w-3.5 text-amber" aria-hidden="true" />
-                  <span>VO Muted</span>
+                  <span>Muted</span>
                 </>
               ) : (
                 <>
-                  <Volume2 className="h-3.5 w-3.5 text-sage" aria-hidden="true" />
-                  <span>English VO On</span>
+                  <Volume2 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  <span>VO · US Female</span>
                 </>
               )}
             </button>
@@ -1617,73 +1529,53 @@ export function BangMotionStackExplainer() {
                 unlockAudio();
                 startPlayback(true);
               }}
-              aria-label="Restart explainer film from beginning"
-              className="inline-flex h-11 w-11 items-center justify-center border border-border bg-surface-elevated text-foreground hover:border-primary hover:text-primary cursor-pointer"
+              aria-label="Restart explainer video from beginning"
+              className="inline-flex min-h-10 items-center gap-1.5 border border-border bg-background px-3 py-1.5 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground cursor-pointer"
             >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Restart</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-3 font-mono text-xs">
-            <span className="hidden text-primary font-semibold sm:inline">
+          <div className="flex items-center gap-3 font-mono text-[11px] text-muted">
+            <span className="hidden font-semibold text-foreground md:inline">
               {currentBeat.label}
             </span>
-            <span className="tabular-nums text-muted min-w-[11ch] text-right">
-              {formatClock(currentTime)} / {formatClock(TOTAL_DURATION)}
+            <span ref={clockRef} className="tabular-nums text-foreground">
+              00:05 / {formatClock(TOTAL_DURATION)}
             </span>
           </div>
         </div>
 
-        {/* Interactive Chapter Progress Bar */}
-        <div className="mt-3.5 space-y-2.5">
-          <div className="h-1.5 w-full overflow-hidden bg-surface-elevated">
-            <div
-              className="h-full bg-primary transition-all duration-100"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-6">
-            {VO_BEATS.map((beat, i) => {
-              const active = i === activeBeatIdx;
-              return (
-                <button
-                  key={beat.id}
-                  type="button"
-                  onClick={() => handleSeekBeat(beat.start)}
-                  className={`min-h-10 truncate border px-2.5 py-1.5 text-left font-mono text-[11px] font-medium cursor-pointer ${
-                    active
-                      ? "border-primary bg-primary-soft text-primary font-bold"
-                      : "border-border bg-background/70 text-muted hover:border-border-strong hover:text-foreground"
-                  }`}
-                >
-                  {beat.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Direct-DOM-Updated Progress Rail */}
+        <div className="mt-2.5 h-1.5 w-full overflow-hidden bg-surface-elevated">
+          <div
+            ref={progressBarRef}
+            className="h-full origin-left bg-primary will-change-transform"
+            style={{ transform: "scaleX(0.05)" }}
+          />
         </div>
 
-        {/* Accessible Collapsible English Voice-Over Transcript */}
-        <details className="mt-3 border-t border-border pt-3">
-          <summary className="inline-flex cursor-pointer items-center gap-2 font-mono text-xs font-medium text-muted hover:text-foreground">
-            <FileText className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            <span>Read Full English Voice-Over Script</span>
-          </summary>
-          <ol className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
-            {VO_BEATS.map((beat) => (
-              <li
+        {/* Interactive Chapter Jump Rail */}
+        <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-6">
+          {VO_BEATS.map((beat, idx) => {
+            const active = idx === activeBeatIdx;
+            return (
+              <button
                 key={beat.id}
-                className="border border-border bg-background/70 p-3 text-xs leading-relaxed text-ink-secondary"
+                type="button"
+                onClick={() => handleSeekBeat(beat.start, idx)}
+                className={`min-h-10 truncate border px-2.5 py-2 text-left font-mono text-[11px] transition-colors cursor-pointer ${
+                  active
+                    ? "border-primary bg-primary-soft font-bold text-primary"
+                    : "border-border bg-background text-muted hover:border-border-strong hover:text-foreground"
+                }`}
               >
-                <div className="mb-1 font-mono text-[11px] font-bold uppercase text-primary">
-                  {beat.label} ({formatClock(beat.start)})
-                </div>
-                <p>{beat.text}</p>
-              </li>
-            ))}
-          </ol>
-        </details>
+                {beat.label.replace(/^\d+\s*\/\/\s*/, `0${idx + 1} · `)}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

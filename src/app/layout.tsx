@@ -7,19 +7,25 @@ import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvide
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

@@ -66,9 +66,9 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
           ref={lenisRef}
           options={{
             autoRaf: false,
-            lerp: 0.085,
-            duration: 1.15,
+            lerp: 0.125,
             smoothWheel: true,
+            wheelMultiplier: 1.0,
             anchors: { offset: -76 },
           }}
         >

@@ -9,7 +9,7 @@ const BOOT_PIPELINE = [
   {
     code: "01",
     label: "DETERMINISTIC PRD",
-    detail: "OpenAPI · ERD · RBAC Contracts",
+    detail: "OpenAPI · ERD · BuildFlow ERP (12 Modules)",
     threshold: 22,
   },
   {
@@ -20,8 +20,8 @@ const BOOT_PIPELINE = [
   },
   {
     code: "03",
-    label: "MCP HARNESS & HYBRID RAG",
-    detail: "43+ Tools · 91.67% Recall · 694ms",
+    label: "CRAFTRIG MCP & HYBRID RAG",
+    detail: "mcp-craftrig · 91.67% Recall · 694ms",
     threshold: 78,
   },
   {
@@ -32,12 +32,21 @@ const BOOT_PIPELINE = [
   },
 ] as const;
 
+/**
+ * Ultra-fast zero-jank Welcome Boot Sequence:
+ * - Zero 60fps React re-renders: progress bar scaleX and numeric readout update directly via DOM refs.
+ * - Snappy 1.35s duration (instant dismiss on click / Enter / Space / Escape) so LCP & INP stay blazingly fast.
+ */
 export function WelcomeScreen() {
   const { welcomeVisible, dismissWelcome, unlockAudio } = useAudioGate();
-  const [progress, setProgress] = useState(0);
+  const [stageLevel, setStageLevel] = useState(0);
   const [exiting, setExiting] = useState(false);
+
   const rafRef = useRef<number | null>(null);
   const dismissedRef = useRef(false);
+  const pctRef = useRef<HTMLSpanElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!welcomeVisible) {
@@ -46,28 +55,56 @@ export function WelcomeScreen() {
     }
 
     dismissedRef.current = false;
+    let lastStage = 0;
 
     const startTime = performance.now();
-    const duration = 2150;
+    const duration = 1350;
+
+    const finishDismiss = (delayMs: number) => {
+      if (dismissedRef.current) return;
+      dismissedRef.current = true;
+      if (pctRef.current) pctRef.current.textContent = "100%";
+      if (barRef.current) barRef.current.style.transform = "scaleX(1)";
+      if (statusRef.current) statusRef.current.textContent = "Ready — opening shutter";
+      setStageLevel(4);
+      setExiting(true);
+      window.setTimeout(() => {
+        dismissWelcome();
+        setExiting(false);
+        setStageLevel(0);
+      }, delayMs);
+    };
+
+    // Respect prefers-reduced-motion: skip boot animation delay immediately
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const id = requestAnimationFrame(() => {
+        dismissedRef.current = true;
+        dismissWelcome();
+      });
+      return () => cancelAnimationFrame(id);
+    }
 
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const t = Math.min(1, elapsed / duration);
-      // Smooth cubic ease-out-in progression
       const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       const pct = Math.min(100, Math.round(eased * 100));
-      setProgress(pct);
+
+      // Direct DOM updates — ZERO React state thrashing during initial page load!
+      if (pctRef.current) pctRef.current.textContent = `${String(pct).padStart(3, "0")}%`;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${pct / 100})`;
+
+      const nextStage =
+        pct >= 98 ? 4 : pct >= 78 ? 3 : pct >= 50 ? 2 : pct >= 22 ? 1 : 0;
+      if (nextStage !== lastStage) {
+        lastStage = nextStage;
+        setStageLevel(nextStage);
+      }
 
       if (t < 1 && !dismissedRef.current) {
         rafRef.current = requestAnimationFrame(tick);
-      } else if (!dismissedRef.current) {
-        dismissedRef.current = true;
-        setExiting(true);
-        window.setTimeout(() => {
-          dismissWelcome();
-          setExiting(false);
-          setProgress(0);
-        }, 560);
+      } else {
+        finishDismiss(420);
       }
     };
 
@@ -76,16 +113,7 @@ export function WelcomeScreen() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
         unlockAudio();
-        if (!dismissedRef.current) {
-          dismissedRef.current = true;
-          setProgress(100);
-          setExiting(true);
-          window.setTimeout(() => {
-            dismissWelcome();
-            setExiting(false);
-            setProgress(0);
-          }, 420);
-        }
+        finishDismiss(320);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -100,11 +128,15 @@ export function WelcomeScreen() {
     unlockAudio();
     if (dismissedRef.current) return;
     dismissedRef.current = true;
-    setProgress(100);
+    if (pctRef.current) pctRef.current.textContent = "100%";
+    if (barRef.current) barRef.current.style.transform = "scaleX(1)";
+    setStageLevel(4);
     setExiting(true);
     window.setTimeout(() => {
       dismissWelcome();
-    }, 420);
+      setExiting(false);
+      setStageLevel(0);
+    }, 320);
   };
 
   return (
@@ -117,34 +149,33 @@ export function WelcomeScreen() {
           aria-label="Welcome to M. Vicky Mosafan Full-Stack & AI-Augmented Engineering Portfolio"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[90] flex flex-col overflow-hidden bg-background text-foreground"
         >
           {/* Upper & Lower Architectural Split Shutters */}
           <motion.div
             aria-hidden="true"
             animate={{ y: exiting ? "-102%" : "0%" }}
-            transition={{ duration: 0.56, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.42, ease: [0.76, 0, 0.24, 1] }}
             className="pointer-events-none absolute inset-x-0 top-0 h-1/2 border-b border-border-strong/50 bg-background"
           />
           <motion.div
             aria-hidden="true"
             animate={{ y: exiting ? "102%" : "0%" }}
-            transition={{ duration: 0.56, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.42, ease: [0.76, 0, 0.24, 1] }}
             className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 border-t border-border-strong/50 bg-background"
           />
 
-          {/* Subtle Precision Blueprint Grid & Corner Crosshairs */}
           <motion.div
-            animate={{ opacity: exiting ? 0 : 1 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            animate={{ y: exiting ? "-100%" : "0%" }}
+            transition={{ duration: 0.34, ease: [0.76, 0, 0.24, 1] }}
             className="relative z-10 flex h-full w-full flex-col justify-between bg-architectural-grid p-5 sm:p-8 lg:p-12"
           >
             {/* Top Telemetry Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-                <span className="text-foreground font-semibold">VM // STUDIO BOOT SEQUENCE</span>
+                <span className="font-semibold text-foreground">VM // STUDIO BOOT SEQUENCE</span>
                 <span className="hidden text-muted sm:inline">LAT -7.706 · LON 114.009</span>
               </div>
 
@@ -160,7 +191,6 @@ export function WelcomeScreen() {
 
             {/* Center Architectural Identity & Deterministic Pipeline */}
             <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 py-6 lg:grid-cols-12">
-              {/* Left 7 Cols: Signature Full-Stack × AI-Augmented Typography */}
               <div className="space-y-5 lg:col-span-7">
                 <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary-soft px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                   <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
@@ -169,21 +199,21 @@ export function WelcomeScreen() {
 
                 <div className="space-y-2">
                   <div className="overflow-hidden">
-                    <motion.h1
+                    <motion.p
                       initial={{ y: "100%" }}
                       animate={{ y: "0%" }}
-                      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl leading-[0.98]"
                     >
                       M. Vicky Mosafan
-                    </motion.h1>
+                    </motion.p>
                   </div>
 
                   <div className="overflow-hidden">
                     <motion.p
                       initial={{ y: "100%" }}
                       animate={{ y: "0%" }}
-                      transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.45, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
                       className="font-heading text-lg font-medium text-ink-secondary sm:text-2xl"
                     >
                       Full-Stack Developer building with{" "}
@@ -194,7 +224,6 @@ export function WelcomeScreen() {
                   </div>
                 </div>
 
-                {/* Tactile Capability Strip */}
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 font-mono text-xs text-muted">
                   <span className="inline-flex items-center gap-1.5">
                     <Terminal className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -202,7 +231,7 @@ export function WelcomeScreen() {
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Layers className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-                    43+ Custom MCP Tools
+                    Craftrig MCP (45+ Tools)
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <ShieldCheck className="h-3.5 w-3.5 text-sage" aria-hidden="true" />
@@ -211,24 +240,26 @@ export function WelcomeScreen() {
                 </div>
               </div>
 
-              {/* Right 5 Cols: Live Deterministic Boot Telemetry Readout */}
               <div className="lg:col-span-5">
-                <div className="border border-border-strong bg-surface/90 p-5 shadow-2xl">
+                <div className="border border-border-strong bg-surface/95 p-5 shadow-2xl">
                   <div className="mb-4 flex items-center justify-between border-b border-border pb-3 font-mono text-[11px] uppercase tracking-[0.14em]">
-                    <span className="text-muted">RUNTIME // AGENTIC HARNESS</span>
-                    <span className="font-bold text-primary tabular-nums min-w-[4ch] text-right">
-                      {String(progress).padStart(3, "0")}%
+                    <span className="text-muted">RUNTIME // CRAFTRIG MCP RIG</span>
+                    <span
+                      ref={pctRef}
+                      className="min-w-[4ch] text-right font-bold text-primary tabular-nums"
+                    >
+                      000%
                     </span>
                   </div>
 
                   <ol className="space-y-3">
-                    {BOOT_PIPELINE.map((item) => {
-                      const active = progress >= item.threshold - 16;
-                      const done = progress >= item.threshold;
+                    {BOOT_PIPELINE.map((item, idx) => {
+                      const done = stageLevel > idx;
+                      const active = stageLevel === idx;
                       return (
                         <li
                           key={item.code}
-                          className={`flex items-start justify-between gap-3 border-l-2 pl-3 transition-colors duration-200 ${
+                          className={`flex items-start justify-between gap-3 border-l-2 pl-3 transition-colors duration-150 ${
                             done
                               ? "border-primary text-foreground"
                               : active
@@ -245,7 +276,7 @@ export function WelcomeScreen() {
                             </div>
                           </div>
                           <span
-                            className={`shrink-0 font-mono text-[11px] font-bold uppercase px-1.5 py-0.5 ${
+                            className={`shrink-0 px-1.5 py-0.5 font-mono text-[11px] font-bold uppercase ${
                               done
                                 ? "bg-primary text-primary-foreground"
                                 : active
@@ -267,14 +298,15 @@ export function WelcomeScreen() {
             <div className="space-y-2.5">
               <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
                 <span>Initializing interactive 3D &amp; motion architecture</span>
-                <span className="tabular-nums text-foreground">
-                  {progress < 100 ? "Compiling scene graph..." : "Ready — opening shutter"}
+                <span ref={statusRef} className="tabular-nums text-foreground">
+                  Compiling scene graph...
                 </span>
               </div>
               <div className="h-[3px] w-full overflow-hidden bg-surface-elevated">
                 <div
-                  className="h-full origin-left bg-primary transition-transform duration-75"
-                  style={{ transform: `scaleX(${progress / 100})` }}
+                  ref={barRef}
+                  className="h-full origin-left bg-primary will-change-transform"
+                  style={{ transform: "scaleX(0)" }}
                 />
               </div>
             </div>

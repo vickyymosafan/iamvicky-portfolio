@@ -1,26 +1,19 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 /**
  * Seamless Bidirectional Scroll Bridge connecting Section 02 (AI-Augmented Workflow)
  * and Section 03 (3D Experience Timeline).
- * Scrubbed 1:1 with scroll progress in BOTH directions (02 → 03 and 03 → 02)
- * without snapping or resetting state — keeping the transition kinetic and cohesive.
+ * Direct 1:1 scrollYProgress mapping synced with Lenis smooth scroll for 120–300 FPS responsiveness.
  */
 export function SectionScrollBridge() {
   const bridgeRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress: smooth } = useScroll({
     target: bridgeRef,
     offset: ["start end", "end start"],
-  });
-
-  const smooth = useSpring(scrollYProgress, {
-    stiffness: 135,
-    damping: 26,
-    mass: 0.28,
   });
 
   const spineScaleY = useTransform(smooth, [0.12, 0.86], [0, 1]);

@@ -418,6 +418,32 @@ dialog.native-modal[open] {
   border-color: var(--border-strong);
 }
 
+/* ==========================================================================
+   Modern Web Guidance: Defer rendering off-screen below-the-fold static blocks
+   (defer-rendering-heavy-content + interactions-in-complex-layouts)
+   Paired with contain-intrinsic-size to guarantee zero CLS & scrollbar jumps.
+   ========================================================================== */
+.cv-auto-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 620px;
+}
+
+.cv-auto-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 420px;
+}
+
+@supports not (content-visibility: auto) {
+  .cv-auto-section,
+  .cv-auto-footer {
+    contain: layout style paint;
+  }
+}
+
+.isolate-stage {
+  contain: layout style paint;
+}
+
 /* Lenis recommended utility states */
 html.lenis,
 html.lenis body {

@@ -35,7 +35,7 @@ export function ContactFooter() {
   };
 
   return (
-    <footer id="contact" className="relative border-t border-border bg-surface/35 py-16 sm:py-20">
+    <footer id="contact" className="cv-auto-footer relative border-t border-border bg-surface/35 py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="relative border border-border-strong bg-surface p-6 sm:p-10 lg:p-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">

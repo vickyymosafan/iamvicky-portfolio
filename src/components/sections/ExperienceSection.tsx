@@ -1,26 +1,35 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
+import dynamic from "next/dynamic";
+import { motion, useScroll } from "framer-motion";
 import { Briefcase, ExternalLink, Github, Star } from "lucide-react";
 import { EXPERIENCES } from "@/data/portfolio";
 import { EditorialReveal, SectionHeader } from "@/components/motion/MotionPrimitives";
-import { ExperienceStoryCanvas } from "@/components/three/ExperienceStoryCanvas";
+
+// Code-split Three.js diorama canvas with exact height skeleton (0 CLS)
+const ExperienceStoryCanvas = dynamic(
+  () =>
+    import("@/components/three/ExperienceStoryCanvas").then(
+      (m) => m.ExperienceStoryCanvas
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[304px] border border-border-strong bg-surface/95" aria-hidden="true" />
+    ),
+  }
+);
 
 export function ExperienceSection() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const [activeChapter, setActiveChapter] = useState(0);
 
-  const { scrollYProgress } = useScroll({
+  // Direct 1:1 scroll progress synced to Lenis smooth scroll (zero double-spring lag)
+  const { scrollYProgress: spineScaleY } = useScroll({
     target: timelineRef,
     offset: ["start 75%", "end 65%"],
-  });
-
-  const spineScaleY = useSpring(scrollYProgress, {
-    stiffness: 130,
-    damping: 26,
-    mass: 0.25,
   });
 
   // Sync active 3D storytelling chapter automatically as the user scrolls through each role

@@ -56,6 +56,13 @@ export interface ExperienceItem {
   links: ProjectLink[];
 }
 
+export interface ConsoleLine {
+  kind: "comment" | "keyval" | "pass" | "metric" | "code";
+  label?: string;
+  value: string;
+  note?: string;
+}
+
 export interface AiWorkflowStage {
   id: string;
   step: string;
@@ -64,8 +71,17 @@ export interface AiWorkflowStage {
   tagline: string;
   description: string;
   tools: string[];
+  command: string;
+  terminalTitle: string;
   artifactTitle: string;
   artifactLanguage: string;
+  statusLine: string;
+  readableFlow: {
+    input: string;
+    process: string;
+    verified: string;
+  };
+  consoleLines: ConsoleLine[];
   artifactLines: string[];
   outcome: string;
 }
@@ -97,9 +113,9 @@ export const PROFILE = {
   phoneHref: "tel:+6285179556798",
   cvPdfPath: "/CV-M-Vicky-Mosafan.pdf",
   summary:
-    "Full-Stack Web Developer (Bachelor of Information Systems, GPA 3.94/4.00) building production web systems with Next.js, NestJS/Express, Prisma, and PostgreSQL — accelerated by AI coding agents, deterministic PRDs, and custom TypeScript MCP servers.",
+    "Full-Stack Web Developer (Bachelor of Information Systems, GPA 3.94/4.00) building production web systems with Next.js, NestJS/Express, Prisma, and PostgreSQL — accelerated by AI coding agents, deterministic PRDs, and Craftrig MCP.",
   subSummary:
-    "From hybrid retrieval RAG engines (91.67% Recall, 26× faster cached responses) and offline-first healthcare PWAs to 12-module construction ERPs and multi-agent engineering harnesses.",
+    "From hybrid retrieval RAG engines (91.67% Recall, 26× faster cached responses) and offline-first healthcare PWAs to 12-module BuildFlow ERP and Craftrig multi-agent MCP servers.",
   socials: {
     github: "https://github.com/vickyymosafan",
     linkedin: "https://www.linkedin.com/in/vickymosafan/",
@@ -121,9 +137,9 @@ export const PROFILE = {
       sub: "18.3s → 694ms",
     },
     {
-      value: "43+",
+      value: "45+",
       label: "MCP Tools Built",
-      sub: "2 TypeScript Servers",
+      sub: "Craftrig + 3D QA",
     },
     {
       value: "3.94",
@@ -245,41 +261,41 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     ],
   },
   {
-    id: "mcp-servers",
+    id: "mcp-craftrig",
     index: "03",
-    title: "Principal Agentic Harness & 3D QA MCP",
-    subtitle: "Two TypeScript Model Context Protocol Servers",
+    title: "Craftrig MCP & 3D Visual QA",
+    subtitle: "vickyymosafan/mcp-craftrig · Multi-Agent Governance Rig",
     category: "MCP & Agentic",
     year: "2026",
-    featuredTag: "43+ MCP Tools · 21 Agent Skills",
+    featuredTag: "MCP SDK v2 · 50/50 Tests · 13-VP QA",
     summary:
-      "Two Clean Architecture TypeScript MCP servers powering autonomous multi-agent software engineering, 13-viewport Playwright QA, and automated Three.js/WebGL scene auditing.",
+      "Open-source TypeScript MCP server (vickyymosafan/mcp-craftrig) orchestrating multi-agent workflows with topological critical-path DAG scheduling, exclusive file locks, blueprint autopilot, and 13-viewport Playwright visual/a11y QA.",
     problem:
       "AI coding agents frequently drift out of scope, overwrite concurrent files, skip real browser checks, or fabricate UI/3D verification passes without objective evidence.",
     solution:
-      "Authored Principal Agentic Harness (23 tools: DAG planning, exclusive file locking, evidence registry, quality gates, 13-viewport Playwright localhost QA, 21 Agent Skills) and Three.js Visual QA (20+ WebGL inspection & screenshot diffing tools).",
+      "Authored Craftrig MCP (MCP SDK v2, Strict TypeScript, Node 22+, 50/50 tests pass) with Kahn's topological DAG planner, stale lock recovery, SQLite WAL evidence registry, Brotli plan archival, and 13-viewport Playwright dual-theme QA — paired with Three.js Visual QA MCP.",
     engineeringDecisions: [
-      "Enforced strict task DAG dependencies, atomic file locks, and evidence-backed quality gates so agents cannot self-attest unverified completions.",
-      "Automated Playwright responsive & visual accessibility audits across 13 viewport profiles (320px to 1920px) with deduplicated screenshot artifacts.",
-      "Built 20+ Three.js/WebGL diagnostic tools inspecting geometry collisions, mesh integrity, WebGL health, FPS budgets, and visual reference diffs.",
+      "Engineered topological critical-path DAG scheduling (Kahn's algorithm + reverse DP) to prioritize high-impact tasks and minimize parallel makespan.",
+      "Implemented exclusive path-level write locks with stale lease recovery and auditable SQLite WAL evidence gates blocking unverified self-attestation.",
+      "Built automated localhost Playwright 13-viewport responsive & dual-theme axe-core contrast audits alongside 20+ Three.js/WebGL scene inspection tools.",
     ],
     metrics: [
-      { label: "Agentic Harness", value: "23 Tools", detail: "+ 21 Agent Skills" },
-      { label: "Three.js QA", value: "20+ Tools", detail: "WebGL + Ref Diff" },
-      { label: "QA Viewports", value: "13", detail: "320px → 1920px" },
+      { label: "MCP Suite", value: "45+ Tools", detail: "Craftrig + 3D QA" },
+      { label: "Test Suite", value: "50/50", detail: "Strict TypeScript" },
+      { label: "QA Matrix", value: "13 VPs", detail: "320px → 1920px" },
     ],
     tech: [
-      "TypeScript",
-      "Model Context Protocol",
-      "Clean Architecture",
-      "Playwright",
-      "Three.js / WebGL",
-      "Agent Skills",
+      "TypeScript Strict",
+      "MCP SDK v2",
+      "Topological DAG",
+      "Playwright QA",
+      "SQLite WAL + Brotli",
+      "Three.js Visual QA",
     ],
     links: [
       {
-        label: "Agentic Harness",
-        href: "https://github.com/vickyymosafan/mcp_principal-agentic-harness",
+        label: "vickyymosafan/mcp-craftrig",
+        href: "https://github.com/vickyymosafan/mcp-craftrig",
         kind: "github",
       },
       {
@@ -289,58 +305,58 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       },
     ],
     architecture: [
-      { id: "agent", label: "AI Coding Agent", sublabel: "Claude / Antigravity", layer: "ai" },
-      { id: "dag", label: "Task DAG + Locks", sublabel: "23 Harness Tools", layer: "orchestration" },
-      { id: "qa", label: "Playwright + 3D QA", sublabel: "13 Viewports + Diff", layer: "client" },
-      { id: "gate", label: "Evidence Gate", sublabel: "Verified Pass Only", layer: "data" },
+      { id: "agent", label: "Claude / Antigravity", sublabel: "Parallel Subagents", layer: "ai" },
+      { id: "dag", label: "Craftrig DAG + Locks", sublabel: "Kahn Critical Path", layer: "orchestration" },
+      { id: "qa", label: "Playwright 13-VP", sublabel: "Dual-Theme A11y QA", layer: "client" },
+      { id: "gate", label: "Evidence Gate", sublabel: "SQLite WAL + Brotli", layer: "data" },
     ],
   },
   {
     id: "buildflow-erp",
     index: "04",
     title: "BuildFlow ERP",
-    subtitle: "Construction Enterprise Management System",
+    subtitle: "vickyymosafan/fullstack_buildflow-erp · Construction ERP",
     category: "Enterprise ERP",
     year: "2026",
-    featuredTag: "12 Domain Modules · Outbox Pattern",
+    featuredTag: "12 Vertical Slices · Outbox Pattern",
     summary:
-      "Modular monolith ERP designed for mid-size construction enterprises spanning 12 tightly bounded business modules from BOQ cost control to double-entry finance and BI.",
+      "Modular monolith Construction ERP (vickyymosafan/fullstack_buildflow-erp) engineered for mid-size contractors (50–300 staff, multi-branch, multi-warehouse) across 12 tightly bounded vertical-slice business modules.",
     problem:
-      "Construction teams suffer from fragmented spreadsheets across field operations, procurement invoices, and accounting ledgers, causing budget overruns and reconciliation drift.",
+      "Construction teams suffer from fragmented spreadsheets across field operations, BOQ cost baselines, procurement 3-way matching, and double-entry ledgers, causing budget overruns and reconciliation drift.",
     solution:
-      "Architected a 12-module Next.js + NestJS ERP backed by PostgreSQL, Prisma, Redis + BullMQ transactional outbox, MinIO document storage, OpenAPI contracts, ERD, and an RBAC security matrix.",
+      "Architected a 12-module Next.js 15 + NestJS CQRS modular monolith backed by PostgreSQL 16 (Decimal precision, UUIDs), Prisma/Drizzle, Redis 7 + BullMQ transactional outbox, MinIO/R2/S3 document storage, offline PWA daily site reports, and OpenAPI + RBAC governance.",
     engineeringDecisions: [
-      "Structured 12 clear domain boundaries: project management, BOQ cost control, procurement with 3-way matching, inventory, double-entry finance, site operations, and BI.",
-      "Used Redis + BullMQ with a transactional outbox pattern for reliable async workflows and event consistency.",
-      "Documented full pnpm workspace architecture, relational ERD, RBAC/security matrix, and OpenAPI-first contracts.",
+      "Structured 12 strict vertical slices: Multi-Tenant Core/RBAC, CRM, Project WBS/Gantt, BOQ/RAB Cost Baseline, 3-Way Procurement, Immutable Stock Ledger, Double-Entry GL, HR Timesheets, Offline Site Ops, CAD/BIM Docs, QC/NCR/HSE Safety, and Executive BI.",
+      "Engineered Redis 7 + BullMQ transactional outbox queues for reliable event-driven workflows across procurement, warehouse transfers, and accounting postings.",
+      "Codified full contract governance: SYSTEM_ARCHITECTURE, MODULE_BOUNDARIES, DATABASE_ERD, API_CONTRACT (OpenAPI), DESIGN tokens, and SECURITY RBAC threat matrix.",
     ],
     metrics: [
-      { label: "Domain Modules", value: "12", detail: "Modular Monolith" },
-      { label: "Procurement", value: "3-Way", detail: "PO · GRN · Invoice" },
-      { label: "Reliability", value: "Outbox", detail: "Redis + BullMQ" },
+      { label: "Domain Modules", value: "12", detail: "Vertical Slices" },
+      { label: "Procurement", value: "3-Way", detail: "PO · GR · Invoice" },
+      { label: "Async Engine", value: "Outbox", detail: "Redis 7 + BullMQ" },
     ],
     tech: [
-      "Next.js",
-      "NestJS",
-      "PostgreSQL",
-      "Prisma",
-      "Redis + BullMQ",
-      "MinIO",
+      "Next.js 15 PWA",
+      "NestJS CQRS",
+      "PostgreSQL 16",
+      "Prisma / Drizzle",
+      "Redis 7 + BullMQ",
+      "MinIO / R2 / S3",
       "shadcn/ui",
-      "OpenAPI",
+      "pnpm + Turborepo",
     ],
     links: [
       {
-        label: "GitHub Repository",
+        label: "vickyymosafan/fullstack_buildflow-erp",
         href: "https://github.com/vickyymosafan/fullstack_buildflow-erp",
         kind: "github",
       },
     ],
     architecture: [
-      { id: "web", label: "Next.js + shadcn", sublabel: "12 ERP Modules", layer: "client" },
-      { id: "api", label: "NestJS Monolith", sublabel: "OpenAPI + RBAC", layer: "orchestration" },
-      { id: "queue", label: "BullMQ Outbox", sublabel: "Async Events", layer: "ai" },
-      { id: "db", label: "PostgreSQL + MinIO", sublabel: "Double-Entry + Files", layer: "data" },
+      { id: "web", label: "Next.js 15 + shadcn", sublabel: "12 Modules + PWA", layer: "client" },
+      { id: "api", label: "NestJS CQRS API", sublabel: "OpenAPI + RBAC", layer: "orchestration" },
+      { id: "queue", label: "BullMQ Outbox", sublabel: "Redis 7 Events", layer: "ai" },
+      { id: "db", label: "PostgreSQL 16 + S3", sublabel: "Double-Entry + BIM", layer: "data" },
     ],
   },
   {
@@ -552,98 +568,176 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     step: "01",
     title: "Deterministic PRD & Architecture Blueprint",
     shortTitle: "Deterministic PRD",
-    tagline: "Zero guesswork before the first line of code",
+    tagline: "Zero guesswork before a single line of code is written",
     description:
-      "Every project starts with a machine-readable engineering blueprint: domain modules, relational ERD, RBAC threat model, OpenAPI contracts, and measurable acceptance criteria.",
-    tools: ["Deterministic PRDs", "OpenAPI Spec", "ERD & RBAC Matrix", "Threat Modeling"],
-    artifactTitle: "blueprint/buildflow-erp.contract.yaml",
-    artifactLanguage: "YAML",
-    artifactLines: [
-      "domain_modules: 12 # BOQ, Procurement 3-Way, Double-Entry, BI",
-      "invariants:",
-      "  - id: INV-01",
-      "    rule: atomic_inventory_reservation_before_payment_capture",
-      "  - id: INV-02",
-      "    rule: idempotent_webhook_with_transactional_outbox",
-      "acceptance_gates: [typecheck, jest_supertest, playwright_13vp]",
+      "Every build starts with a structured, machine-readable blueprint: domain module boundaries, relational ERD, OpenAPI 3.1 contracts, RBAC threat model, and testable acceptance gates — proven across BuildFlow ERP's 12 modules.",
+    tools: ["Deterministic PRDs", "Craftrig Blueprint", "OpenAPI 3.1", "ERD & RBAC Matrix"],
+    command: "craftrig blueprint compile --project fullstack_buildflow-erp --strict",
+    terminalTitle: "craftrig-blueprint · bash",
+    artifactTitle: "docs/architecture/buildflow-erp.blueprint.yaml",
+    artifactLanguage: "CLI + YAML",
+    statusLine: "Blueprint Linter: 0 errors · 12 domain boundaries locked",
+    readableFlow: {
+      input: "Business requirements, user roles, and failure invariants.",
+      process: "Craftrig Blueprint Interview compiles ERD, OpenAPI spec & REQ-IDs.",
+      verified: "Locked machine-readable contract shared by humans & AI agents.",
+    },
+    consoleLines: [
+      { kind: "comment", value: "# Compile 12 vertical-slice modules & invariants for BuildFlow ERP" },
+      { kind: "keyval", label: "modules", value: "12 slices (BOQ, 3-Way Procurement, Double-Entry GL, Site PWA, BI)" },
+      { kind: "keyval", label: "invariant.01", value: "Atomic inventory reservation enforced before payment capture" },
+      { kind: "keyval", label: "invariant.02", value: "Redis 7 + BullMQ transactional outbox with idempotent retries" },
+      { kind: "pass", label: "CONTRACT", value: "ERD + OpenAPI 3.1 + RBAC Threat Matrix validated (0 drift)" },
     ],
-    outcome: "Eliminates prompt drift and aligns humans + coding agents on one source of truth.",
+    artifactLines: [
+      "$ craftrig blueprint compile --project fullstack_buildflow-erp --strict",
+      "modules: 12 # BOQ, 3-Way Procurement, Double-Entry GL, Site PWA, BI",
+      "invariants:",
+      "  - INV-01: atomic_inventory_reservation_before_payment_capture",
+      "  - INV-02: redis_bullmq_transactional_outbox_with_idempotency",
+      "gates: [typecheck, jest_supertest, playwright_13vp] -> LOCKED",
+    ],
+    outcome: "Eliminates prompt drift and aligns human engineers + AI coding agents on one strict source of truth.",
   },
   {
     id: "mcp",
     step: "02",
-    title: "Multi-Agent Orchestration via Custom MCP",
-    shortTitle: "MCP Orchestration",
-    tagline: "Tool-enforced engineering discipline, not raw chat prompting",
+    title: "Multi-Agent Orchestration via Craftrig MCP",
+    shortTitle: "Craftrig MCP",
+    tagline: "Tool-enforced engineering discipline, never raw chat prompting",
     description:
-      "Using Claude Code, Google Antigravity, and my own Principal Agentic Harness MCP server (23 tools + 21 Agent Skills), work decomposes into parallel task DAGs with exclusive file locks.",
-    tools: ["Claude Code", "Google Antigravity", "Principal Agentic Harness", "21 Agent Skills"],
-    artifactTitle: "mcp/craftrig.task-dag.json",
-    artifactLanguage: "JSON",
-    artifactLines: [
-      '{ "mcp_server": "principal-agentic-harness", "tools": 23, "skills": 21 }',
-      '{ "task": "frontend-workstream", "ownedPaths": ["src/components/sections"] }',
-      '{ "task": "motion-workstream",   "ownedPaths": ["src/components/motion"] }',
-      '{ "guard": "file_lock_exclusive", "anti_gaming": "evidence_required" }',
+      "Claude Code and Google Antigravity run in parallel waves governed by my open-source TypeScript MCP server (vickyymosafan/mcp-craftrig) — enforcing Kahn's critical-path task DAGs, exclusive file write locks, and 21 modular Agent Skills.",
+    tools: ["vickyymosafan/mcp-craftrig", "Claude Code", "Google Antigravity", "21 Agent Skills"],
+    command: "claude mcp add craftrig -- node dist/src/index.js && craftrig autopilot next",
+    terminalTitle: "mcp-craftrig · autopilot",
+    artifactTitle: ".craftrig/execution-plan.dag.json",
+    artifactLanguage: "MCP SDK v2",
+    statusLine: "Craftrig MCP · 50/50 tests pass · 0 lock collisions",
+    readableFlow: {
+      input: "Compiled blueprint REQ-IDs split into dependency-aware tasks.",
+      process: "Kahn topological critical-path scheduler assigns exclusive file locks.",
+      verified: "Parallel Claude Code + Antigravity waves finish with zero merge conflicts.",
+    },
+    consoleLines: [
+      { kind: "comment", value: "# Register vickyymosafan/mcp-craftrig & launch parallel wave" },
+      { kind: "keyval", label: "mcp_server", value: "vickyymosafan/mcp-craftrig (MCP SDK v2 · Strict TS)" },
+      { kind: "keyval", label: "scheduler", value: "Kahn topological DAG + reverse DP critical path" },
+      { kind: "keyval", label: "wave_locks", value: "Agent-A [src/api/*]  |  Agent-B [src/components/*]" },
+      { kind: "pass", label: "LOCK GUARD", value: "Exclusive write leases active · stale lock auto-recovery ON" },
     ],
-    outcome: "Parallel execution with zero merge collisions and auditable task handoffs.",
+    artifactLines: [
+      "$ claude mcp add craftrig -- node dist/src/index.js",
+      '{ "repo": "vickyymosafan/mcp-craftrig", "protocol": "MCP SDK v2", "tests": "50/50" }',
+      '{ "scheduler": "kahn_topological_critical_path", "skills_routed": 21 }',
+      '{ "locks": { "agent_a": "src/api/*", "agent_b": "src/components/*" } }',
+      '{ "guard": "exclusive_file_locks", "anti_gaming": "evidence_required" }',
+    ],
+    outcome: "Parallel multi-agent execution with zero overwrite collisions, minimal token waste, and auditable handoffs.",
   },
   {
     id: "fullstack",
     step: "03",
-    title: "Clean Architecture Full-Stack Build",
-    shortTitle: "Full-Stack Build",
-    tagline: "Typed end-to-end from UI micro-interactions to PostgreSQL & Edge",
+    title: "Clean Architecture Full-Stack & Hybrid RAG Build",
+    shortTitle: "Full-Stack + RAG",
+    tagline: "Typed end-to-end from 3D/PWA UI to PostgreSQL, pgvector & Edge",
     description:
-      "AI accelerates scaffolding and iteration while human engineering governs clean boundaries, database indexing, offline IndexedDB caching, and hybrid RAG retrieval tuning.",
-    tools: ["Next.js 16 / React 19", "NestJS / Express / Hono", "Prisma + PostgreSQL", "Redis + BullMQ"],
-    artifactTitle: "rag/weighted-rrf.pipeline.ts",
+      "AI accelerates scaffolding and iteration while human engineering governs clean vertical boundaries, SQL decimal precision, offline Dexie IndexedDB caching, and weighted RRF hybrid retrieval tuning.",
+    tools: ["Next.js 16 / React 19", "NestJS / Hono / Express", "PostgreSQL + Prisma", "pgvector + BM25 + Redis"],
+    command: "pnpm --filter @rag/engine benchmark --dataset academic-policy --cache redis",
+    terminalTitle: "hybrid-rag · benchmark",
+    artifactTitle: "src/rag/weighted-rrf.pipeline.ts",
     artifactLanguage: "TypeScript",
+    statusLine: "Recall 91.67% · MRR 1.00 · Cached Latency 694ms (26× faster)",
+    readableFlow: {
+      input: "User query hitting Next.js PWA -> Hono/n8n retrieval pipeline.",
+      process: "Fuses Supabase pgvector semantic Top-50 + BM25 lexical rerank via wRRF.",
+      verified: "Recall rises 75% → 91.67%, MRR 0.71 → 1.00, Redis cuts 18.3s → 694ms.",
+    },
+    consoleLines: [
+      { kind: "comment", value: "# Hybrid Retrieval Pipeline: Dense Semantic + Sparse Lexical Fusion" },
+      { kind: "code", value: "const semanticTop50 = await pgvector.search(geminiEmbed, { limit: 50 });" },
+      { kind: "code", value: "const fusedTop5 = weightedRRF(semanticTop50, bm25.rerank(query));" },
+      { kind: "metric", label: "ACCURACY", value: "Recall 91.67% (↑ from 75.0%) · MRR 1.00 (↑ from 0.71)" },
+      { kind: "pass", label: "REDIS CACHE", value: "Median E2E latency cut 18,300ms → 694ms (26× speedup)" },
+    ],
     artifactLines: [
-      "const semanticTop50 = await pgvector.search(geminiEmbedding, { limit: 50 });",
+      "$ pnpm --filter @rag/engine benchmark --dataset academic-policy --cache redis",
+      "const semanticTop50 = await pgvector.search(geminiEmbed, { limit: 50 });",
       "const lexicalRanked = bm25.rerank(query, semanticTop50);",
       "const fusedTop5 = weightedRRF(semanticTop50, lexicalRanked, { k: 60 });",
-      "// Benchmarked: Recall 75% -> 91.67% | MRR 0.71 -> 1.00 | Redis 694ms",
+      "// Result: Recall 91.67% | MRR 1.00 | Redis Cached Path 694ms (26x faster)",
     ],
-    outcome: "Production-grade code that stays readable, modular, and maintainable.",
+    outcome: "Production-grade code that stays readable, modular, benchmarked, and effortless to maintain.",
   },
   {
     id: "qa",
     step: "04",
-    title: "Autonomous Verification & Visual QA",
+    title: "Autonomous Verification & 13-Viewport Visual QA",
     shortTitle: "Autonomous QA",
-    tagline: "Real browsers, real contrast math, real 3D & API tests",
+    tagline: "Real headless Chrome, real contrast math, zero guesswork",
     description:
-      "Never trust self-attestation. Every feature runs through Jest/Supertest suites, Playwright across 13 viewport profiles (320px–1920px), axe-core contrast audits, and Three.js Visual QA.",
-    tools: ["Playwright (13 Viewports)", "Jest & Supertest", "axe-core A11y", "Three.js Visual QA MCP"],
-    artifactTitle: "qa/localhost-verification.receipt.json",
-    artifactLanguage: "JSON",
-    artifactLines: [
-      '{ "viewports_checked": [320, 360, 375, 390, 414, 430, 768, 844, 1024, 1280, 1366, 1440, 1920] }',
-      '{ "horizontal_overflow": 0, "console_errors": 0, "wcag_contrast": "AA/AAA" }',
-      '{ "themes_verified": ["dark", "light"], "reduced_motion": "verified" }',
-      '{ "quality_gate": "PASS", "evidence_linked": true }',
+      "Never trust an AI agent saying 'looks good'. Craftrig automatically drives Playwright across 13 viewport profiles (320px–1920px) in both Dark & Light modes, checking WCAG contrast, overflow, console errors, and WebGL health.",
+    tools: ["Craftrig Localhost QA", "Playwright 13-VP", "axe-core Contrast", "Jest & Supertest"],
+    command: "craftrig localhost audit --themes dark,light --viewports 13 --axe wcag2aa",
+    terminalTitle: "craftrig-qa · playwright",
+    artifactTitle: ".craftrig/evidence/visual-a11y.receipt.json",
+    artifactLanguage: "Playwright QA",
+    statusLine: "Quality Gate: PASS · 13/13 viewports · 0 overflow · 0 console errors",
+    readableFlow: {
+      input: "Running localhost Next.js production server + API test suite.",
+      process: "Playwright audits 13 screen sizes in Dark & Light themes + Jest API tests.",
+      verified: "Deduplicated screenshots & SQLite WAL receipts unlock the release gate.",
+    },
+    consoleLines: [
+      { kind: "comment", value: "# Automated Dual-Theme Visual, Contrast & Responsive Scan (< 4s)" },
+      { kind: "keyval", label: "viewports", value: "320 · 360 · 375 · 390 · 414 · 430 · 768 · 844 · 1024 · 1280 · 1366 · 1440 · 1920" },
+      { kind: "keyval", label: "a11y_audit", value: "@axe-core/playwright + alpha-composited WCAG AA/AAA contrast" },
+      { kind: "metric", label: "DEFECTS", value: "0 horizontal overflow · 0 console/page errors · 0 broken assets" },
+      { kind: "pass", label: "QUALITY GATE", value: "ALL CHECKPOINTS PASSED — evidence archived (Brotli + WAL)" },
     ],
-    outcome: "Catches layout regressions, contrast issues, and runtime bugs before shipping.",
+    artifactLines: [
+      "$ craftrig localhost audit --themes dark,light --viewports 13 --axe wcag2aa",
+      '{ "viewports": [320, 360, 375, 390, 414, 430, 768, 844, 1024, 1280, 1366, 1440, 1920] }',
+      '{ "themes": ["dark", "light"], "horizontal_overflow": 0, "console_errors": 0 }',
+      '{ "wcag_contrast": "AA/AAA", "reduced_motion": "verified" }',
+      '{ "quality_gate": "PASS", "evidence_stored": ".craftrig/archive/plan.json.br" }',
+    ],
+    outcome: "Catches responsive breaks, contrast bugs, and runtime regressions automatically before deployment.",
   },
   {
     id: "ship",
     step: "05",
-    title: "Measured Delivery & Continuous Reliability",
-    shortTitle: "Measured Delivery",
-    tagline: "Shipped to edge & cloud with fallbacks and observable proof",
+    title: "Resilient Edge Delivery & Failover Proof",
+    shortTitle: "Resilient Ship",
+    tagline: "Shipped to edge & cloud with zero-downtime fallbacks",
     description:
-      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, or Hostinger with resilient fallback datasets, multi-LLM failover chains, and clear engineering documentation.",
-    tools: ["GitHub Actions", "Vercel", "Cloudflare Workers", "Multi-LLM Failover"],
-    artifactTitle: "deploy/resilience-checklist.md",
-    artifactLanguage: "Markdown",
-    artifactLines: [
-      "- [x] Multi-LLM fallback: Gemini -> Groq -> Cohere -> OpenRouter",
-      "- [x] Redis cache path: 18.3s -> 694ms (26x faster academic QA)",
-      "- [x] Market feed fallback dataset guarantees zero blank charts",
-      "- [x] Offline IndexedDB (Dexie) sync for field health workers",
+      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, Railway, or Hostinger with automatic multi-LLM provider failovers, offline-first IndexedDB queues, and deterministic fallback datasets.",
+    tools: ["GitHub Actions", "Vercel Edge", "Cloudflare Workers", "Multi-LLM Failover"],
+    command: "gh workflow run deploy-production.yml --ref main --verify-edge",
+    terminalTitle: "deploy-edge · ci/cd",
+    artifactTitle: "deploy/resilience-manifest.md",
+    artifactLanguage: "CI/CD Log",
+    statusLine: "Production Live · Edge 200 OK · Multi-LLM Failover Armed",
+    readableFlow: {
+      input: "Green quality gate commit pushed to main branch.",
+      process: "GitHub Actions builds & deploys to Vercel Edge & Cloudflare Workers.",
+      verified: "Resilient failover chains keep apps fast even during API or offline hiccups.",
+    },
+    consoleLines: [
+      { kind: "comment", value: "# Production Resilience Verification Checklist" },
+      { kind: "pass", label: "LLM CHAIN", value: "Gemini → Groq → Cohere → OpenRouter automatic edge fallback" },
+      { kind: "pass", label: "CACHE PATH", value: "Redis response cache active (18.3s → 694ms on academic RAG)" },
+      { kind: "pass", label: "OFFLINE PWA", value: "Dexie IndexedDB local sync active for field Posyandu & Site Ops" },
+      { kind: "metric", label: "DEPLOY", value: "Vercel Edge + Cloudflare Workers live · Core Web Vitals green" },
     ],
-    outcome: "Fast, resilient web products engineered for real-world network conditions.",
+    artifactLines: [
+      "$ gh workflow run deploy-production.yml --ref main --verify-edge",
+      "[PASS] Multi-LLM fallback: Gemini -> Groq -> Cohere -> OpenRouter",
+      "[PASS] Redis cache path: 18.3s -> 694ms (26x faster academic RAG)",
+      "[PASS] Market feed fallback dataset guarantees zero blank financial charts",
+      "[PASS] Offline IndexedDB (Dexie) sync for field healthcare & construction ops",
+    ],
+    outcome: "Fast, resilient web products engineered to thrive under real-world mobile and network conditions.",
   },
 ];
 

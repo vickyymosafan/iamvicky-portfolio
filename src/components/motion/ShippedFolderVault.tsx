@@ -40,11 +40,14 @@ export function ShippedFolderVault() {
   }, [isOpen]);
 
   // Auto-retract files and close filters when scrolling downward past the folder vault.
+  // rAF-throttled so scroll events never force synchronous layout recalculation (zero INP/scroll jank).
   // Never auto-reopens when scrolling back up (stays closed unless clicked).
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
+    let rafPending = false;
 
-    const onScroll = () => {
+    const checkScroll = () => {
+      rafPending = false;
       const currentY = window.scrollY;
       const scrollingDown = currentY > lastScrollYRef.current + 4;
       lastScrollYRef.current = currentY;
@@ -55,11 +58,20 @@ export function ShippedFolderVault() {
       if (!el) return;
       const rect = el.getBoundingClientRect();
 
-      // Trigger smooth close-and-retract once the folder header scrolls up toward the top edge
-      // or the vault moves past the lower third while advancing toward Section 02
       if (rect.top < -80 || rect.bottom < window.innerHeight * 0.45) {
         setIsOpen(false);
         setActiveFilter("All");
+      }
+    };
+
+    const onScroll = () => {
+      if (!isOpenRef.current) {
+        lastScrollYRef.current = window.scrollY;
+        return;
+      }
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(checkScroll);
       }
     };
 
