@@ -17,6 +17,7 @@ import {
 import { FEATURED_PROJECTS, FeaturedProject, PROFILE } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -372,7 +373,10 @@ export function CommandPalette({
         </div>
 
         <div className="flex items-center justify-between border-t border-border bg-surface-elevated/60 px-4 py-2.5 font-mono text-[11px] text-muted">
-          <span>↑↓ Navigate · Enter Open</span>
+          <span className="inline-flex items-center gap-2">
+            <BrandLogo size={18} className="shrink-0" />
+            <span>↑↓ Navigate · Enter Open</span>
+          </span>
           <span>Esc Close</span>
         </div>
       </div>

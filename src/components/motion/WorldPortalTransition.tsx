@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface WorldPortalTransitionProps {
   renderTheater: (portalReady: boolean) => React.ReactNode;
@@ -144,6 +145,11 @@ export function WorldPortalTransition({ renderTheater }: WorldPortalTransitionPr
             }}
             className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center will-change-transform"
           >
+            <BrandLogo
+              size={52}
+              tone="dark"
+              className="mb-4 drop-shadow-[0_0_24px_rgba(200,245,60,0.3)]"
+            />
             <div className="inline-flex items-center gap-2 border border-white/25 bg-[#070a0d]/85 px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c8f53c]">
               <span>03 → 04 // INNER WORLD TO OUTER WORLD</span>
             </div>

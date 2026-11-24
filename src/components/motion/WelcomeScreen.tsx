@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Cpu, Layers, ShieldCheck, Terminal } from "lucide-react";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const BOOT_PIPELINE = [
   {
@@ -174,7 +175,7 @@ export function WelcomeScreen() {
             {/* Top Telemetry Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <BrandLogo size={30} className="shrink-0" />
                 <span className="font-semibold text-foreground">VM // STUDIO BOOT SEQUENCE</span>
                 <span className="hidden text-muted sm:inline">LAT -7.706 · LON 114.009</span>
               </div>
@@ -192,9 +193,12 @@ export function WelcomeScreen() {
             {/* Center Architectural Identity & Deterministic Pipeline */}
             <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 py-6 lg:grid-cols-12">
               <div className="space-y-5 lg:col-span-7">
-                <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary-soft px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                  <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Full-Stack × AI-Assisted &amp; AI-Augmented Engineering</span>
+                <div className="flex flex-wrap items-center gap-3.5">
+                  <BrandLogo size={52} className="shrink-0 shadow-lg" />
+                  <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary-soft px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                    <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Full-Stack × AI-Assisted &amp; AI-Augmented Engineering</span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

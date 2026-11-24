@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 /**
  * Calm, Static Architectural Contact Footer (ZERO Scroll Reveal Animations):
@@ -167,10 +168,13 @@ export function ContactFooter() {
 
         {/* Bottom Copyright & Back to Top */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 font-mono text-xs text-muted sm:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} {PROFILE.fullName} · Built with Next.js 16,
-            React 19, Three.js, GSAP &amp; Lenis.
-          </p>
+          <div className="flex items-center gap-3">
+            <BrandLogo size={34} className="shrink-0" />
+            <p>
+              &copy; {new Date().getFullYear()} {PROFILE.fullName} · Built with Next.js 16,
+              React 19, Three.js, GSAP &amp; Lenis.
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => scrollTo(0, 0)}

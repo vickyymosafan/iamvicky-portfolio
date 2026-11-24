@@ -16,13 +16,13 @@ import {
   Play,
   RotateCcw,
   Sparkles,
-  Terminal,
   TrendingUp,
 } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 // Next.js 16 dynamic code-splitting: keeps Three.js out of the critical initial Hero LCP bundle
 const HeroFieldCanvas = dynamic(
@@ -390,8 +390,8 @@ export function HeroSection() {
                 />
 
                 <div className="mb-2.5 flex items-center justify-between border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                  <span className="flex items-center gap-1.5 font-semibold text-foreground">
-                    <Terminal className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  <span className="flex items-center gap-2 font-semibold text-foreground">
+                    <BrandLogo size={22} className="shrink-0" />
                     ENGINEER.PROFILE // 00
                   </span>
                   <span className="font-bold text-primary">ID: VM-2026</span>

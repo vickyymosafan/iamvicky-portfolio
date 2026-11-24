@@ -13,6 +13,7 @@ import {
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
 import { EXPLAINER_TOTAL_DURATION, VO_BEATS } from "@/data/voBeats";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const STAGE_W = 1920;
 const STAGE_H = 1080;
@@ -869,9 +870,10 @@ export function BangMotionStackExplainer({
                 <div
                   id="bm-v1-kicker"
                   style={{ fontSize: 34, letterSpacing: "0.24em" }}
-                  className="mb-8 font-mono font-semibold uppercase text-[#56ccf2]"
+                  className="mb-8 inline-flex items-center gap-6 font-mono font-semibold uppercase text-[#56ccf2]"
                 >
-                  BEYOND RAW CHAT PROMPTING
+                  <BrandLogo size={68} tone="dark" className="shrink-0" />
+                  <span>BEYOND RAW CHAT PROMPTING</span>
                 </div>
 
                 <div
@@ -1428,8 +1430,9 @@ export function BangMotionStackExplainer({
                     Engineered to ship.{" "}
                     <span className="text-[#c8f53c]">Verified to last.</span>
                   </div>
-                  <div style={{ fontSize: 32, letterSpacing: "0.2em" }} className="mt-4 font-mono uppercase text-[#9aa7b0]">
-                    M. VICKY MOSAFAN · FULL-STACK &amp; AI-AUGMENTED ENGINEER
+                  <div style={{ fontSize: 32, letterSpacing: "0.2em" }} className="mt-5 inline-flex items-center justify-center gap-5 font-mono uppercase text-[#9aa7b0]">
+                    <BrandLogo size={60} tone="dark" className="shrink-0" />
+                    <span>M. VICKY MOSAFAN · FULL-STACK &amp; AI-AUGMENTED ENGINEER</span>
                   </div>
                 </div>
               </div>

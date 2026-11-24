@@ -14,6 +14,7 @@ import { PROFILE } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const NAV_ITEMS = [
   { id: "work", label: "Work" },
@@ -86,9 +87,10 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
           onClick={(e) => handleNavClick(e, "hero")}
           className="group inline-flex min-h-11 items-center gap-2.5 rounded-lg pr-2 text-foreground"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-strong bg-surface font-mono text-xs font-bold text-primary group-hover:border-primary">
-            VM
-          </span>
+          <BrandLogo
+            size={36}
+            className="shrink-0 transition-transform duration-200 group-hover:scale-105"
+          />
           <span className="flex flex-col leading-tight">
             <span className="font-heading text-sm font-bold tracking-tight sm:text-[15px]">
               {PROFILE.displayName}

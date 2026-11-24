@@ -29,6 +29,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://iamvicky.vercel.app"),
   title: "M. Vicky Mosafan — Full-Stack Developer & AI-Augmented Engineer",
   description:
     "Portfolio of M. Vicky Mosafan — Full-Stack Web Developer (Next.js, NestJS, Prisma, PostgreSQL) & AI-Augmented Software Engineer building Hybrid/Agentic RAG engines, TypeScript MCP servers, and production web systems.",

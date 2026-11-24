@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    .bg { fill: #0b0d0f; stroke: #2c353d; }
+    .inner { stroke: rgba(243, 245, 242, 0.12); }
+    .primary { fill: #c8f53c; }
+    .primary-stroke { stroke: #c8f53c; }
+    .ink { fill: #f3f5f2; }
+    .accent { fill: #56ccf2; }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #f6f4ee; stroke: #b8c0c5; }
+      .inner { stroke: rgba(17, 21, 24, 0.12); }
+      .primary { fill: #185c37; }
+      .primary-stroke { stroke: #185c37; }
+      .ink { fill: #111518; }
+      .accent { fill: #035e8c; }
+    }
+  </style>
+  <path class="bg" d="M12 3H52L61 12V52L52 61H12L3 52V12L12 3Z" stroke-width="2.5"/>
+  <path class="inner" d="M14.5 7.5H49.5L56.5 14.5V49.5L49.5 56.5H14.5L7.5 49.5V14.5L14.5 7.5Z" stroke-width="1"/>
+  <path class="primary-stroke" d="M44 3H52L61 12V20" stroke-width="2.8" stroke-linecap="square"/>
+  <path class="ink" d="M35.8 19L41.8 33.4L47.2 19H53V46H47.2V31.6L42.9 42H40.3L33.4 25.8L35.8 19Z"/>
+  <path class="primary" d="M11 19H17.6L23.5 36.2L29.8 19H36.2L26.2 46H20.8L11 19Z"/>
+  <path class="accent" d="M23.7 18.2L27.1 21.6L23.7 25L20.3 21.6L23.7 18.2Z"/>
+</svg>
