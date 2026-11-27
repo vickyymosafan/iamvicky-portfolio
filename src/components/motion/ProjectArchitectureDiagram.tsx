@@ -31,8 +31,8 @@ const LAYER_STYLES: Record<
     Icon: Cpu,
   },
   data: {
-    badgeBg: "bg-sage-soft",
-    badgeText: "text-sage",
+    badgeBg: "bg-surface-elevated",
+    badgeText: "text-foreground",
     label: "DATA",
     Icon: Database,
   },

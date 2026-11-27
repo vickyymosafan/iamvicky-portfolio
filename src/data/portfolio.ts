@@ -24,6 +24,7 @@ export interface FeaturedProject {
   subtitle: string;
   category: "AI & RAG" | "MCP & Agentic" | "Full-Stack" | "Enterprise ERP";
   year: string;
+  image: string;
   summary: string;
   problem: string;
   solution: string;
@@ -35,28 +36,32 @@ export interface FeaturedProject {
   featuredTag: string;
 }
 
-export interface AdditionalProject {
+interface AdditionalProject {
   name: string;
   fileCode: string;
   category: "Full-Stack" | "Trading & Data" | "Utilities";
-  stackBadge: string;
+  tags: string[];
+  image: string;
   focus: string;
   href: string;
+  featured?: boolean;
 }
 
-export interface ExperienceItem {
+interface ExperienceItem {
   id: string;
+  index: string;
   role: string;
   company: string;
   period: string;
   locationOrMode: string;
+  image: string;
   summary: string;
   highlights: string[];
   stack: string[];
   links: ProjectLink[];
 }
 
-export interface ConsoleLine {
+interface ConsoleLine {
   kind: "comment" | "keyval" | "pass" | "metric" | "code";
   label?: string;
   value: string;
@@ -88,6 +93,8 @@ interface AiWorkflowStage {
 
 interface SkillGroup {
   id: string;
+  filterKey: string;
+  badge: string;
   label: string;
   description: string;
   items: string[];
@@ -104,18 +111,26 @@ interface LeadershipItem {
 export const PROFILE = {
   fullName: "M. Vicky Mosafan",
   displayName: "Vicky Mosafan",
-  roleTitle: "Full-Stack Web Developer & AI-Augmented Engineer",
-  shortRole: "Full-Stack × AI-Augmented Engineering",
+  roleTitle: "Full-Stack Web Developer & AI Systems Engineer",
+  shortRole: "Full-Stack Developer",
   location: "Situbondo, East Java, Indonesia",
-  availability: "Open to Full-Stack / Frontend & Backend Roles",
+  availability: "Open to Full-Stack, Frontend & Backend Opportunities",
   email: "mvickymosafan@gmail.com",
   phone: "+62 851-7955-6798",
   phoneHref: "tel:+6285179556798",
   cvPdfPath: "/CV-M-Vicky-Mosafan.pdf",
+  heroHeadlineTop: "Full-Stack Systems",
+  heroHeadlineMid: "Built for Speed &",
+  heroHeadlineAccent: "Real-World Scale.",
   summary:
-    "Full-Stack Web Developer (Bachelor of Information Systems, GPA 3.94/4.00) building production web systems with Next.js, NestJS/Express, Prisma, and PostgreSQL — accelerated by AI coding agents, deterministic PRDs, and Craftrig MCP.",
-  subSummary:
-    "From hybrid retrieval RAG engines (91.67% Recall, 26× faster cached responses) and offline-first healthcare PWAs to 12-module BuildFlow ERP and Craftrig multi-agent MCP servers.",
+    "I'm Vicky Mosafan — a Full-Stack Developer turning messy operational workflows into fast, dependable web apps and AI-powered tools. Focused on clean architecture, measurable performance, and clarity for the people who use them.",
+  aboutEyebrow: "ABOUT ME",
+  aboutHeadline: "Turning Complex Operations into Dependable Software",
+  aboutStory:
+    "My journey began building practical tools for campus labs and local businesses in East Java — from offline-ready community healthcare apps to trading systems and 12-module construction ERPs. Today I combine disciplined TypeScript engineering with structured AI workflows so teams ship production software faster without cutting corners.",
+  aboutShortBio:
+    "Full-Stack Web Developer (B.S. Information Systems, GPA 3.94/4.00) focused on Next.js, NestJS, PostgreSQL, RAG search pipelines, and multi-agent developer tooling.",
+  motto: "Build. Ship. Improve.",
   socials: {
     github: "https://github.com/vickyymosafan",
     linkedin: "https://www.linkedin.com/in/vickymosafan/",
@@ -127,19 +142,14 @@ export const PROFILE = {
   },
   heroProofMetrics: [
     {
-      value: "91.67%",
-      label: "Hybrid RAG Recall",
-      sub: "wRRF · MRR 1.00",
+      value: "2+",
+      label: "Years Hands-On",
+      sub: "Web, AI & Fintech",
     },
     {
-      value: "26×",
-      label: "Faster w/ Redis",
-      sub: "18.3s → 694ms",
-    },
-    {
-      value: "45+",
-      label: "MCP Tools Built",
-      sub: "Craftrig + 3D QA",
+      value: "10+",
+      label: "Shipped Systems",
+      sub: "Live & Open-Source",
     },
     {
       value: "3.94",
@@ -147,15 +157,21 @@ export const PROFILE = {
       sub: "Info Systems · UMJ",
     },
   ],
-  marqueeCapabilities: [
-    "Full-Stack TypeScript Systems",
-    "AI-Augmented Software Engineering",
-    "Custom MCP Server Architecture",
-    "Hybrid & Agentic RAG Pipelines",
-    "Next.js 16 & React 19 UI Craft",
-    "NestJS · Express · Hono APIs",
-    "Deterministic PRDs & Agent Skills",
-    "Playwright 13-Viewport Visual QA",
+  journeyHighlights: [
+    { value: "11+", label: "MQL5 Releases" },
+    { value: "10+", label: "Shipped Systems" },
+    { value: "91.67%", label: "RAG Recall" },
+  ],
+  coreStackPills: [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "NestJS",
+    "Node.js",
+    "PostgreSQL",
+    "Prisma",
+    "Redis",
+    "Tailwind CSS",
   ],
 } as const;
 
@@ -167,36 +183,29 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     subtitle: "Undergraduate Thesis · Weighted RRF RAG Engine",
     category: "AI & RAG",
     year: "2026",
+    image: "/images/redesign/proj-hybrid-rag.jpg",
     featuredTag: "91.67% Recall · 26× Cache Speedup",
     summary:
-      "Production academic RAG PWA combining Gemini pgvector semantic search with BM25 lexical reranking fused via weighted Reciprocal Rank Fusion (wRRF) and Redis response caching.",
+      "Academic assistant PWA pairing semantic vector search with BM25 keyword reranking and Redis caching so students get cited answers in under a second.",
     problem:
-      "Dense semantic search alone frequently missed exact academic codes, course names, and policy clauses, while uncached LLM inference took ~18.3 seconds per query.",
+      "Dense semantic search alone frequently missed exact course codes and academic policy clauses, while uncached LLM calls took ~18.3 seconds per answer.",
     solution:
-      "Engineered an n8n hybrid retrieval pipeline retrieving top-50 semantic chunks from Supabase pgvector, reranking via BM25, fusing with tuned wRRF into top-5 contexts for Cohere Aya Expanse 32B, backed by Redis caching and a Next.js 16 PWA with voice input.",
+      "Built an n8n hybrid retrieval pipeline pulling top-50 semantic chunks from Supabase pgvector, reranking with BM25 via weighted Reciprocal Rank Fusion (wRRF) for Cohere Aya 32B, backed by Redis caching and a Next.js 16 PWA with voice input.",
     engineeringDecisions: [
-      "Benchmarked 3 retrieval scenarios on official study program documents: raised Recall from 75% to 91.67% and MRR from 0.71 to 1.00 using wRRF.",
-      "Implemented Redis caching + session chat memory, cutting median end-to-end latency from 18.3s down to 694ms (~26× speedup).",
-      "Shipped Next.js 16 PWA with Supabase chat history persistence, speech-to-text input, and guided onboarding wizard.",
+      "Benchmarked 3 retrieval setups on real university documents: raised Recall from 75% to 91.67% and MRR from 0.71 to 1.00 using wRRF.",
+      "Added Redis response caching + session memory, cutting median latency from 18.3s down to 694ms (~26× faster).",
+      "Shipped a mobile-ready Next.js 16 PWA with Supabase chat history, speech-to-text input, and guided onboarding.",
     ],
     metrics: [
       { label: "Recall", value: "91.67%", detail: "up from 75.0%" },
       { label: "MRR Score", value: "1.00", detail: "up from 0.71" },
       { label: "Cached Latency", value: "694ms", detail: "26× vs 18.3s" },
     ],
-    tech: [
-      "Next.js 16 PWA",
-      "n8n",
-      "Supabase pgvector",
-      "BM25 + wRRF",
-      "Gemini Embeddings",
-      "Cohere Aya 32B",
-      "Redis",
-    ],
+    tech: ["Next.js 16", "Supabase pgvector", "BM25 + wRRF", "Redis", "n8n", "Cohere Aya 32B"],
     links: [
       { label: "Live Demo", href: "https://ai-smartchat.vercel.app/", kind: "live" },
       {
-        label: "Frontend Repo",
+        label: "GitHub",
         href: "https://github.com/vickyymosafan/FullStack_ai-smartchat",
         kind: "github",
       },
@@ -211,36 +220,29 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "beyond-rag",
     index: "02",
-    title: "Beyond RAG: Agentic RAG Platform",
-    subtitle: "Multi-Hop Retrieval & Self-Critic Grounding Loop",
+    title: "Beyond RAG: Agentic Search Platform",
+    subtitle: "Multi-Hop Retrieval & Self-Critic Verification",
     category: "AI & RAG",
     year: "2026",
-    featuredTag: "Self-Critic Loop · Multi-LLM Fallback",
+    image: "/images/redesign/proj-beyond-rag.jpg",
+    featuredTag: "Self-Critic Loop · 4-LLM Fallback",
     summary:
-      "Edge-deployed agentic RAG system featuring query rewriting, multi-hop retrieval, reranking, and an autonomous self-critic grounding loop to eliminate hallucinations across PDF/DOCX corpora.",
+      "Edge-deployed AI document engine that breaks complex questions into sub-queries, checks its own citations, and fails over across 4 LLM providers automatically.",
     problem:
-      "Single-pass RAG pipelines fail on multi-part analytical questions and silently hallucinate when primary LLM providers rate-limit or degrade.",
+      "Single-pass RAG chatbots struggle with multi-step analytical questions and break silently whenever one LLM API hits rate limits.",
     solution:
-      "Built an edge API on Cloudflare Workers + Hono with Neon PostgreSQL, multi-provider LLM fallback (Gemini, Groq, Cohere, OpenRouter), document ingestion, and a Next.js citation-aware chat UI with Markdown/LaTeX rendering.",
+      "Engineered an edge API on Cloudflare Workers + Hono with Neon PostgreSQL, multi-provider LLM fallback (Gemini, Groq, Cohere, OpenRouter), admin PDF/DOCX ingestion, and a citation-aware Next.js chat interface.",
     engineeringDecisions: [
-      "Added query rewriting, multi-hop sub-query decomposition, reranking, and a self-critic verification loop that auto-corrects ungrounded claims.",
-      "Architected multi-LLM fallback chain (Gemini → Groq → Cohere → OpenRouter) with edge rate limiting and response caching.",
-      "Built virtualized chat list, inline source citations, Markdown/LaTeX math renderer, PWA offline shell, and admin PDF/DOCX ingestion panel.",
+      "Built query rewriting, multi-hop decomposition, reranking, and a self-critic loop that flags and repairs ungrounded claims.",
+      "Wired automatic 4-provider failover (Gemini → Groq → Cohere → OpenRouter) with edge rate limiting and response caching.",
+      "Delivered virtualized chat history, inline citations, Markdown/LaTeX math rendering, and PDF/DOCX upload workflows.",
     ],
     metrics: [
       { label: "Runtime", value: "Edge", detail: "Cloudflare Workers" },
       { label: "LLM Providers", value: "4×", detail: "Automatic fallback" },
       { label: "Ingestion", value: "PDF/DOCX", detail: "Admin pipeline" },
     ],
-    tech: [
-      "Cloudflare Workers",
-      "Hono",
-      "Neon PostgreSQL",
-      "Next.js",
-      "Gemini / Groq / Cohere",
-      "OpenRouter",
-      "Markdown + LaTeX",
-    ],
+    tech: ["Cloudflare Workers", "Hono", "Neon Postgres", "Next.js", "Multi-LLM", "LaTeX"],
     links: [
       {
         label: "Backend Repo",
@@ -263,43 +265,37 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "mcp-craftrig",
     index: "03",
-    title: "Craftrig MCP & 3D Visual QA",
-    subtitle: "vickyymosafan/mcp-craftrig · Multi-Agent Governance Rig",
+    title: "Craftrig MCP Governance Rig",
+    subtitle: "vickyymosafan/mcp-craftrig · Multi-Agent Orchestrator",
     category: "MCP & Agentic",
     year: "2026",
+    image: "/images/redesign/proj-mcp-craftrig.jpg",
     featuredTag: "MCP SDK v2 · 50/50 Tests · 13-VP QA",
     summary:
-      "Open-source TypeScript MCP server (vickyymosafan/mcp-craftrig) orchestrating multi-agent workflows with topological critical-path DAG scheduling, exclusive file locks, blueprint autopilot, and 13-viewport Playwright visual/a11y QA.",
+      "Open-source TypeScript MCP server that keeps AI coding agents disciplined with dependency task graphs, file write locks, and real Playwright browser audits.",
     problem:
-      "AI coding agents frequently drift out of scope, overwrite concurrent files, skip real browser checks, or fabricate UI/3D verification passes without objective evidence.",
+      "Autonomous coding agents often drift off-spec, overwrite each other's files, or claim UI checks passed without ever inspecting a live browser.",
     solution:
-      "Authored Craftrig MCP (MCP SDK v2, Strict TypeScript, Node 22+, 50/50 tests pass) with Kahn's topological DAG planner, stale lock recovery, SQLite WAL evidence registry, Brotli plan archival, and 13-viewport Playwright dual-theme QA — paired with Three.js Visual QA MCP.",
+      "Built Craftrig MCP (Strict TypeScript, MCP SDK v2, Node 22+, 50/50 passing tests) with Kahn critical-path DAG scheduling, lease-based file locks, SQLite WAL evidence gates, and automated 13-viewport Playwright responsive & WCAG contrast QA.",
     engineeringDecisions: [
-      "Engineered topological critical-path DAG scheduling (Kahn's algorithm + reverse DP) to prioritize high-impact tasks and minimize parallel makespan.",
-      "Implemented exclusive path-level write locks with stale lease recovery and auditable SQLite WAL evidence gates blocking unverified self-attestation.",
-      "Built automated localhost Playwright 13-viewport responsive & dual-theme axe-core contrast audits alongside 20+ Three.js/WebGL scene inspection tools.",
+      "Implemented Kahn topological critical-path scheduling so parallel agents execute high-impact work without race conditions.",
+      "Added exclusive path-level write locks with stale lease recovery and SQLite WAL evidence gates requiring real test proof.",
+      "Built automated 13-viewport responsive, dual-theme contrast, and interaction audits directly inside the MCP workflow.",
     ],
     metrics: [
-      { label: "MCP Suite", value: "45+ Tools", detail: "Craftrig + 3D QA" },
+      { label: "MCP Suite", value: "45+ Tools", detail: "Orchestration + QA" },
       { label: "Test Suite", value: "50/50", detail: "Strict TypeScript" },
       { label: "QA Matrix", value: "13 VPs", detail: "320px → 1920px" },
     ],
-    tech: [
-      "TypeScript Strict",
-      "MCP SDK v2",
-      "Topological DAG",
-      "Playwright QA",
-      "SQLite WAL + Brotli",
-      "Three.js Visual QA",
-    ],
+    tech: ["TypeScript", "MCP SDK v2", "Playwright", "SQLite WAL", "Topological DAG", "Node 22"],
     links: [
       {
-        label: "vickyymosafan/mcp-craftrig",
+        label: "GitHub",
         href: "https://github.com/vickyymosafan/mcp-craftrig",
         kind: "github",
       },
       {
-        label: "Three.js Visual QA",
+        label: "Visual QA MCP",
         href: "https://github.com/vickyymosafan/mcp_threejs-visual-qa",
         kind: "github",
       },
@@ -314,40 +310,32 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "buildflow-erp",
     index: "04",
-    title: "BuildFlow ERP",
-    subtitle: "vickyymosafan/fullstack_buildflow-erp · Construction ERP",
+    title: "BuildFlow Construction ERP",
+    subtitle: "vickyymosafan/fullstack_buildflow-erp · 12-Module Platform",
     category: "Enterprise ERP",
     year: "2026",
+    image: "/images/redesign/proj-buildflow-erp.jpg",
     featuredTag: "12 Vertical Slices · Outbox Pattern",
     summary:
-      "Modular monolith Construction ERP (vickyymosafan/fullstack_buildflow-erp) engineered for mid-size contractors (50–300 staff, multi-branch, multi-warehouse) across 12 tightly bounded vertical-slice business modules.",
+      "Modular monolith ERP tailored for mid-size contractors (50–300 staff) unifying BOQ cost baselines, 3-way procurement, warehouse stock, and double-entry accounting.",
     problem:
-      "Construction teams suffer from fragmented spreadsheets across field operations, BOQ cost baselines, procurement 3-way matching, and double-entry ledgers, causing budget overruns and reconciliation drift.",
+      "Construction firms lose visibility when field logs, BOQ budgets, purchase orders, and ledgers live in disconnected spreadsheets.",
     solution:
-      "Architected a 12-module Next.js 15 + NestJS CQRS modular monolith backed by PostgreSQL 16 (Decimal precision, UUIDs), Prisma/Drizzle, Redis 7 + BullMQ transactional outbox, MinIO/R2/S3 document storage, offline PWA daily site reports, and OpenAPI + RBAC governance.",
+      "Architected a 12-module Next.js 15 + NestJS CQRS modular monolith backed by PostgreSQL 16, Prisma/Drizzle, Redis 7 + BullMQ transactional outbox queues, S3/R2 document vaults, and offline PWA daily site reporting.",
     engineeringDecisions: [
-      "Structured 12 strict vertical slices: Multi-Tenant Core/RBAC, CRM, Project WBS/Gantt, BOQ/RAB Cost Baseline, 3-Way Procurement, Immutable Stock Ledger, Double-Entry GL, HR Timesheets, Offline Site Ops, CAD/BIM Docs, QC/NCR/HSE Safety, and Executive BI.",
-      "Engineered Redis 7 + BullMQ transactional outbox queues for reliable event-driven workflows across procurement, warehouse transfers, and accounting postings.",
-      "Codified full contract governance: SYSTEM_ARCHITECTURE, MODULE_BOUNDARIES, DATABASE_ERD, API_CONTRACT (OpenAPI), DESIGN tokens, and SECURITY RBAC threat matrix.",
+      "Separated 12 vertical slices: Multi-Tenant RBAC, CRM, Project WBS, BOQ/RAB Costing, 3-Way Procurement, Stock Ledger, Double-Entry GL, HR Timesheets, Offline Site Ops, Docs, QC/HSE Safety, and Executive BI.",
+      "Used Redis 7 + BullMQ transactional outbox queues for reliable event propagation across procurement, stock, and accounting.",
+      "Locked full architecture contracts up front: ERD, OpenAPI spec, module boundaries, and RBAC security matrix.",
     ],
     metrics: [
       { label: "Domain Modules", value: "12", detail: "Vertical Slices" },
       { label: "Procurement", value: "3-Way", detail: "PO · GR · Invoice" },
       { label: "Async Engine", value: "Outbox", detail: "Redis 7 + BullMQ" },
     ],
-    tech: [
-      "Next.js 15 PWA",
-      "NestJS CQRS",
-      "PostgreSQL 16",
-      "Prisma / Drizzle",
-      "Redis 7 + BullMQ",
-      "MinIO / R2 / S3",
-      "shadcn/ui",
-      "pnpm + Turborepo",
-    ],
+    tech: ["Next.js 15", "NestJS CQRS", "PostgreSQL 16", "Redis + BullMQ", "Prisma", "Turborepo"],
     links: [
       {
-        label: "vickyymosafan/fullstack_buildflow-erp",
+        label: "GitHub",
         href: "https://github.com/vickyymosafan/fullstack_buildflow-erp",
         kind: "github",
       },
@@ -356,51 +344,44 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       { id: "web", label: "Next.js 15 + shadcn", sublabel: "12 Modules + PWA", layer: "client" },
       { id: "api", label: "NestJS CQRS API", sublabel: "OpenAPI + RBAC", layer: "orchestration" },
       { id: "queue", label: "BullMQ Outbox", sublabel: "Redis 7 Events", layer: "ai" },
-      { id: "db", label: "PostgreSQL 16 + S3", sublabel: "Double-Entry + BIM", layer: "data" },
+      { id: "db", label: "PostgreSQL 16 + S3", sublabel: "Double-Entry Ledger", layer: "data" },
     ],
   },
   {
     id: "arven-ecommerce",
     index: "05",
     title: "Arven Luxury E-Commerce",
-    subtitle: "D2C Fashion Platform with 3D Product Viewer",
+    subtitle: "D2C Fashion Storefront & Atomic Checkout Engine",
     category: "Full-Stack",
     year: "2026",
-    featuredTag: "3D Viewer · Atomic Inventory",
+    image: "/images/redesign/proj-arven-ecommerce.jpg",
+    featuredTag: "Atomic Inventory · Midtrans Webhooks",
     summary:
-      "End-to-end product, business, and technical architecture for a luxury D2C fashion platform featuring a 3D product viewer, atomic inventory reservation, and idempotent Midtrans webhooks.",
+      "End-to-end luxury D2C fashion platform engineered with atomic inventory locks and idempotent Midtrans payment processing to survive high-traffic drops.",
     problem:
-      "High-demand luxury drops risk overselling during concurrent checkouts and duplicate payment state transitions when payment webhooks retry.",
+      "Limited luxury product releases risk overselling during concurrent checkouts and duplicate order states when payment webhooks retry.",
     solution:
-      "Designed a pnpm + Turborepo monorepo combining Next.js storefront/admin, NestJS API, PostgreSQL + Prisma, Redis/BullMQ, Midtrans adapter, RBAC, threat model, and automated CI workflows.",
+      "Built a pnpm + Turborepo monorepo combining a Next.js storefront & admin dashboard, NestJS commerce API, PostgreSQL + Prisma, Redis/BullMQ queues, Midtrans adapter, and RBAC security controls.",
     engineeringDecisions: [
-      "Engineered atomic inventory reservation windows to eliminate race-condition overselling under peak checkout traffic.",
-      "Implemented idempotency keys on Midtrans payment webhooks paired with a transactional outbox for order fulfillment.",
-      "Authored complete business + technical PRD, RBAC permissions, and security threat model alongside Turborepo CI pipelines.",
+      "Implemented atomic stock reservation windows so concurrent checkouts can never oversell limited SKU inventory.",
+      "Added idempotency keys on Midtrans webhooks paired with a transactional outbox for dependable order fulfillment.",
+      "Documented complete business & technical PRDs, RBAC policies, and CI pipelines across the monorepo.",
     ],
     metrics: [
       { label: "Checkout Safety", value: "Atomic", detail: "Stock reservation" },
       { label: "Payments", value: "Midtrans", detail: "Idempotent webhook" },
       { label: "Monorepo", value: "Turbo", detail: "Storefront + Admin" },
     ],
-    tech: [
-      "Next.js",
-      "NestJS",
-      "PostgreSQL + Prisma",
-      "Redis / BullMQ",
-      "Midtrans",
-      "3D Viewer",
-      "Turborepo + CI",
-    ],
+    tech: ["Next.js", "NestJS", "PostgreSQL", "Prisma", "Redis / BullMQ", "Midtrans"],
     links: [
       {
-        label: "GitHub Repository",
+        label: "GitHub",
         href: "https://github.com/vickyymosafan/arven-ecommerce",
         kind: "github",
       },
     ],
     architecture: [
-      { id: "store", label: "Storefront + 3D", sublabel: "Next.js + Admin", layer: "client" },
+      { id: "store", label: "Next.js Storefront", sublabel: "Catalog + Admin", layer: "client" },
       { id: "nest", label: "NestJS Commerce", sublabel: "Atomic Stock Lock", layer: "orchestration" },
       { id: "pay", label: "Midtrans Adapter", sublabel: "Idempotent Hooks", layer: "ai" },
       { id: "pg", label: "Prisma + BullMQ", sublabel: "Transactional Outbox", layer: "data" },
@@ -409,36 +390,29 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "digital-posyandu",
     index: "06",
-    title: "Digital Posyandu PWA",
+    title: "Digital Posyandu Healthcare PWA",
     subtitle: "Offline-First Elderly Health Monitoring · UM Jember",
     category: "Full-Stack",
     year: "2026",
+    image: "/images/redesign/proj-digital-posyandu.jpg",
     featuredTag: "Offline-First PWA · Tested REST API",
     summary:
-      "Community healthcare PWA tracking elderly BMI, systolic/diastolic blood pressure, cholesterol, uric acid, and blood sugar with automated clinical classification and trend charts.",
+      "Community health web app enabling Posyandu cadres to record elderly biometrics offline with automatic clinical risk classification and trend dashboards.",
     problem:
-      "Field health cadres at Posyandu often operate in unstable mobile connectivity zones while manually calculating health thresholds on paper forms.",
+      "Community health cadres frequently work in areas with unreliable mobile signal while classifying blood pressure, glucose, and cholesterol by hand on paper.",
     solution:
-      "Delivered a Next.js + IndexedDB (Dexie) offline-capable PWA with Recharts trend dashboards backed by a hardened Express.js + TypeScript + Prisma + PostgreSQL API.",
+      "Delivered a Next.js + Dexie IndexedDB offline-first PWA with Recharts trend visualizations connected to a hardened Express.js + TypeScript + Prisma + PostgreSQL REST API.",
     engineeringDecisions: [
-      "Implemented httpOnly cookie JWT authentication, Admin/Petugas RBAC, Zod request validation, and API rate limiting.",
-      "Verified critical backend endpoints with Jest and Supertest automated integration suites.",
-      "Added Dexie IndexedDB local storage so health checkups stay usable offline and sync cleanly.",
+      "Hardened backend with httpOnly cookie JWT auth, Admin/Petugas RBAC, Zod schema validation, and request rate limiting.",
+      "Covered critical API endpoints with automated Jest and Supertest integration tests.",
+      "Built Dexie IndexedDB local caching so checkups keep working offline and sync smoothly once reconnected.",
     ],
     metrics: [
       { label: "Biometrics", value: "5+", detail: "Auto-classification" },
       { label: "Offline Sync", value: "Dexie", detail: "IndexedDB PWA" },
       { label: "API QA", value: "Jest", detail: "+ Supertest + Zod" },
     ],
-    tech: [
-      "Next.js",
-      "Tailwind CSS",
-      "Recharts",
-      "IndexedDB (Dexie)",
-      "Express.js + TS",
-      "Prisma + PostgreSQL",
-      "Jest / Supertest",
-    ],
+    tech: ["Next.js", "Express.js", "TypeScript", "Prisma", "PostgreSQL", "Dexie PWA"],
     links: [
       {
         label: "Live Demo",
@@ -446,12 +420,12 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
         kind: "live",
       },
       {
-        label: "Frontend Repo",
+        label: "Frontend",
         href: "https://github.com/vickyymosafan/fe_posyandu-digital",
         kind: "github",
       },
       {
-        label: "Backend Repo",
+        label: "Backend",
         href: "https://github.com/vickyymosafan/be_posyandu-digital",
         kind: "github",
       },
@@ -466,35 +440,29 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "destino-copytrade",
     index: "07",
-    title: "Destino Copytrade Platform",
-    subtitle: "Financial Transparency Portal & Risk Calculator",
+    title: "Destino Copytrade Portal",
+    subtitle: "Financial Transparency Platform & Risk Simulator",
     category: "Full-Stack",
     year: "2026",
-    featuredTag: "Next.js 16 · Live Ticker & Risk Calc",
+    image: "/images/redesign/proj-destino-copytrade.jpg",
+    featuredTag: "Next.js 16 · Live Feeds & Risk Calc",
     summary:
-      "5-page company profile and transparency platform for a TMGM copytrading partner featuring live market tickers, Myfxbook performance ledger with fallback datasets, and an interactive risk calculator.",
+      "5-page client portal for a TMGM copytrading partner delivering live market tickers, verified Myfxbook performance tables, and an interactive lot-sizing calculator.",
     problem:
-      "Copytrading investors need verifiable performance transparency and clear lot/risk simulation without broken pages when upstream market APIs hiccup.",
+      "Investors needed clear, verifiable historical PnL reporting and risk simulation that stays online even when third-party market APIs lag.",
     solution:
-      "Built 5 thematic responsive pages (Home, Strategies, Performance/PnL Ledger, Risk Calculator, Testimonials) in Next.js 16, React 19, TypeScript, and Tailwind CSS 4 with resilient API routes.",
+      "Shipped 5 responsive pages (Home, Strategies, Performance Ledger, Risk Calculator, Testimonials) in Next.js 16, React 19, and Tailwind CSS 4 backed by resilient API routes with deterministic fallbacks.",
     engineeringDecisions: [
-      "Engineered Next.js API routes fetching live market ticker and Myfxbook performance data with deterministic fallback datasets for 100% uptime.",
-      "Built an interactive risk & multiplier calculator giving real-time position sizing feedback.",
-      "Crafted smooth route transitions and responsive financial ledger tables across mobile and desktop viewports.",
+      "Engineered Next.js API routes for live market tickers and Myfxbook feeds with automatic fallback snapshots for 100% availability.",
+      "Built an interactive risk & multiplier calculator giving instant drawdown and lot-sizing estimates.",
+      "Structured mobile-friendly financial ledger tables and smooth transitions across all 5 routes.",
     ],
     metrics: [
-      { label: "Pages", value: "5", detail: "Thematic routes" },
+      { label: "Routes", value: "5", detail: "Thematic pages" },
       { label: "Data Feed", value: "Live", detail: "Myfxbook + fallback" },
       { label: "Stack", value: "Next 16", detail: "React 19 + TW 4" },
     ],
-    tech: [
-      "Next.js 16",
-      "React 19",
-      "TypeScript",
-      "Tailwind CSS 4",
-      "API Routes",
-      "Myfxbook Feed",
-    ],
+    tech: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS 4", "API Routes", "Myfxbook"],
     links: [
       {
         label: "Live Website",
@@ -503,7 +471,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       },
     ],
     architecture: [
-      { id: "pages", label: "5 Thematic Pages", sublabel: "Smooth Transitions", layer: "client" },
+      { id: "pages", label: "5 Thematic Pages", sublabel: "Responsive Portal", layer: "client" },
       { id: "calc", label: "Risk Calculator", sublabel: "Multiplier Engine", layer: "ai" },
       { id: "api", label: "Next.js Routes", sublabel: "Ticker + Myfxbook", layer: "orchestration" },
       { id: "fb", label: "Fallback Dataset", sublabel: "Zero-Downtime UI", layer: "data" },
@@ -516,48 +484,55 @@ export const ADDITIONAL_PROJECTS: AdditionalProject[] = [
     name: "SIM Architect & Company Site",
     fileCode: "SIM-ARCH.php",
     category: "Full-Stack",
-    stackBadge: "PHP MVC · MySQL",
-    focus: "3-role project & RAB management (PHP MVC, MySQL, Tailwind, Railway)",
+    tags: ["Full-Stack", "PHP MVC"],
+    image: "/images/redesign/icon-architecture-building.jpg",
+    focus: "3-role architecture project & RAB management platform with custom PHP MVC, MySQL, and automated Railway CI/CD.",
     href: "https://github.com/vickyymosafan/antosa-architect",
+    featured: true,
   },
   {
     name: "MQL5 Algorithmic Trading Suite",
     fileCode: "MQL5-SUITE.mq5",
     category: "Trading & Data",
-    stackBadge: "11 Products · 5.0★",
-    focus: "11 published MT5 products (2 EAs, 9 Indicators) · 5.0★ rating",
+    tags: ["Trading & Data", "11 Products · 5.0★"],
+    image: "/images/redesign/proj-destino-copytrade.jpg",
+    focus: "11 published MetaTrader 5 products (2 Expert Advisors, 9 custom indicators) earning a 5.0★ global trader rating.",
     href: "https://www.mql5.com/en/users/vickymosafan",
   },
   {
-    name: "POS PT IndoAugust (Backend)",
+    name: "POS API for PT IndoAugust",
     fileCode: "POS-API.ts",
     category: "Full-Stack",
-    stackBadge: "REST API · Inventory",
-    focus: "Retail point-of-sale API & inventory backend services",
+    tags: ["Backend", "REST API"],
+    image: "/images/redesign/icon-pos-terminal.jpg",
+    focus: "Retail point-of-sale backend API managing product catalogs, stock updates, and transactional sales services.",
     href: "https://github.com/vickyymosafan",
   },
   {
     name: "CommOS & Sistem Pemerintahan",
     fileCode: "COMM-OS.sys",
     category: "Full-Stack",
-    stackBadge: "Gov & Community",
-    focus: "Community operations & public administration web systems",
+    tags: ["Community", "Web App"],
+    image: "/images/redesign/icon-civic-platform.jpg",
+    focus: "Community operations and public administration web tools focused on structured data workflows.",
     href: "https://github.com/vickyymosafan",
   },
   {
     name: "Ngopi Jember & Analytical XAUUSD",
     fileCode: "XAUUSD-LAB.py",
     category: "Trading & Data",
-    stackBadge: "Analytics · Discovery",
-    focus: "Local discovery platform & gold market analytics tooling",
+    tags: ["Analytics", "Discovery"],
+    image: "/images/redesign/icon-coffee-analytics.jpg",
+    focus: "Local specialty coffee discovery platform alongside quantitative XAUUSD gold market analytics tooling.",
     href: "https://github.com/vickyymosafan",
   },
   {
-    name: "Utilities & Desktop/CLI Apps",
+    name: "Utilities & Desktop / CLI Apps",
     fileCode: "DEV-UTILS.cli",
     category: "Utilities",
-    stackBadge: "Desktop · Automation",
-    focus: "Instagram Unfollower Checker, Windows Alarm App, Playlist Downloader, Image Converter",
+    tags: ["Desktop", "Automation"],
+    image: "/images/redesign/icon-mobile-kotlin.jpg",
+    focus: "Everyday productivity tools: Instagram Unfollower Checker, Windows Alarm App, Playlist Downloader & Image Converter.",
     href: "https://github.com/vickyymosafan",
   },
 ];
@@ -566,21 +541,21 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
   {
     id: "prd",
     step: "01",
-    title: "Deterministic PRD & Architecture Blueprint",
-    shortTitle: "Deterministic PRD",
+    title: "Clear Specs & Architecture Blueprint",
+    shortTitle: "PRD & Blueprint",
     tagline: "Zero guesswork before a single line of code is written",
     description:
-      "Every build starts with a structured, machine-readable blueprint: domain module boundaries, relational ERD, OpenAPI 3.1 contracts, RBAC threat model, and testable acceptance gates — proven across BuildFlow ERP's 12 modules.",
-    tools: ["Deterministic PRDs", "Craftrig Blueprint", "OpenAPI 3.1", "ERD & RBAC Matrix"],
-    command: "craftrig blueprint compile --project fullstack_buildflow-erp --strict",
-    terminalTitle: "craftrig-blueprint · bash",
+      "Every project begins with a structured blueprint: domain boundaries, database schema, OpenAPI contracts, security roles, and clear acceptance criteria — proven across BuildFlow ERP's 12 modules.",
+    tools: ["Structured PRDs", "OpenAPI 3.1", "Database ERD", "RBAC Matrix"],
+    command: "craftrig blueprint compile --project buildflow-erp --strict",
+    terminalTitle: "architecture.yaml",
     artifactTitle: "docs/architecture/buildflow-erp.blueprint.yaml",
-    artifactLanguage: "CLI + YAML",
+    artifactLanguage: "YAML",
     statusLine: "Blueprint Linter: 0 errors · 12 domain boundaries locked",
     readableFlow: {
-      input: "Business requirements, user roles, and failure invariants.",
-      process: "Craftrig Blueprint Interview compiles ERD, OpenAPI spec & REQ-IDs.",
-      verified: "Locked machine-readable contract shared by humans & AI agents.",
+      input: "Business requirements, user roles, and edge-case constraints.",
+      process: "Draft relational ERD, OpenAPI contract, and module ownership rules.",
+      verified: "Shared single source of truth for both engineers and AI coding assistants.",
     },
     consoleLines: [
       { kind: "comment", value: "# Compile 12 vertical-slice modules & invariants for BuildFlow ERP" },
@@ -590,68 +565,76 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
       { kind: "pass", label: "CONTRACT", value: "ERD + OpenAPI 3.1 + RBAC Threat Matrix validated (0 drift)" },
     ],
     artifactLines: [
-      "$ craftrig blueprint compile --project fullstack_buildflow-erp --strict",
-      "modules: 12 # BOQ, 3-Way Procurement, Double-Entry GL, Site PWA, BI",
-      "invariants:",
-      "  - INV-01: atomic_inventory_reservation_before_payment_capture",
-      "  - INV-02: redis_bullmq_transactional_outbox_with_idempotency",
-      "gates: [typecheck, jest_supertest, playwright_13vp] -> LOCKED",
+      "project: buildflow-erp",
+      "modules:",
+      "  - name: core-rbac",
+      "    scope: Multi-tenant authentication & audit permissions",
+      "  - name: procurement-3way",
+      "    scope: Purchase Order, Goods Receipt & Invoice matching",
+      "  - name: ledger-gl",
+      "    scope: Double-entry accounting via BullMQ outbox",
+      "gates: [typecheck, jest_supertest, playwright_13vp]",
     ],
-    outcome: "Eliminates prompt drift and aligns human engineers + AI coding agents on one strict source of truth.",
+    outcome: "Eliminates scope drift and aligns design, backend, and AI-assisted coding on one clear contract.",
   },
   {
     id: "mcp",
     step: "02",
     title: "Multi-Agent Orchestration via Craftrig MCP",
-    shortTitle: "Craftrig MCP",
-    tagline: "Tool-enforced engineering discipline, never raw chat prompting",
+    shortTitle: "MCP Tooling",
+    tagline: "Tool-enforced discipline instead of chaotic chat prompting",
     description:
-      "Claude Code and Google Antigravity run in parallel waves governed by my open-source TypeScript MCP server (vickyymosafan/mcp-craftrig) — enforcing Kahn's critical-path task DAGs, exclusive file write locks, and 21 modular Agent Skills.",
-    tools: ["vickyymosafan/mcp-craftrig", "Claude Code", "Google Antigravity", "21 Agent Skills"],
-    command: "claude mcp add craftrig -- node dist/src/index.js && craftrig autopilot next",
-    terminalTitle: "mcp-craftrig · autopilot",
+      "AI tools like Claude Code and Google Antigravity work inside my open-source TypeScript MCP server (vickyymosafan/mcp-craftrig), enforcing dependency-ordered task graphs and exclusive file write locks.",
+    tools: ["mcp-craftrig", "Claude Code", "Google Antigravity", "21 Agent Skills"],
+    command: "claude mcp add craftrig -- node dist/src/index.js",
+    terminalTitle: "execution-plan.dag.json",
     artifactTitle: ".craftrig/execution-plan.dag.json",
-    artifactLanguage: "MCP SDK v2",
+    artifactLanguage: "JSON",
     statusLine: "Craftrig MCP · 50/50 tests pass · 0 lock collisions",
     readableFlow: {
-      input: "Compiled blueprint REQ-IDs split into dependency-aware tasks.",
-      process: "Kahn topological critical-path scheduler assigns exclusive file locks.",
-      verified: "Parallel Claude Code + Antigravity waves finish with zero merge conflicts.",
+      input: "Approved blueprint split into independent, dependency-aware tasks.",
+      process: "Critical-path DAG scheduler assigns exclusive write locks per task.",
+      verified: "Parallel implementation completes cleanly with zero file overwrite conflicts.",
     },
     consoleLines: [
       { kind: "comment", value: "# Register vickyymosafan/mcp-craftrig & launch parallel wave" },
       { kind: "keyval", label: "mcp_server", value: "vickyymosafan/mcp-craftrig (MCP SDK v2 · Strict TS)" },
       { kind: "keyval", label: "scheduler", value: "Kahn topological DAG + reverse DP critical path" },
       { kind: "keyval", label: "wave_locks", value: "Agent-A [src/api/*]  |  Agent-B [src/components/*]" },
-      { kind: "pass", label: "LOCK GUARD", value: "Exclusive write leases active · stale lock auto-recovery ON" },
+      { kind: "pass", label: "LOCK GUARD", value: "Exclusive write leases active · stale lock recovery ON" },
     ],
     artifactLines: [
-      "$ claude mcp add craftrig -- node dist/src/index.js",
-      '{ "repo": "vickyymosafan/mcp-craftrig", "protocol": "MCP SDK v2", "tests": "50/50" }',
-      '{ "scheduler": "kahn_topological_critical_path", "skills_routed": 21 }',
-      '{ "locks": { "agent_a": "src/api/*", "agent_b": "src/components/*" } }',
-      '{ "guard": "exclusive_file_locks", "anti_gaming": "evidence_required" }',
+      "{",
+      '  "server": "vickyymosafan/mcp-craftrig",',
+      '  "protocol": "MCP SDK v2 (Strict TypeScript)",',
+      '  "scheduler": "kahn_topological_critical_path",',
+      '  "locks": {',
+      '    "api_worker": "src/api/*",',
+      '    "ui_worker": "src/components/*"',
+      "  },",
+      '  "tests": "50/50 passing"',
+      "}",
     ],
-    outcome: "Parallel multi-agent execution with zero overwrite collisions, minimal token waste, and auditable handoffs.",
+    outcome: "Fast parallel execution with predictable architecture boundaries and auditable task handoffs.",
   },
   {
     id: "fullstack",
     step: "03",
-    title: "Clean Architecture Full-Stack & Hybrid RAG Build",
-    shortTitle: "Full-Stack + RAG",
-    tagline: "Typed end-to-end from 3D/PWA UI to PostgreSQL, pgvector & Edge",
+    title: "Modular Full-Stack & Hybrid RAG Build",
+    shortTitle: "Full-Stack Build",
+    tagline: "Typed end-to-end from UI components to PostgreSQL & vector search",
     description:
-      "AI accelerates scaffolding and iteration while human engineering governs clean vertical boundaries, SQL decimal precision, offline Dexie IndexedDB caching, and weighted RRF hybrid retrieval tuning.",
-    tools: ["Next.js 16 / React 19", "NestJS / Hono / Express", "PostgreSQL + Prisma", "pgvector + BM25 + Redis"],
-    command: "pnpm --filter @rag/engine benchmark --dataset academic-policy --cache redis",
-    terminalTitle: "hybrid-rag · benchmark",
+      "Clean vertical modules keep features easy to read and extend — whether tuning weighted RRF retrieval on pgvector, building offline IndexedDB sync, or structuring NestJS and Next.js services.",
+    tools: ["Next.js 16 / React 19", "NestJS / Express / Hono", "PostgreSQL + Prisma", "pgvector + Redis"],
+    command: "pnpm --filter @rag/engine benchmark --cache redis",
+    terminalTitle: "weighted-rrf.pipeline.ts",
     artifactTitle: "src/rag/weighted-rrf.pipeline.ts",
     artifactLanguage: "TypeScript",
     statusLine: "Recall 91.67% · MRR 1.00 · Cached Latency 694ms (26× faster)",
     readableFlow: {
-      input: "User query hitting Next.js PWA -> Hono/n8n retrieval pipeline.",
+      input: "User query enters Next.js PWA and hits typed retrieval API.",
       process: "Fuses Supabase pgvector semantic Top-50 + BM25 lexical rerank via wRRF.",
-      verified: "Recall rises 75% → 91.67%, MRR 0.71 → 1.00, Redis cuts 18.3s → 694ms.",
+      verified: "Recall improves 75% → 91.67%, MRR 0.71 → 1.00, Redis cuts 18.3s → 694ms.",
     },
     consoleLines: [
       { kind: "comment", value: "# Hybrid Retrieval Pipeline: Dense Semantic + Sparse Lexical Fusion" },
@@ -661,67 +644,73 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
       { kind: "pass", label: "REDIS CACHE", value: "Median E2E latency cut 18,300ms → 694ms (26× speedup)" },
     ],
     artifactLines: [
-      "$ pnpm --filter @rag/engine benchmark --dataset academic-policy --cache redis",
-      "const semanticTop50 = await pgvector.search(geminiEmbed, { limit: 50 });",
-      "const lexicalRanked = bm25.rerank(query, semanticTop50);",
-      "const fusedTop5 = weightedRRF(semanticTop50, lexicalRanked, { k: 60 });",
-      "// Result: Recall 91.67% | MRR 1.00 | Redis Cached Path 694ms (26x faster)",
+      "export async function retrieveAcademicContext(query: string) {",
+      "  const semanticTop50 = await pgvector.search(query, { limit: 50 });",
+      "  const lexicalRanked = bm25.rerank(query, semanticTop50);",
+      "  const fusedTop5 = weightedRRF(semanticTop50, lexicalRanked, { k: 60 });",
+      "  return cache.wrap(query, () => generateCitedAnswer(fusedTop5));",
+      "}",
+      "// Benchmarked: Recall 91.67% | MRR 1.00 | Cached 694ms (26x faster)",
     ],
-    outcome: "Production-grade code that stays readable, modular, benchmarked, and effortless to maintain.",
+    outcome: "Production code that stays readable, fast, and maintainable long after launch.",
   },
   {
     id: "qa",
     step: "04",
-    title: "Autonomous Verification & 13-Viewport Visual QA",
-    shortTitle: "Autonomous QA",
-    tagline: "Real headless Chrome, real contrast math, zero guesswork",
+    title: "Automated Visual, Contrast & API QA",
+    shortTitle: "Automated QA",
+    tagline: "Verified in real headless Chrome across 13 screen sizes",
     description:
-      "Never trust an AI agent saying 'looks good'. Craftrig automatically drives Playwright across 13 viewport profiles (320px–1920px) in both Dark & Light modes, checking WCAG contrast, overflow, console errors, and WebGL health.",
-    tools: ["Craftrig Localhost QA", "Playwright 13-VP", "axe-core Contrast", "Jest & Supertest"],
-    command: "craftrig localhost audit --themes dark,light --viewports 13 --axe wcag2aa",
-    terminalTitle: "craftrig-qa · playwright",
+      "Nothing ships on assumptions. Playwright automatically inspects 13 viewports (320px to 1920px) in both Dark & Light themes for layout overflow, WCAG contrast, keyboard accessibility, and runtime errors — alongside Jest API suites.",
+    tools: ["Playwright 13-VP", "axe-core Contrast", "Jest & Supertest", "TypeScript Strict"],
+    command: "craftrig localhost audit --themes dark,light --viewports 13",
+    terminalTitle: "visual-a11y.receipt.json",
     artifactTitle: ".craftrig/evidence/visual-a11y.receipt.json",
-    artifactLanguage: "Playwright QA",
+    artifactLanguage: "JSON",
     statusLine: "Quality Gate: PASS · 13/13 viewports · 0 overflow · 0 console errors",
     readableFlow: {
-      input: "Running localhost Next.js production server + API test suite.",
-      process: "Playwright audits 13 screen sizes in Dark & Light themes + Jest API tests.",
-      verified: "Deduplicated screenshots & SQLite WAL receipts unlock the release gate.",
+      input: "Live local production build + Express/NestJS integration test suite.",
+      process: "Playwright verifies 13 viewports, dark/light contrast, and interactive flows.",
+      verified: "Objective evidence receipts unlock release only when every check passes.",
     },
     consoleLines: [
-      { kind: "comment", value: "# Automated Dual-Theme Visual, Contrast & Responsive Scan (< 4s)" },
+      { kind: "comment", value: "# Automated Dual-Theme Visual, Contrast & Responsive Scan" },
       { kind: "keyval", label: "viewports", value: "320 · 360 · 375 · 390 · 414 · 430 · 768 · 844 · 1024 · 1280 · 1366 · 1440 · 1920" },
-      { kind: "keyval", label: "a11y_audit", value: "@axe-core/playwright + alpha-composited WCAG AA/AAA contrast" },
+      { kind: "keyval", label: "a11y_audit", value: "@axe-core/playwright + WCAG AA/AAA contrast verification" },
       { kind: "metric", label: "DEFECTS", value: "0 horizontal overflow · 0 console/page errors · 0 broken assets" },
-      { kind: "pass", label: "QUALITY GATE", value: "ALL CHECKPOINTS PASSED — evidence archived (Brotli + WAL)" },
+      { kind: "pass", label: "QUALITY GATE", value: "ALL CHECKPOINTS PASSED — evidence archived cleanly" },
     ],
     artifactLines: [
-      "$ craftrig localhost audit --themes dark,light --viewports 13 --axe wcag2aa",
-      '{ "viewports": [320, 360, 375, 390, 414, 430, 768, 844, 1024, 1280, 1366, 1440, 1920] }',
-      '{ "themes": ["dark", "light"], "horizontal_overflow": 0, "console_errors": 0 }',
-      '{ "wcag_contrast": "AA/AAA", "reduced_motion": "verified" }',
-      '{ "quality_gate": "PASS", "evidence_stored": ".craftrig/archive/plan.json.br" }',
+      "{",
+      '  "viewports_tested": 13,',
+      '  "range_px": "320px -> 1920px",',
+      '  "themes": ["dark", "light"],',
+      '  "horizontal_overflow": 0,',
+      '  "axe_violations": 0,',
+      '  "console_errors": 0,',
+      '  "quality_gate": "PASS"',
+      "}",
     ],
-    outcome: "Catches responsive breaks, contrast bugs, and runtime regressions automatically before deployment.",
+    outcome: "Catches responsive breaks, contrast bugs, and API regressions before any user sees them.",
   },
   {
     id: "ship",
     step: "05",
-    title: "Resilient Edge Delivery & Failover Proof",
-    shortTitle: "Resilient Ship",
-    tagline: "Shipped to edge & cloud with zero-downtime fallbacks",
+    title: "Resilient Deployment & Failover Ready",
+    shortTitle: "Production Ship",
+    tagline: "Fast edge delivery engineered for real-world networks",
     description:
-      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, Railway, or Hostinger with automatic multi-LLM provider failovers, offline-first IndexedDB queues, and deterministic fallback datasets.",
-    tools: ["GitHub Actions", "Vercel Edge", "Cloudflare Workers", "Multi-LLM Failover"],
-    command: "gh workflow run deploy-production.yml --ref main --verify-edge",
-    terminalTitle: "deploy-edge · ci/cd",
+      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, and Railway with practical safeguards — multi-LLM fallbacks, Redis fast paths, offline IndexedDB queues, and fallback datasets.",
+    tools: ["GitHub Actions", "Vercel Edge", "Cloudflare Workers", "Railway CI/CD"],
+    command: "gh workflow run deploy-production.yml --ref main",
+    terminalTitle: "resilience-manifest.md",
     artifactTitle: "deploy/resilience-manifest.md",
-    artifactLanguage: "CI/CD Log",
-    statusLine: "Production Live · Edge 200 OK · Multi-LLM Failover Armed",
+    artifactLanguage: "Checklist",
+    statusLine: "Production Live · Edge 200 OK · Fallbacks Verified",
     readableFlow: {
-      input: "Green quality gate commit pushed to main branch.",
-      process: "GitHub Actions builds & deploys to Vercel Edge & Cloudflare Workers.",
-      verified: "Resilient failover chains keep apps fast even during API or offline hiccups.",
+      input: "Verified commit passes TypeScript, ESLint, build, and browser checks.",
+      process: "GitHub Actions deploys cleanly to Vercel Edge, Workers, or Railway.",
+      verified: "Resilient caching & fallback layers keep UX fast on slow mobile networks.",
     },
     consoleLines: [
       { kind: "comment", value: "# Production Resilience Verification Checklist" },
@@ -731,49 +720,53 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
       { kind: "metric", label: "DEPLOY", value: "Vercel Edge + Cloudflare Workers live · Core Web Vitals green" },
     ],
     artifactLines: [
-      "$ gh workflow run deploy-production.yml --ref main --verify-edge",
-      "[PASS] Multi-LLM fallback: Gemini -> Groq -> Cohere -> OpenRouter",
-      "[PASS] Redis cache path: 18.3s -> 694ms (26x faster academic RAG)",
-      "[PASS] Market feed fallback dataset guarantees zero blank financial charts",
-      "[PASS] Offline IndexedDB (Dexie) sync for field healthcare & construction ops",
+      "[PASS] Multi-LLM failover: Gemini -> Groq -> Cohere -> OpenRouter",
+      "[PASS] Redis hot-cache path: 18.3s -> 694ms (26x faster academic RAG)",
+      "[PASS] Deterministic market fallback prevents blank fintech tables",
+      "[PASS] Offline IndexedDB (Dexie) sync for field healthcare PWAs",
+      "[PASS] Automated GitHub Actions deployment -> Vercel / Railway / Edge",
     ],
-    outcome: "Fast, resilient web products engineered to thrive under real-world mobile and network conditions.",
+    outcome: "Fast, resilient web products designed to hold up under real mobile and network conditions.",
   },
 ];
 
 export const EXPERIENCES: ExperienceItem[] = [
   {
     id: "destino",
+    index: "01",
     role: "Web Developer",
     company: "Destino Copytrade",
     period: "Oct 2026",
     locationOrMode: "Client Project · Fintech Web",
+    image: "/images/redesign/proj-destino-copytrade.jpg",
     summary:
-      "Built the 5-page company profile and financial transparency platform for a TMGM copytrading partner with live market API routes and an interactive risk/multiplier simulator.",
+      "Built the 5-page company profile and financial transparency portal for a TMGM copytrading partner with live market feeds and an interactive risk calculator.",
     highlights: [
-      "Shipped 5 thematic pages (Home, Strategies, Performance/PnL Ledger, Risk Calculator, Testimonials) with responsive layouts and smooth route transitions.",
+      "Shipped 5 responsive pages (Home, Strategies, Performance/PnL Ledger, Risk Calculator, Testimonials) with smooth transitions.",
       "Built Next.js API routes for live market tickers and Myfxbook performance feeds with an automatic fallback dataset.",
-      "Implemented an interactive risk/multiplier calculator for investor lot-sizing simulations.",
+      "Created an interactive risk & multiplier calculator so investors can simulate lot sizing clearly.",
     ],
     stack: ["Next.js 16", "React 19", "TypeScript", "Tailwind CSS 4", "API Routes"],
     links: [{ label: "destinocopytrade.com", href: "https://destinocopytrade.com/", kind: "live" }],
   },
   {
     id: "mql5",
+    index: "02",
     role: "Algorithmic Trading Developer",
     company: "MQL5 Market",
     period: "Aug 2026 – Oct 2026",
-    locationOrMode: "Freelance · Quantitative Tooling",
+    locationOrMode: "Independent Seller · Quantitative Tooling",
+    image: "/images/redesign/proj-mcp-craftrig.jpg",
     summary:
-      "Developed and published commercial MetaTrader 5 Expert Advisors and custom technical indicators in MQL5, maintaining live versions for global traders.",
+      "Developed, shipped, and maintained 11 commercial MetaTrader 5 trading products for global retail traders, sustaining a 5.0★ rating.",
     highlights: [
-      "Published 11 products on the official MQL5 Market (2 Expert Advisors and 9 custom Technical Indicators).",
-      "Earned a 5.0 / 5.0 rating across customer reviews through responsive maintenance, bug fixes, feature additions, and version upgrades.",
+      "Published 11 products on the official MQL5 Market (2 automated Expert Advisors and 9 custom technical indicators).",
+      "Earned a 5.0 / 5.0 customer rating through fast support, bug fixes, feature iterations, and clean releases.",
     ],
     stack: ["MQL5", "MetaTrader 5", "Algorithmic Systems", "Release Management"],
     links: [
       {
-        label: "MQL5 Seller Profile",
+        label: "MQL5 Profile",
         href: "https://www.mql5.com/en/users/vickymosafan",
         kind: "profile",
       },
@@ -781,16 +774,18 @@ export const EXPERIENCES: ExperienceItem[] = [
   },
   {
     id: "posyandu",
+    index: "03",
     role: "Full-Stack Web Developer",
     company: "Digital Posyandu · Universitas Muhammadiyah Jember",
     period: "Jul 2026 – Aug 2026",
-    locationOrMode: "University Healthcare Initiative",
+    locationOrMode: "Healthcare Initiative · Offline-First PWA",
+    image: "/images/redesign/proj-digital-posyandu.jpg",
     summary:
       "Engineered an offline-capable elderly health monitoring PWA with automated medical threshold classification and a tested TypeScript REST API.",
     highlights: [
-      "Tracks BMI, systolic/diastolic blood pressure, cholesterol, uric acid, and blood sugar with automated status classification and trend summaries.",
-      "Built Express.js + TypeScript REST API with Prisma ORM, PostgreSQL, httpOnly cookie JWT auth, Admin/Petugas RBAC, Zod validation, rate limiting, and Jest/Supertest tests.",
-      "Built Next.js + Tailwind CSS + Recharts frontend with Dexie IndexedDB for offline field operations.",
+      "Tracks BMI, blood pressure, cholesterol, uric acid, and blood sugar with automated clinical classification and trend charts.",
+      "Built Express.js + TypeScript REST API with Prisma, PostgreSQL, httpOnly JWT auth, RBAC, Zod validation, and Jest/Supertest tests.",
+      "Implemented Dexie IndexedDB local storage so field cadres can log visits seamlessly without signal.",
     ],
     stack: ["Next.js", "Express.js", "TypeScript", "Prisma", "PostgreSQL", "Dexie", "Jest"],
     links: [
@@ -801,33 +796,37 @@ export const EXPERIENCES: ExperienceItem[] = [
   },
   {
     id: "antosa",
+    index: "04",
     role: "Web Developer Intern",
     company: "PT Antosa Architect",
     period: "Apr 2025 – Jul 2025",
-    locationOrMode: "Internship · Enterprise & Agency Web",
+    locationOrMode: "Internship · Architecture & Agency Web",
+    image: "/images/redesign/icon-architecture-building.jpg",
     summary:
-      "Built SIM Architect — a 3-role architecture project management information system — plus the company's custom PHP MVC marketing website with automated Railway deployment.",
+      "Built SIM Architect — a 3-role architecture project management system — plus the firm's custom PHP MVC company website with automated Railway deployment.",
     highlights: [
-      "Built 3-role workflow (Admin, Project Staff, Client): project & daily task tracking, RAB cost estimate upload with verification log, design file vault, and client revision requests with quota & review.",
-      "Designed 10-table MySQL database with secure password hashing, session ID regeneration, login audit logs, and password reset.",
-      "Delivered company website on a custom PHP MVC framework + Tailwind CSS with automatic GitHub-to-Railway CI/CD.",
+      "Delivered 3-role workflow (Admin, Project Staff, Client): task tracking, RAB estimate verification, design vault, and client revision quotas.",
+      "Designed a 10-table MySQL database with secure password hashing, session regeneration, and login audit logs.",
+      "Shipped the company website on custom PHP MVC + Tailwind CSS with automated GitHub-to-Railway CI/CD.",
     ],
-    stack: ["PHP", "Custom MVC", "MySQL", "Bootstrap", "Tailwind CSS", "Railway"],
+    stack: ["PHP", "Custom MVC", "MySQL", "Tailwind CSS", "Railway"],
     links: [
       { label: "GitHub", href: "https://github.com/vickyymosafan/antosa-architect", kind: "github" },
     ],
   },
   {
     id: "mandiri",
+    index: "05",
     role: "Mobile Developer Virtual Intern",
     company: "Bank Mandiri × Rakamin Academy",
     period: "Feb 2025 – Mar 2025",
     locationOrMode: "Virtual Internship · Android / Kotlin",
+    image: "/images/redesign/icon-mobile-kotlin.jpg",
     summary:
-      "Built NewsApp in Kotlin integrating live news APIs while practicing unit testing and disciplined GitLab project workflows.",
+      "Built the NewsApp Android client in Kotlin integrating external REST news APIs with unit testing and structured GitLab workflows.",
     highlights: [
-      "Developed NewsApp mobile news client in Kotlin connected to an external REST news API.",
-      "Practiced automated unit testing, clean API integration patterns, and GitLab merge/issue workflows.",
+      "Developed NewsApp mobile news client in Kotlin connected to live REST news endpoints.",
+      "Practiced automated unit testing, clean API integration architecture, and disciplined GitLab merge workflows.",
     ],
     stack: ["Kotlin", "Android", "REST API", "Unit Testing", "GitLab"],
     links: [],
@@ -837,38 +836,46 @@ export const EXPERIENCES: ExperienceItem[] = [
 export const SKILL_GROUPS: SkillGroup[] = [
   {
     id: "ai-augmented",
+    filterKey: "AI & Agents",
+    badge: "AI & Agents",
     label: "AI-Augmented Engineering",
-    description: "Agentic workflows, MCP tooling, and deterministic specs that multiply velocity without losing rigor.",
+    description: "Structured specs, MCP tooling, and hybrid RAG systems that amplify delivery without losing rigor.",
     items: [
       "Claude Code",
       "Google Antigravity",
       "Deterministic PRDs",
-      "MCP Server Development",
-      "Agent Skills Prompt Engineering",
+      "MCP Server Dev",
+      "Agent Skills",
       "Hybrid & Agentic RAG",
     ],
   },
   {
     id: "frontend",
+    filterKey: "Frontend",
+    badge: "Frontend",
     label: "Frontend Architecture",
-    description: "Accessible, motion-rich, offline-ready interfaces crafted with modern React & TypeScript.",
+    description: "Fast, accessible, motion-crafted web interfaces and offline-capable PWAs built with modern React.",
     items: ["React 19", "Next.js 16", "Vue.js", "Tailwind CSS 4", "Framer Motion", "PWA & Recharts"],
   },
   {
     id: "backend",
+    filterKey: "Backend",
+    badge: "Backend",
     label: "Backend & APIs",
-    description: "Clean-boundary REST APIs, edge workers, queues, and enterprise domain services.",
+    description: "Clean-boundary REST APIs, edge workers, transactional queues, and modular enterprise services.",
     items: ["Node.js", "NestJS", "Express.js", "Hono", "Laravel", "OpenAPI & RBAC"],
   },
   {
     id: "database",
+    filterKey: "Database & Cache",
+    badge: "Database & Cache",
     label: "Database, Vector & Cache",
-    description: "Relational schemas, vector search, offline IndexedDB, and high-speed caching.",
+    description: "Relational schemas, pgvector semantic search, offline IndexedDB, and sub-second Redis caching.",
     items: [
       "PostgreSQL",
       "MySQL",
       "Prisma ORM",
-      "Supabase Vector (pgvector)",
+      "Supabase pgvector",
       "Neon Postgres",
       "Redis + BullMQ",
       "IndexedDB (Dexie)",
@@ -876,24 +883,26 @@ export const SKILL_GROUPS: SkillGroup[] = [
   },
   {
     id: "languages",
-    label: "Languages",
-    description: "Polyglot foundation across web, backend, mobile, and quantitative scripting.",
-    items: ["TypeScript", "JavaScript", "PHP", "Python", "HTML", "CSS", "Kotlin", "MQL5"],
+    filterKey: "Languages",
+    badge: "Languages",
+    label: "Programming Languages",
+    description: "Polyglot engineering across full-stack web, backend services, mobile apps, and trading scripts.",
+    items: ["TypeScript", "JavaScript", "PHP", "Python", "HTML & CSS", "Kotlin", "MQL5"],
   },
   {
     id: "testing-devops",
-    label: "Testing & DevOps",
-    description: "Automated test suites, browser QA matrices, and reliable edge/cloud deployments.",
+    filterKey: "Testing & DevOps",
+    badge: "Testing & DevOps",
+    label: "Testing & Deployment",
+    description: "Automated API suites, 13-viewport Playwright visual QA, and reliable cloud/edge deployments.",
     items: [
-      "Jest",
-      "Supertest",
-      "Playwright",
-      "Unit Testing",
-      "Git & GitHub Actions",
-      "GitLab",
-      "Vercel",
+      "Jest & Supertest",
+      "Playwright QA",
+      "GitHub Actions",
+      "Git & GitLab",
+      "Vercel Edge",
       "Cloudflare Workers",
-      "Hostinger",
+      "Railway",
     ],
   },
 ];
@@ -942,20 +951,20 @@ export const LEADERSHIP: LeadershipItem[] = [
     organization: "Information Systems Diklat, UM Jember",
     period: "2024",
     summary:
-      "Taught design and programming fundamentals and shared practical software engineering insights with incoming cohorts.",
+      "Taught design and programming fundamentals and shared practical software engineering lessons with incoming students.",
   },
   {
     role: "Event Coordinator",
     organization: "Sisfo Insinco",
     period: "2024",
     summary:
-      "Directed a cybersecurity-themed design competition covering logistics, judging criteria, participant comms, and marketing.",
+      "Directed a cybersecurity-themed design competition covering logistics, judging criteria, participant comms, and outreach.",
   },
   {
     role: "Volunteer & Programming Tutor",
     organization: "Relawan TIK Jember (RTIK)",
     period: "2024",
     summary:
-      "Mentored 5th-grade students building Scratch games (Catch Me, Dino Chrome) and promoted digital literacy at SDN2 Plalangan.",
+      "Mentored 5th-grade students building Scratch games and promoted digital literacy at SDN 2 Plalangan.",
   },
 ];

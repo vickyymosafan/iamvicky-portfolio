@@ -106,12 +106,12 @@ export function ProjectCaseStudyDialog({
                 <span className="text-muted">·</span>
                 <span className="text-muted">{project.year}</span>
               </div>
-              <h1
+              <h2
                 id={titleId}
                 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
               >
                 {project.title}
-              </h1>
+              </h2>
               <p className="font-mono text-xs text-muted">{project.subtitle}</p>
             </div>
 
@@ -154,17 +154,17 @@ export function ProjectCaseStudyDialog({
             {/* Problem & Solution */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-amber">
+                <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-amber">
                   Engineering Challenge
-                </h2>
+                </h3>
                 <p className="mt-2.5 text-sm leading-relaxed text-ink-secondary">
                   {project.problem}
                 </p>
               </div>
               <div className="rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-                <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-sage">
+                <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-accent">
                   Architecture &amp; Delivery
-                </h2>
+                </h3>
                 <p className="mt-2.5 text-sm leading-relaxed text-ink-secondary">
                   {project.solution}
                 </p>
@@ -173,9 +173,9 @@ export function ProjectCaseStudyDialog({
 
             {/* Engineering Decisions */}
             <div className="space-y-3">
-              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-muted">
+              <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-muted">
                 Verified Engineering Decisions &amp; Outcomes
-              </h2>
+              </h3>
               <ul className="space-y-2.5">
                 {project.engineeringDecisions.map((decision) => (
                   <li
@@ -194,9 +194,9 @@ export function ProjectCaseStudyDialog({
 
             {/* Full Stack */}
             <div className="space-y-2.5">
-              <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-muted">
+              <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-muted">
                 Technologies Used
-              </h2>
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {project.tech.map((item) => (
                   <span

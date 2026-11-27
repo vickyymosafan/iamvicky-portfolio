@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <path d="M12 3H52L61 12V52L52 61H12L3 52V12L12 3Z" fill="#0b0d0f" stroke="rgba(243,245,242,0.24)" stroke-width="2"/>
-  <path d="M14.5 7.5H49.5L56.5 14.5V49.5L49.5 56.5H14.5L7.5 49.5V14.5L14.5 7.5Z" stroke="rgba(243,245,242,0.09)" stroke-width="1"/>
-  <path d="M44 3H52L61 12V20" stroke="#c8f53c" stroke-width="2.6" stroke-linecap="square"/>
-  <path d="M35.8 19L41.8 33.4L47.2 19H53V46H47.2V31.6L42.9 42H40.3L33.4 25.8L35.8 19Z" fill="#f3f5f2"/>
-  <path d="M11 19H17.6L23.5 36.2L29.8 19H36.2L26.2 46H20.8L11 19Z" fill="#c8f53c"/>
-  <path d="M23.7 18.2L27.1 21.6L23.7 25L20.3 21.6L23.7 18.2Z" fill="#56ccf2"/>
+  <path d="M12 3H52L61 12V52L52 61H12L3 52V12L12 3Z" fill="#080a0f" stroke="rgba(245,246,248,0.24)" stroke-width="2"/>
+  <path d="M14.5 7.5H49.5L56.5 14.5V49.5L49.5 56.5H14.5L7.5 49.5V14.5L14.5 7.5Z" stroke="rgba(245,246,248,0.09)" stroke-width="1"/>
+  <path d="M44 3H52L61 12V20" stroke="#f5a623" stroke-width="2.6" stroke-linecap="square"/>
+  <path d="M35.8 19L41.8 33.4L47.2 19H53V46H47.2V31.6L42.9 42H40.3L33.4 25.8L35.8 19Z" fill="#f5f6f8"/>
+  <path d="M11 19H17.6L23.5 36.2L29.8 19H36.2L26.2 46H20.8L11 19Z" fill="#f5a623"/>
+  <path d="M23.7 18.2L27.1 21.6L23.7 25L20.3 21.6L23.7 18.2Z" fill="#38bdf8"/>
 </svg>

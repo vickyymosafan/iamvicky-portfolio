@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <style>
-    .bg { fill: #0b0d0f; stroke: #2c353d; }
-    .inner { stroke: rgba(243, 245, 242, 0.12); }
-    .primary { fill: #c8f53c; }
-    .primary-stroke { stroke: #c8f53c; }
-    .ink { fill: #f3f5f2; }
-    .accent { fill: #56ccf2; }
+    .bg { fill: #080a0f; stroke: #2c3544; }
+    .inner { stroke: rgba(245, 246, 248, 0.12); }
+    .primary { fill: #f5a623; }
+    .primary-stroke { stroke: #f5a623; }
+    .ink { fill: #f5f6f8; }
+    .accent { fill: #38bdf8; }
     @media (prefers-color-scheme: light) {
-      .bg { fill: #f6f4ee; stroke: #b8c0c5; }
-      .inner { stroke: rgba(17, 21, 24, 0.12); }
-      .primary { fill: #185c37; }
-      .primary-stroke { stroke: #185c37; }
-      .ink { fill: #111518; }
-      .accent { fill: #035e8c; }
+      .bg { fill: #f8f6f0; stroke: #b8c0cc; }
+      .inner { stroke: rgba(14, 19, 27, 0.12); }
+      .primary { fill: #b45309; }
+      .primary-stroke { stroke: #b45309; }
+      .ink { fill: #0e131b; }
+      .accent { fill: #0369a1; }
     }
   </style>
   <path class="bg" d="M12 3H52L61 12V52L52 61H12L3 52V12L12 3Z" stroke-width="2.5"/>

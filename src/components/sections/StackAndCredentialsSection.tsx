@@ -1,8 +1,27 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Award, ExternalLink, FileText, GraduationCap, Users } from "lucide-react";
+import Image from "next/image";
+import { m } from "framer-motion";
+import {
+  ArrowDown,
+  ArrowRight,
+  Award,
+  Code2,
+  Cpu,
+  Database,
+  ExternalLink,
+  FileDown,
+  FileText,
+  GraduationCap,
+  Layers,
+  Server,
+  ShieldCheck,
+  User,
+  Users,
+  Zap,
+} from "lucide-react";
 import {
   CERTIFICATIONS,
   EDUCATION,
@@ -12,286 +31,518 @@ import {
 } from "@/data/portfolio";
 import { VO_BEATS } from "@/data/voBeats";
 import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
-
-// Code-split + truly lazy-mount WorldPortalTransition & GSAP BangMotionStackExplainer
-// ONLY when scrolling within 700px of Section 04 (0 bytes & 0 DOM nodes at initial Hero load!)
-const WorldPortalTransition = dynamic(
-  () =>
-    import("@/components/motion/WorldPortalTransition").then(
-      (m) => m.WorldPortalTransition
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-[135vh] w-full items-center justify-center bg-[#070a0d] font-mono text-xs uppercase tracking-[0.18em] text-[#c8f53c]">
-        Initializing Outer World Theater...
-      </div>
-    ),
-  }
-);
+import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
+import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
 
 const BangMotionStackExplainer = dynamic(
   () =>
     import("@/components/sections/BangMotionStackExplainer").then(
-      (m) => m.BangMotionStackExplainer
+      (mod) => mod.BangMotionStackExplainer
     ),
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto aspect-video w-full max-w-5xl border border-border-strong bg-[#080b0f]" />
+      <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-border-strong bg-[#080a0f] font-mono text-xs uppercase tracking-[0.16em] text-primary">
+        Loading Interactive Engineering Walkthrough...
+      </div>
     ),
   }
 );
 
-/**
- * Section 04 — Lazy-Mounted Portal-to-Cinema Theater + Calm Static Credentials Zone:
- * - Exact-height 135vh outer host guarantees 0.000 CLS when lazy-mounting the Portal & GSAP film.
- * - Anchors `#stack` directly on the static outer host so anchor scrolling always works immediately.
- * - Below: Static Reference Stack Breakdown + Voice Over Transcript + Education & Certifications
- *   with CSS `content-visibility: auto`.
- */
-export function StackAndCredentialsSection() {
-  const portalHostRef = useRef<HTMLDivElement>(null);
-  const [theaterMounted, setTheaterMounted] = useState(false);
+const SKILL_FILTERS = [
+  "All",
+  "AI & Agents",
+  "Frontend",
+  "Backend",
+  "Database & Cache",
+  "Languages",
+  "Testing & DevOps",
+] as const;
 
-  // Warm up WorldPortalTransition + BangMotionStackExplainer cleanly during scroll-idle
-  // (NEVER mounting synchronously during an active wheel gesture!)
+const SKILL_ICONS: Record<string, typeof Cpu> = {
+  "ai-augmented": Cpu,
+  frontend: Layers,
+  backend: Server,
+  database: Database,
+  languages: Code2,
+  "testing-devops": ShieldCheck,
+};
+
+export function StackAndCredentialsSection() {
+  const { scrollTo } = useSmoothScroll();
+  const [explainerReady, setExplainerReady] = useState(false);
+  const [skillFilter, setSkillFilter] = useState<(typeof SKILL_FILTERS)[number]>("All");
+
   useEffect(() => {
-    if (theaterMounted) return;
+    if (explainerReady) return;
     return scheduleWhenScrollIdle(() => {
-      setTheaterMounted(true);
-    }, 1000);
-  }, [theaterMounted]);
+      setExplainerReady(true);
+    }, 900);
+  }, [explainerReady]);
+
+  const visibleSkillGroups = useMemo(() => {
+    if (skillFilter === "All") return SKILL_GROUPS;
+    return SKILL_GROUPS.filter((g) => g.filterKey === skillFilter);
+  }, [skillFilter]);
 
   return (
     <section
-      aria-label="Technical Stack, AI-Augmented Film, Education and Certifications"
-      className="relative bg-background"
+      aria-label="Engineering Process Film, Technical Stack, Education and Certifications"
+      className="relative border-t border-border bg-background"
     >
-      {/* Exact-height 135vh Portal Host — 0 CLS when lazy-mounted, #stack anchor always present */}
-      <div ref={portalHostRef} className="relative min-h-[135vh] w-full bg-[#070a0d]">
-        <div
-          id="stack"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-screen"
-          aria-hidden="true"
-        />
-        {theaterMounted ? (
-          <WorldPortalTransition
-            renderTheater={(portalReady) => (
-              <BangMotionStackExplainer portalReady={portalReady} />
-            )}
-          />
-        ) : (
-          <div className="sticky top-0 flex h-[100dvh] w-full items-center justify-center bg-[#070a0d] font-mono text-xs uppercase tracking-[0.18em] text-[#c8f53c]">
-            03 → 04 // Outer World Architecture Film
-          </div>
-        )}
-      </div>
+      {/* ====================================================================
+          SECTION 04 — INTERACTIVE PROCESS WALKTHROUGH FILM (redesign-section-4.png)
+         ==================================================================== */}
+      <div id="film" className="cv-auto-section scroll-mt-20 py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl space-y-8 px-5 sm:px-8">
+          {/* Header Row */}
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <span>04 / Engineering Process Film</span>
+              </div>
 
-      {/* Calm Static Editorial Zone Below Cinema (Zero Animations, content-visibility: auto) */}
-      <div className="mx-auto max-w-7xl space-y-16 px-5 pt-10 pb-20 sm:px-8 sm:pb-24">
-        {/* Accessible American Female Voice-Over Script Reference */}
-        <details className="border border-border bg-surface p-4 text-xs">
-          <summary className="flex min-h-10 cursor-pointer items-center gap-2 font-mono font-semibold uppercase tracking-[0.14em] text-foreground hover:text-primary">
-            <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
-            <span>Read Full English Voice-Over Script (US Female · 6 Chapters)</span>
-          </summary>
-          <ol className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-2">
-            {VO_BEATS.map((beat) => (
-              <li
-                key={beat.id}
-                className="border border-border bg-surface-elevated/45 p-3.5 leading-relaxed text-ink-secondary"
-              >
-                <div className="font-mono text-[11px] font-bold uppercase text-primary">
-                  {beat.label}
-                </div>
-                <p className="mt-1.5 text-xs text-foreground">{beat.text}</p>
-              </li>
-            ))}
-          </ol>
-        </details>
+              <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
+                How AI-Augmented{" "}
+                <span className="text-primary">Software Engineering</span> Works
+              </h2>
 
-        {/* Part B: Static Reference Technical Matrix */}
-        <div className="cv-auto-section border-t border-border pt-14">
-          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                STATIC REFERENCE INDEX
+              <p className="text-sm leading-relaxed text-ink-secondary sm:text-base">
+                From clear specification to verified deployment — watch the 6-chapter
+                interactive walkthrough with synchronized voice-over.
               </p>
-              <h3 className="mt-1 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Complete Technical Stack Breakdown
-              </h3>
             </div>
-            <p className="font-mono text-xs text-muted">
-              Verified directly from shipped systems &amp; CV
-            </p>
+
+            <button
+              type="button"
+              onClick={() => scrollTo("#stack", -80)}
+              className="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-foreground hover:border-primary hover:text-primary"
+            >
+              <span>Skip to Stack &amp; Credentials</span>
+              <ArrowDown className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 border-t border-l border-border md:grid-cols-2 lg:grid-cols-3">
-            {SKILL_GROUPS.map((group) => (
-              <div
-                key={group.id}
-                className="flex flex-col justify-between border-r border-b border-border bg-surface/80 p-5 sm:p-6"
-              >
-                <div>
-                  <h4 className="font-heading text-base font-bold text-foreground sm:text-lg">
-                    {group.label}
-                  </h4>
-                  <p className="mt-1 text-xs leading-relaxed text-muted">
-                    {group.description}
-                  </p>
+          {/* 12-Col Film Theater + Core Tech Snapshot Sidebar (Exact layout of redesign-section-4.png) */}
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+            {/* Interactive Film Player */}
+            <div className="relative rounded-3xl border border-primary/35 bg-[#080a0f] p-2.5 shadow-2xl sm:p-4 lg:col-span-9">
+              {explainerReady ? (
+                <BangMotionStackExplainer />
+              ) : (
+                <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-[#0b0e15] font-mono text-xs uppercase tracking-[0.16em] text-primary">
+                  Preparing 6-Chapter Walkthrough...
+                </div>
+              )}
+            </div>
+
+            {/* Right Sidebar: Core Tech Snapshot */}
+            <aside className="studio-card flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <h3 className="font-heading text-base font-bold text-foreground">
+                    My Core Stack
+                  </h3>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {group.items.map((skill) => (
+                <div className="flex flex-wrap gap-2">
+                  {PROFILE.coreStackPills.map((item) => (
                     <span
-                      key={skill}
-                      className="border border-border bg-surface-elevated px-2.5 py-1 font-mono text-[11px] font-medium text-foreground"
+                      key={item}
+                      className="rounded-full border border-border bg-surface-elevated px-3 py-1 font-mono text-xs font-medium text-foreground"
                     >
-                      {skill}
+                      {item}
                     </span>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Part C: Education & Google AI & Cloud Certifications */}
-        <div
-          id="education-credentials"
-          className="cv-auto-section scroll-mt-24 border-t border-border pt-14"
-        >
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-            {/* Education Column */}
-            <div className="space-y-5 lg:col-span-5">
-              <div className="flex items-center gap-2.5">
-                <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" />
-                <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-                  Education
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                {EDUCATION.map((edu) => (
-                  <div
-                    key={edu.institution}
-                    className="space-y-2 border border-border bg-surface p-5"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-xs text-muted">{edu.period}</span>
-                      <span className="bg-primary-soft px-2.5 py-1 font-mono text-xs font-semibold text-primary">
-                        {edu.highlight}
-                      </span>
-                    </div>
-                    <h4 className="font-heading text-base font-bold text-foreground sm:text-lg">
-                      {edu.institution}
-                    </h4>
-                    <p className="text-sm font-medium text-ink-secondary">{edu.degree}</p>
-                    <p className="text-xs leading-relaxed text-muted">{edu.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Google AI & Cloud Certifications */}
-            <div className="space-y-5 lg:col-span-7">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <Award className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-                    Google AI &amp; Cloud Certifications
-                  </h3>
-                </div>
-
-                <a
-                  href={PROFILE.socials.googleSkills}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-10 items-center gap-1.5 border border-border bg-surface px-3.5 py-1.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
-                >
-                  <span>Verify All Badges</span>
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {CERTIFICATIONS.map((cert, i) => (
-                  <div
-                    key={cert}
-                    className="flex flex-col justify-between border border-border bg-surface p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-primary">
-                        0{i + 1}
-                      </span>
-                      <span className="bg-accent-soft px-2 py-0.5 font-mono text-[11px] font-semibold uppercase text-accent">
-                        Google Cloud Skills
-                      </span>
-                    </div>
-                    <p className="mt-3 font-heading text-sm font-bold leading-snug text-foreground sm:text-base">
-                      {cert}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border border-border bg-surface p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-muted">
-                  <span>Languages: Indonesian (Native) · English (Basic / Technical)</span>
-                  <span className="font-semibold text-sage">8 Verified Google Badges</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Part D: Leadership, Speaking & Community Impact */}
-        <div className="cv-auto-section space-y-6 border-t border-border pt-14">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <Users className="h-5 w-5 text-primary" aria-hidden="true" />
-              <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-                Leadership, Speaking &amp; Community Impact
-              </h3>
-            </div>
-            <span className="font-mono text-xs text-muted">
-              HIMAFORSI UMJ · Information Systems Diklat · RTIK Jember
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {LEADERSHIP.map((item) => (
-              <div
-                key={item.role}
-                className="flex h-full flex-col justify-between border border-border bg-surface p-5"
-              >
-                <div className="space-y-2">
-                  <span className="font-mono text-[11px] font-semibold text-primary">
-                    {item.period}
-                  </span>
-                  <h4 className="font-heading text-base font-bold leading-snug text-foreground">
-                    {item.role}
-                  </h4>
-                  <p className="font-mono text-xs text-muted">{item.organization}</p>
-                  <p className="pt-1 text-xs leading-relaxed text-ink-secondary">
-                    {item.summary}
+              <div className="space-y-4 border-t border-border pt-5">
+                <div className="flex items-start gap-2.5">
+                  <Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                  <p className="text-xs leading-relaxed text-ink-secondary">
+                    Building fast, maintainable, and user-centered software systems with
+                    verifiable engineering standards.
                   </p>
                 </div>
 
-                {item.link ? (
+                <a
+                  href="#stack"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollTo("#stack", -80);
+                  }}
+                  className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full border border-border-strong bg-surface-elevated px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+                >
+                  <span>Full Stack Matrix</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                </a>
+              </div>
+            </aside>
+          </div>
+
+          {/* Collapsible English Voice-Over Script Reference */}
+          <details className="studio-card rounded-2xl p-4 text-xs">
+            <summary className="flex min-h-10 cursor-pointer items-center gap-2 font-mono font-semibold uppercase tracking-[0.14em] text-foreground hover:text-primary">
+              <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
+              <span>Read Full English Voice-Over Script (6 Chapters)</span>
+            </summary>
+            <ol className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-2">
+              {VO_BEATS.map((beat) => (
+                <li
+                  key={beat.id}
+                  className="rounded-xl border border-border bg-surface-elevated/55 p-3.5 leading-relaxed text-ink-secondary"
+                >
+                  <div className="font-mono text-[11px] font-bold uppercase text-primary">
+                    {beat.label}
+                  </div>
+                  <p className="mt-1.5 text-xs text-foreground">{beat.text}</p>
+                </li>
+              ))}
+            </ol>
+          </details>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          SECTION 05 — COMPLETE TECHNICAL STACK & BIO (redesign-section-4.1.png)
+         ==================================================================== */}
+      <div
+        id="stack"
+        className="cv-auto-section scroll-mt-20 border-t border-border py-20 sm:py-28"
+      >
+        <div className="mx-auto max-w-7xl space-y-16 px-5 sm:px-8">
+          {/* Top Hero Row */}
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+            <m.div
+              initial={{ y: 12 }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
+              className="space-y-5 lg:col-span-7"
+            >
+              <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <span>05 / Stack &amp; Credentials</span>
+              </div>
+
+              <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
+                Complete Technical{" "}
+                <span className="text-primary">Stack &amp; Professional Bio.</span>
+              </h2>
+
+              <p className="max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
+                A clear overview of the technologies, academic foundation, verified Google
+                certifications, and community leadership behind my work.
+              </p>
+
+              <a
+                href={PROFILE.cvPdfPath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+              >
+                <FileDown className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span>Download Full Resume (PDF)</span>
+              </a>
+            </m.div>
+
+            <div className="studio-card relative mx-auto w-full max-w-[440px] overflow-hidden rounded-3xl bg-[#080a0f] lg:col-span-5 lg:max-w-none">
+              <div className="relative aspect-[16/10] w-full">
+                <Image
+                  src="/images/redesign/hero-stack-laptop.jpg"
+                  alt="VM workstation displaying core technical stack badges"
+                  fill
+                  sizes="(max-width: 1024px) 92vw, 460px"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Bento Split: Filterable Tech Stack (9 cols) + About Me Bio Card (3 cols) */}
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+            {/* Left Filterable Tech Stack Panel */}
+            <div className="studio-card space-y-6 rounded-3xl p-5 sm:p-7 lg:col-span-9">
+              <div className="flex flex-col gap-3 border-b border-border pb-5 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                    <Cpu className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <h3 className="font-heading text-lg font-bold text-foreground">
+                    My Tech Stack
+                  </h3>
+                </div>
+
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  role="tablist"
+                  aria-label="Filter technical skills by area"
+                >
+                  {SKILL_FILTERS.map((cat) => {
+                    const active = skillFilter === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setSkillFilter(cat)}
+                        className={`min-h-9 cursor-pointer rounded-full px-3 py-1 font-mono text-xs font-medium ${
+                          active
+                            ? "bg-primary font-semibold text-primary-foreground"
+                            : "border border-border bg-surface-elevated text-muted hover:text-foreground"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {visibleSkillGroups.map((group) => {
+                  const Icon = SKILL_ICONS[group.id] ?? Code2;
+                  return (
+                    <div
+                      key={group.id}
+                      className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-surface-elevated/45 p-5 hover:border-primary/45"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/30 bg-primary-soft text-primary">
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                          <span className="rounded-full border border-border bg-surface px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-primary">
+                            {group.badge}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-heading text-base font-bold text-foreground">
+                            {group.label}
+                          </h4>
+                          <p className="mt-1 text-xs leading-relaxed text-muted">
+                            {group.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        {group.items.map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-foreground"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right About Me Bio Card (Matches right sidebar of redesign-section-4.1.png) */}
+            <aside className="studio-card-featured flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                    <User className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <h3 className="font-heading text-lg font-bold text-foreground">About Me</h3>
+                </div>
+
+                <p className="text-sm leading-relaxed text-ink-secondary">
+                  {PROFILE.aboutShortBio}
+                </p>
+
+                <div className="grid grid-cols-3 gap-2 border-y border-border py-4 text-center">
+                  <div>
+                    <div className="font-heading text-xl font-bold text-foreground tabular-nums">
+                      10+
+                    </div>
+                    <div className="font-mono text-[11px] text-muted">Systems</div>
+                  </div>
+                  <div className="border-x border-border">
+                    <div className="font-heading text-xl font-bold text-primary tabular-nums">
+                      3.94
+                    </div>
+                    <div className="font-mono text-[11px] text-muted">GPA</div>
+                  </div>
+                  <div>
+                    <div className="font-heading text-xl font-bold text-accent tabular-nums">
+                      8
+                    </div>
+                    <div className="font-mono text-[11px] text-muted">Certs</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <a
+                  href="#contact"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollTo("#contact", -80);
+                  }}
+                  className="cta-glow inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+                >
+                  <span>Let&apos;s Connect</span>
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+
+                <p className="text-center font-heading text-xs italic text-muted">
+                  &ldquo;{PROFILE.motto}&rdquo;
+                </p>
+              </div>
+            </aside>
+          </div>
+
+          {/* ================================================================
+              EDUCATION & GOOGLE AI / CLOUD CERTIFICATIONS
+             ================================================================ */}
+          <div
+            id="education-credentials"
+            className="scroll-mt-24 border-t border-border pt-14"
+          >
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+              {/* Education Column */}
+              <div className="space-y-5 lg:col-span-5">
+                <div className="flex items-center gap-2.5">
+                  <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+                    Education
+                  </h3>
+                </div>
+
+                <div className="space-y-4">
+                  {EDUCATION.map((edu) => (
+                    <div
+                      key={edu.institution}
+                      className="studio-card space-y-2 rounded-2xl p-5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-mono text-xs text-muted">{edu.period}</span>
+                        <span className="rounded-full bg-primary-soft px-3 py-0.5 font-mono text-xs font-semibold text-primary">
+                          {edu.highlight}
+                        </span>
+                      </div>
+                      <h4 className="font-heading text-base font-bold text-foreground sm:text-lg">
+                        {edu.institution}
+                      </h4>
+                      <p className="text-sm font-medium text-ink-secondary">{edu.degree}</p>
+                      <p className="text-xs leading-relaxed text-muted">{edu.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Certifications Column */}
+              <div className="space-y-5 lg:col-span-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <Award className="h-5 w-5 text-primary" aria-hidden="true" />
+                    <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+                      Google AI &amp; Cloud Certifications
+                    </h3>
+                  </div>
+
                   <a
-                    href={item.link}
+                    href={PROFILE.socials.googleSkills}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex min-h-10 items-center gap-1.5 font-mono text-xs font-semibold text-primary hover:underline"
+                    className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border-strong bg-surface px-4 py-1.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
                   >
-                    <span>View @himaforsi_umjember</span>
+                    <span>Verify All Badges</span>
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
-                ) : null}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {CERTIFICATIONS.map((cert, i) => (
+                    <div
+                      key={cert}
+                      className="studio-card flex flex-col justify-between rounded-2xl p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-primary">
+                          0{i + 1}
+                        </span>
+                        <span className="rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase text-accent">
+                          Google Cloud Skills
+                        </span>
+                      </div>
+                      <p className="mt-3 font-heading text-sm font-bold leading-snug text-foreground">
+                        {cert}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="studio-card rounded-2xl p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-muted">
+                    <span>Languages: Indonesian (Native) · English (Technical)</span>
+                    <span className="font-semibold text-primary">8 Verified Badges</span>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* ================================================================
+              LEADERSHIP, SPEAKING & COMMUNITY IMPACT
+             ================================================================ */}
+          <div className="space-y-6 border-t border-border pt-14">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <Users className="h-5 w-5 text-primary" aria-hidden="true" />
+                <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+                  Leadership, Speaking &amp; Community Impact
+                </h3>
+              </div>
+              <span className="font-mono text-xs text-muted">
+                HIMAFORSI UMJ · Information Systems Diklat · RTIK Jember
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {LEADERSHIP.map((item) => (
+                <div
+                  key={item.role}
+                  className="studio-card flex h-full flex-col justify-between rounded-2xl p-5"
+                >
+                  <div className="space-y-2">
+                    <span className="font-mono text-[11px] font-semibold text-primary">
+                      {item.period}
+                    </span>
+                    <h4 className="font-heading text-base font-bold leading-snug text-foreground">
+                      {item.role}
+                    </h4>
+                    <p className="font-mono text-xs text-muted">{item.organization}</p>
+                    <p className="pt-1 text-xs leading-relaxed text-ink-secondary">
+                      {item.summary}
+                    </p>
+                  </div>
+
+                  {item.link ? (
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex min-h-10 items-center gap-1.5 font-mono text-xs font-semibold text-primary hover:underline"
+                    >
+                      <span>View @himaforsi_umjember</span>
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                    </a>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -27,21 +27,21 @@ export function BrandLogo({
   const palette =
     tone === "dark"
       ? {
-          bg: "#0b0d0f",
-          border: "rgba(243, 245, 242, 0.22)",
-          innerLine: "rgba(243, 245, 242, 0.08)",
-          primary: "#c8f53c",
-          ink: "#f3f5f2",
-          accent: "#56ccf2",
+          bg: "#080a0f",
+          border: "rgba(245, 246, 248, 0.22)",
+          innerLine: "rgba(245, 246, 248, 0.08)",
+          primary: "#f5a623",
+          ink: "#f5f6f8",
+          accent: "#38bdf8",
         }
       : tone === "light"
       ? {
           bg: "#ffffff",
-          border: "rgba(17, 21, 24, 0.24)",
-          innerLine: "rgba(17, 21, 24, 0.08)",
-          primary: "#185c37",
-          ink: "#111518",
-          accent: "#035e8c",
+          border: "rgba(14, 19, 27, 0.24)",
+          innerLine: "rgba(14, 19, 27, 0.08)",
+          primary: "#b45309",
+          ink: "#0e131b",
+          accent: "#0369a1",
         }
       : {
           bg: "var(--surface)",

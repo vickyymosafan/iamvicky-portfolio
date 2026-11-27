@@ -17,10 +17,6 @@ import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-/**
- * Calm, Static Architectural Contact Footer (ZERO Scroll Reveal Animations):
- * Continues the serene static reading flow from Education & Certifications down to page end.
- */
 export function ContactFooter() {
   const [copied, setCopied] = useState(false);
   const { scrollTo } = useSmoothScroll();
@@ -36,30 +32,44 @@ export function ContactFooter() {
   };
 
   return (
-    <footer id="contact" className="cv-auto-footer relative border-t border-border bg-surface/35 py-16 sm:py-20">
+    <footer
+      id="contact"
+      className="cv-auto-footer relative border-t border-border bg-surface/30 py-16 sm:py-24"
+    >
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="relative border border-border-strong bg-surface p-6 sm:p-10 lg:p-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+        <div className="studio-card-featured relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12">
+          {/* Subtle Ambient Corner Highlight */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-45"
+            style={{
+              background:
+                "radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)",
+            }}
+          />
+
+          <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
             <div className="space-y-4 lg:col-span-7">
-              <div className="inline-flex items-center gap-2 border-l-2 border-primary bg-primary-soft px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                <span className="h-2 w-2 rounded-full bg-sage" aria-hidden="true" />
-                <span>05 / Ready for Full-Stack &amp; AI-Augmented Teams</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary-soft px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <span>06 / Let&apos;s Work Together</span>
               </div>
 
-              <h2 className="font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl leading-[1.06]">
-                Let&apos;s build reliable, fast software together.
+              <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                Let&apos;s build fast, dependable{" "}
+                <span className="text-primary">software together.</span>
               </h2>
 
               <p className="max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
-                Actively seeking an entry-level Full-Stack, Frontend, or Backend Developer
-                role — or high-impact engineering collaborations. Reach out directly via
-                email, phone, or LinkedIn.
+                Open to Full-Stack, Frontend, or Backend Developer roles — as well as
+                focused product engineering collaborations. Reach out directly via email,
+                phone, or LinkedIn.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <a
                   href={`mailto:${PROFILE.email}`}
-                  className="inline-flex min-h-12 max-w-full items-center gap-2 bg-primary px-3.5 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:px-5 sm:text-sm"
+                  className="cta-glow inline-flex min-h-12 max-w-full items-center gap-2 rounded-full bg-primary px-4 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:px-6 sm:text-sm"
                 >
                   <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="truncate">{PROFILE.email}</span>
@@ -69,11 +79,11 @@ export function ContactFooter() {
                 <button
                   type="button"
                   onClick={handleCopyEmail}
-                  className="inline-flex min-h-12 items-center gap-2 border border-border-strong bg-surface-elevated px-4 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary cursor-pointer"
+                  className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface-elevated px-5 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
                 >
                   {copied ? (
                     <>
-                      <Check className="h-4 w-4 text-sage" aria-hidden="true" />
+                      <Check className="h-4 w-4 text-primary" aria-hidden="true" />
                       <span>Copied!</span>
                     </>
                   ) : (
@@ -88,12 +98,13 @@ export function ContactFooter() {
                   href={PROFILE.cvPdfPath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center gap-2 border border-border bg-background px-4 py-3 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-foreground"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-background px-5 py-3 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-foreground"
                 >
                   <FileDown className="h-4 w-4" aria-hidden="true" />
                   <span>Download CV</span>
                 </a>
               </div>
+
               <span className="sr-only" aria-live="polite">
                 {copied ? "Email address copied to clipboard." : ""}
               </span>
@@ -103,7 +114,7 @@ export function ContactFooter() {
             <div className="space-y-3 lg:col-span-5">
               <a
                 href={PROFILE.phoneHref}
-                className="flex min-h-12 items-center justify-between border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
+                className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
               >
                 <span className="flex items-center gap-2.5 font-mono text-xs">
                   <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -117,7 +128,7 @@ export function ContactFooter() {
                   href={PROFILE.socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
                   <span className="flex items-center gap-2">
                     <Github className="h-4 w-4" aria-hidden="true" />
@@ -130,7 +141,7 @@ export function ContactFooter() {
                   href={PROFILE.socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
                   <span className="flex items-center gap-2">
                     <Linkedin className="h-4 w-4" aria-hidden="true" />
@@ -143,7 +154,7 @@ export function ContactFooter() {
                   href={PROFILE.socials.mql5}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
                   <span className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" aria-hidden="true" />
@@ -156,7 +167,7 @@ export function ContactFooter() {
                   href={PROFILE.socials.googleSkills}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
                   <span>Google Skills</span>
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -172,13 +183,13 @@ export function ContactFooter() {
             <BrandLogo size={34} className="shrink-0" />
             <p>
               &copy; {new Date().getFullYear()} {PROFILE.fullName} · Built with Next.js 16,
-              React 19, Three.js, GSAP &amp; Lenis.
+              React 19, Tailwind CSS 4 &amp; Framer Motion.
             </p>
           </div>
           <button
             type="button"
             onClick={() => scrollTo(0, 0)}
-            className="inline-flex min-h-11 items-center gap-1.5 border border-border bg-surface px-3.5 py-2 text-foreground hover:border-primary hover:text-primary cursor-pointer"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface px-4 py-2 text-foreground hover:border-primary hover:text-primary"
           >
             <span>Back to top</span>
             <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />

@@ -3,22 +3,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FeaturedProject } from "@/data/portfolio";
-import { AudioGateProvider, useAudioGate } from "@/components/providers/AudioGateProvider";
 import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
 import { Navbar } from "@/components/navigation/Navbar";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { WorkSection } from "@/components/sections/WorkSection";
 import { AiWorkflowSection } from "@/components/sections/AiWorkflowSection";
-import { SectionScrollBridge } from "@/components/motion/SectionScrollBridge";
 import { ExperienceSection } from "@/components/sections/ExperienceSection";
 import { StackAndCredentialsSection } from "@/components/sections/StackAndCredentialsSection";
 import { ContactFooter } from "@/components/sections/ContactFooter";
-
-// Code-split on-demand overlays & native <dialog> modals: 0 bytes until triggered!
-const WelcomeScreen = dynamic(
-  () => import("@/components/motion/WelcomeScreen").then((m) => m.WelcomeScreen),
-  { ssr: false }
-);
 
 const CommandPalette = dynamic(
   () => import("@/components/navigation/CommandPalette").then((m) => m.CommandPalette),
@@ -32,11 +24,6 @@ const ProjectCaseStudyDialog = dynamic(
     ),
   { ssr: false }
 );
-
-function OnDemandWelcomeOverlay() {
-  const { welcomeVisible } = useAudioGate();
-  return welcomeVisible ? <WelcomeScreen /> : null;
-}
 
 export function PortfolioShell() {
   const [commandOpen, setCommandOpen] = useState(false);
@@ -67,52 +54,46 @@ export function PortfolioShell() {
   }, []);
 
   return (
-    <AudioGateProvider>
-      <div className="relative min-h-screen bg-background text-foreground">
-        {/* Subtle architectural grid background */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 -z-20 bg-architectural-grid"
+    <div className="relative min-h-screen bg-background text-foreground">
+      {/* Subtle Obsidian Architectural Grid + Soft Amber/Blue Ambient Auras */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-20 bg-architectural-grid"
+      />
+
+      {/* Native CSS Scroll-Driven Top Progress Bar */}
+      <ScrollProgressBar />
+
+      {/* Floating Pill Navbar */}
+      <Navbar onOpenCommandPalette={openCommand} />
+
+      {/* Clean 6-Chapter Storytelling Flow */}
+      <main id="main-content" className="relative z-10">
+        <HeroSection />
+        <WorkSection onInspectProject={inspectProject} />
+        <AiWorkflowSection />
+        <ExperienceSection />
+        <StackAndCredentialsSection />
+      </main>
+
+      <ContactFooter />
+
+      {/* Native <dialog> Command Palette */}
+      {commandLoaded ? (
+        <CommandPalette
+          open={commandOpen}
+          onClose={() => setCommandOpen(false)}
+          onSelectProject={inspectProject}
         />
+      ) : null}
 
-        {/* On-demand Welcome Boot Sequence (replayed via Hero button — 0ms initial load cost) */}
-        <OnDemandWelcomeOverlay />
-
-        {/* Native CSS Scroll-Driven Top Progress Bar */}
-        <ScrollProgressBar />
-
-        {/* Editorial Glass Navbar */}
-        <Navbar onOpenCommandPalette={openCommand} />
-
-        {/* Primary Page Flow */}
-        <main id="main-content" className="relative z-10">
-          <HeroSection />
-          <WorkSection onInspectProject={inspectProject} />
-          <AiWorkflowSection />
-          <SectionScrollBridge />
-          <ExperienceSection />
-          <StackAndCredentialsSection />
-        </main>
-
-        <ContactFooter />
-
-        {/* Native <dialog> Command Palette (lazy-loaded on first Ctrl+K / click) */}
-        {commandLoaded ? (
-          <CommandPalette
-            open={commandOpen}
-            onClose={() => setCommandOpen(false)}
-            onSelectProject={inspectProject}
-          />
-        ) : null}
-
-        {/* Native <dialog> Architecture Case Study Modal (lazy-loaded on first inspect) */}
-        {dialogLoaded ? (
-          <ProjectCaseStudyDialog
-            project={activeProject}
-            onClose={() => setActiveProject(null)}
-          />
-        ) : null}
-      </div>
-    </AudioGateProvider>
+      {/* Native <dialog> Project Case Study Modal */}
+      {dialogLoaded ? (
+        <ProjectCaseStudyDialog
+          project={activeProject}
+          onClose={() => setActiveProject(null)}
+        />
+      ) : null}
+    </div>
   );
 }

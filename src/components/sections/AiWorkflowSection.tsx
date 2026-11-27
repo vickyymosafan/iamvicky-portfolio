@@ -1,494 +1,510 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { AnimatePresence, m } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
   CheckCircle2,
-  Code2,
   Copy,
-  Cpu,
-  Eye,
+  FileCode2,
+  FolderOpen,
+  Github,
+  Play,
   Terminal,
-  Wrench,
 } from "lucide-react";
-import { AI_WORKFLOW_STAGES, ConsoleLine } from "@/data/portfolio";
-import {
-  ARCHITECTURAL_EASE,
-  SectionHeader,
-  useHorizontalScrollHints,
-} from "@/components/motion/MotionPrimitives";
+import { AI_WORKFLOW_STAGES, PROFILE } from "@/data/portfolio";
+import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
+import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+
+const INSPECTOR_TABS = ["Code", "Console", "Flow", "Outcome"] as const;
+type InspectorTab = (typeof INSPECTOR_TABS)[number];
+
+const IDE_TREE = [
+  { name: "src/", indent: 0, folder: true },
+  { name: "blueprints/", indent: 1, folder: true },
+  { name: "mcp-rig/", indent: 1, folder: true },
+  { name: "rag-engine/", indent: 1, folder: true },
+  { name: "qa-playwright/", indent: 1, folder: true },
+  { name: "pipeline.ts", indent: 1, folder: false, active: true },
+  { name: "package.json", indent: 0, folder: false },
+] as const;
 
 export function AiWorkflowSection() {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [viewMode, setViewMode] = useState<"readable" | "raw">("readable");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { scrollTo } = useSmoothScroll();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<InspectorTab>("Code");
+  const [copied, setCopied] = useState(false);
 
-  const stage = AI_WORKFLOW_STAGES[activeIdx];
-  const stepScrollerRef = useRef<HTMLDivElement>(null);
+  const stage = AI_WORKFLOW_STAGES[activeIndex];
+  const nextIndex = (activeIndex + 1) % AI_WORKFLOW_STAGES.length;
+  const prevIndex = (activeIndex - 1 + AI_WORKFLOW_STAGES.length) % AI_WORKFLOW_STAGES.length;
 
-  useHorizontalScrollHints(stepScrollerRef, AI_WORKFLOW_STAGES.length);
-
-  const handleCopyCommand = async () => {
-    const payload =
-      viewMode === "raw"
-        ? stage.artifactLines.join("\n")
-        : stage.command;
+  const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(payload);
-      setCopiedId(stage.id);
-      window.setTimeout(() => setCopiedId(null), 1800);
+      await navigator.clipboard.writeText(stage.artifactLines.join("\n"));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
     } catch {
-      // Clipboard fallback unavailable
+      setCopied(false);
     }
   };
-
-  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      setActiveIdx((prev) => (prev + 1) % AI_WORKFLOW_STAGES.length);
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      setActiveIdx(
-        (prev) => (prev - 1 + AI_WORKFLOW_STAGES.length) % AI_WORKFLOW_STAGES.length
-      );
-    }
-  };
-
-  const isCopied = copiedId === stage.id;
 
   return (
     <section
-      id="ai-workflow"
-      className="relative border-t border-border bg-surface/45 py-20 sm:py-28"
+      id="workflow"
+      className="cv-auto-section relative scroll-mt-20 border-t border-border py-20 sm:py-28"
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <SectionHeader
-          index="02"
-          eyebrow="AI-Augmented Software Engineering"
-          title="Deterministic workflow. Autonomous velocity."
-          description="AI coding agents work best inside strict architectural boundaries. Step through the 5-stage pipeline governing Claude Code, Google Antigravity, Craftrig MCP (vickyymosafan/mcp-craftrig), and BuildFlow ERP."
-        />
+      {/* Subtle Ambient Corner Glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-10 -left-24 h-[380px] w-[380px] rounded-full opacity-35"
+        style={{
+          background:
+            "radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)",
+        }}
+      />
 
-        {/* Architectural Connected 5-Stage Pipeline Workbench */}
-        <div className="mt-10 border border-border-strong bg-surface/95 shadow-xl">
-          {/* Interactive Stage Tab Rail */}
-          <div
-            ref={stepScrollerRef}
-            role="tablist"
-            aria-label="AI-augmented engineering workflow stages"
-            onKeyDown={handleTabKeyDown}
-            className="horizontal-snap-track lg:grid lg:grid-cols-5 lg:overflow-visible"
+      <div className="relative z-10 mx-auto max-w-7xl space-y-12 px-5 sm:px-8">
+        {/* ================================================================
+            TOP HERO SPLIT (Modeled after redesign-section-2.png)
+           ================================================================ */}
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+          <m.div
+            initial={{ y: 14 }}
+            whileInView={{ y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
+            className="space-y-6 lg:col-span-6"
           >
+            <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+              <span>02 / How I Build</span>
+            </div>
+
+            <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
+              Structured workflow.{" "}
+              <span className="text-primary">Predictable delivery.</span>
+            </h2>
+
+            <p className="max-w-xl text-base leading-relaxed text-ink-secondary">
+              Fast software only stays dependable when built inside clear boundaries. Step
+              through the 5-stage engineering pipeline I use across BuildFlow ERP, Hybrid
+              RAG, and Craftrig MCP.
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {stage.tools.map((tool) => (
+                <span
+                  key={tool}
+                  className="rounded-full border border-border-strong bg-surface px-3.5 py-1.5 font-mono text-xs font-medium text-foreground"
+                >
+                  {tool}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <a
+                href="https://github.com/vickyymosafan/mcp-craftrig"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cta-glow inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:text-sm"
+              >
+                <Github className="h-4 w-4" aria-hidden="true" />
+                <span>View Craftrig Repo</span>
+              </a>
+
+              <a
+                href="#film"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollTo("#film", -80);
+                }}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary sm:text-sm"
+              >
+                <Play className="h-3.5 w-3.5 fill-current text-primary" aria-hidden="true" />
+                <span>Watch Walkthrough</span>
+              </a>
+            </div>
+          </m.div>
+
+          {/* Right Live Obsidian IDE Visual (Modeled after redesign-section-2.png) */}
+          <m.div
+            initial={{ y: 14 }}
+            whileInView={{ y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.48, delay: 0.06, ease: ARCHITECTURAL_EASE }}
+            className="relative lg:col-span-6"
+          >
+            {/* Subtle Orbital SVG Accent Behind IDE */}
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 540 320"
+              className="pointer-events-none absolute -inset-4 h-[calc(100%+2rem)] w-[calc(100%+2rem)] opacity-60"
+              fill="none"
+            >
+              <ellipse
+                cx="270"
+                cy="165"
+                rx="246"
+                ry="82"
+                transform="rotate(-11 270 165)"
+                stroke="var(--primary)"
+                strokeOpacity="0.4"
+                strokeWidth="1.2"
+              />
+            </svg>
+
+            <div className="studio-card-featured relative overflow-hidden rounded-2xl bg-[#0b0e15] text-[#f5f6f8] shadow-2xl">
+              {/* Editor Top Window Bar */}
+              <div className="flex items-center justify-between border-b border-white/10 bg-[#10141e] px-4 py-3">
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#fb923c]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#f5a623]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#38bdf8]" />
+                </div>
+                <span className="font-mono text-[11px] text-[#93a0b2]">
+                  vicky-studio — {stage.terminalTitle}
+                </span>
+                <span className="rounded-full border border-[#f5a623]/40 bg-[#f5a623]/12 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#f5a623]">
+                  Architecture
+                </span>
+              </div>
+
+              {/* Split File Tree + Live Pipeline Code */}
+              <div className="grid grid-cols-1 sm:grid-cols-12">
+                <div className="hidden border-r border-white/10 bg-[#0d111a] p-4 font-mono text-[11px] sm:col-span-4 sm:block">
+                  <ul className="space-y-1.5">
+                    {IDE_TREE.map((node) => (
+                      <li
+                        key={node.name}
+                        style={{ paddingLeft: `${node.indent * 12}px` }}
+                        className={`flex items-center gap-1.5 rounded-md px-2 py-1 ${
+                          "active" in node && node.active
+                            ? "bg-[#f5a623]/15 font-semibold text-[#f5a623]"
+                            : "text-[#93a0b2]"
+                        }`}
+                      >
+                        {node.folder ? (
+                          <FolderOpen className="h-3.5 w-3.5 shrink-0 text-[#f5a623]/80" />
+                        ) : (
+                          <FileCode2 className="h-3.5 w-3.5 shrink-0 text-[#38bdf8]" />
+                        )}
+                        <span className="truncate">{node.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="overflow-x-auto p-5 font-mono text-xs leading-relaxed sm:col-span-8">
+                  <div className="text-[#93a0b2]">{"// Deterministic delivery loop"}</div>
+                  <div className="mt-1">
+                    <span className="text-[#38bdf8]">export async function</span>{" "}
+                    <span className="font-semibold text-[#f5a623]">shipFeature</span>
+                    <span>(spec: Blueprint) {"{"}</span>
+                  </div>
+                  <div className="pl-4 text-[#cbd3de]">
+                    <span className="text-[#38bdf8]">const</span> plan ={" "}
+                    <span className="text-[#f5a623]">lockContracts</span>(spec);
+                  </div>
+                  <div className="pl-4 text-[#cbd3de]">
+                    <span className="text-[#38bdf8]">const</span> build ={" "}
+                    <span className="text-[#38bdf8]">await</span> executeModules(plan);
+                  </div>
+                  <div className="pl-4 text-[#cbd3de]">
+                    <span className="text-[#38bdf8]">return</span> verifyQualityGate(build,{" "}
+                    <span className="text-[#fb923c]">13</span>);
+                  </div>
+                  <div>{"}"}</div>
+                  <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] text-[#38bdf8]">
+                    <Terminal className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{stage.statusLine}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </m.div>
+        </div>
+
+        {/* ================================================================
+            INTERACTIVE 2-COLUMN STAGE WORKBENCH (Modeled after redesign-section-2.png)
+           ================================================================ */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          {/* Left Narrative Card */}
+          <div className="studio-card flex flex-col justify-between gap-6 rounded-2xl p-6 sm:p-7 lg:col-span-5">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                  <span>STAGE {stage.step} / 05</span>
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex(prevIndex)}
+                    aria-label="Previous workflow stage"
+                    className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-strong bg-surface-elevated text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex(nextIndex)}
+                    aria-label="Next workflow stage"
+                    className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-strong bg-surface-elevated text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <m.div
+                  key={stage.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: ARCHITECTURAL_EASE }}
+                  className="space-y-3"
+                >
+                  <h3 className="font-heading text-2xl font-bold leading-tight text-foreground sm:text-[26px]">
+                    {stage.title}
+                  </h3>
+                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+                    {stage.tagline}
+                  </p>
+                  <p className="text-sm leading-relaxed text-ink-secondary">
+                    {stage.description}
+                  </p>
+                </m.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Clean Input -> Verified Box */}
+            <div className="space-y-2 rounded-xl border border-border bg-surface-elevated/60 p-4 font-mono text-xs">
+              <div className="flex items-start gap-2.5">
+                <span className="shrink-0 font-bold text-primary">1. INPUT</span>
+                <span className="text-ink-secondary">{stage.readableFlow.input}</span>
+              </div>
+              <div className="flex items-start gap-2.5 border-t border-border pt-2">
+                <span className="shrink-0 font-bold text-accent">2. VERIFIED</span>
+                <span className="text-foreground">{stage.readableFlow.verified}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Tabbed Artifact Viewer */}
+          <div className="studio-card flex flex-col justify-between overflow-hidden rounded-2xl lg:col-span-7">
+            {/* Top Tabs + Copy Button */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-elevated/55 px-4 py-3 sm:px-5">
+              <div
+                className="flex flex-wrap items-center gap-1"
+                role="tablist"
+                aria-label="Inspect stage artifacts"
+              >
+                {INSPECTOR_TABS.map((tab) => {
+                  const active = activeTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setActiveTab(tab)}
+                      className={`min-h-9 cursor-pointer rounded-full px-3.5 py-1 font-mono text-xs font-semibold ${
+                        active
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted hover:text-foreground"
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface px-3.5 py-1 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Active Tab Body */}
+            <div className="flex-1 bg-[#0b0e15] p-5 font-mono text-xs leading-relaxed text-[#f5f6f8] sm:p-6">
+              {activeTab === "Code" ? (
+                <div className="overflow-x-auto">
+                  <ol className="space-y-1.5">
+                    {stage.artifactLines.map((line, i) => (
+                      <li key={`${stage.id}-line-${i}`} className="flex gap-4">
+                        <span className="w-5 shrink-0 select-none text-right text-[#8b98ab]">
+                          {i + 1}
+                        </span>
+                        <code
+                          className={
+                            line.startsWith("//") || line.startsWith("#")
+                              ? "text-[#93a0b2]"
+                              : line.startsWith("[PASS]")
+                              ? "text-[#f5a623]"
+                              : "text-[#e2e8f0]"
+                          }
+                        >
+                          {line}
+                        </code>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : activeTab === "Console" ? (
+                <div className="space-y-2.5">
+                  <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[#f5a623]">
+                    $ {stage.command}
+                  </div>
+                  {stage.consoleLines.map((cl, i) => (
+                    <div key={`${stage.id}-cl-${i}`} className="flex flex-wrap gap-2">
+                      {cl.label ? (
+                        <span
+                          className={`font-bold ${
+                            cl.kind === "pass"
+                              ? "text-[#f5a623]"
+                              : cl.kind === "metric"
+                              ? "text-[#38bdf8]"
+                              : "text-[#93a0b2]"
+                          }`}
+                        >
+                          [{cl.label}]
+                        </span>
+                      ) : null}
+                      <span className="text-[#cbd3de]">{cl.value}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : activeTab === "Flow" ? (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
+                    <span className="font-bold text-[#f5a623]">STEP 01 · INPUT</span>
+                    <p className="mt-1 font-body text-sm text-[#e2e8f0]">
+                      {stage.readableFlow.input}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
+                    <span className="font-bold text-[#38bdf8]">STEP 02 · PROCESS</span>
+                    <p className="mt-1 font-body text-sm text-[#e2e8f0]">
+                      {stage.readableFlow.process}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-[#f5a623]/35 bg-[#f5a623]/10 p-3.5">
+                    <span className="font-bold text-[#f5a623]">STEP 03 · VERIFIED</span>
+                    <p className="mt-1 font-body text-sm text-[#f5f6f8]">
+                      {stage.readableFlow.verified}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex h-full flex-col justify-between gap-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-[#f5a623]/35 bg-[#f5a623]/10 p-4">
+                    <CheckCircle2
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#f5a623]"
+                      aria-hidden="true"
+                    />
+                    <div className="space-y-1.5">
+                      <div className="font-bold text-[#f5a623]">WHY THIS STAGE MATTERS</div>
+                      <p className="font-body text-sm leading-relaxed text-[#f5f6f8]">
+                        {stage.outcome}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#93a0b2]">
+                    Author: {PROFILE.fullName} · Verified across shipped repositories.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom File Footer + Next Step CTA */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-elevated/55 px-4 py-3 font-mono text-xs sm:px-5">
+              <span className="inline-flex items-center gap-2 text-muted">
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <span>{stage.terminalTitle}</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setActiveIndex(nextIndex)}
+                className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 font-semibold text-primary hover:underline"
+              >
+                <span>
+                  Next: {AI_WORKFLOW_STAGES[nextIndex].step} / 05 (
+                  {AI_WORKFLOW_STAGES[nextIndex].shortTitle})
+                </span>
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ================================================================
+            BOTTOM 5-STEP CONNECTED TIMELINE RAIL (redesign-section-2.png)
+           ================================================================ */}
+        <div className="relative pt-2">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-[22px] right-8 left-8 hidden h-px bg-border lg:block"
+          />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {AI_WORKFLOW_STAGES.map((item, idx) => {
-              const isSelected = idx === activeIdx;
-              const isCompleted = idx < activeIdx;
+              const active = idx === activeIndex;
               return (
                 <button
                   key={item.id}
                   type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  onClick={() => setActiveIdx(idx)}
-                  className={`relative flex min-h-24 w-[76%] shrink-0 snap-start flex-col justify-between border-r border-border p-4 text-left transition-colors sm:w-[46%] lg:w-auto lg:last:border-r-0 cursor-pointer ${
-                    isSelected
-                      ? "bg-primary-soft/80 text-foreground"
-                      : "bg-transparent hover:bg-surface-elevated/60"
+                  onClick={() => setActiveIndex(idx)}
+                  aria-current={active ? "step" : undefined}
+                  className={`group relative flex cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left ${
+                    active
+                      ? "border-primary/60 bg-primary-soft/60"
+                      : "border-border bg-surface/80 hover:border-border-strong"
                   }`}
                 >
-                  {isSelected ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 top-0 h-[3px] bg-primary"
-                    />
-                  ) : null}
-
-                  <div className="flex items-center justify-between gap-2 font-mono text-[11px]">
-                    <span
-                      className={
-                        isSelected
-                          ? "font-bold text-primary"
-                          : isCompleted
-                          ? "font-semibold text-sage"
-                          : "text-muted"
-                      }
-                    >
-                      STAGE // {item.step}
-                    </span>
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        isSelected
-                          ? "bg-primary"
-                          : isCompleted
-                          ? "bg-sage"
-                          : "bg-border-strong"
-                      }`}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="mt-2 font-heading text-sm font-bold text-foreground sm:text-base">
-                    {item.shortTitle}
+                  <span
+                    className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+                      active
+                        ? "border-primary bg-primary"
+                        : "border-border-strong bg-background group-hover:border-primary"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {active ? <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" /> : null}
+                  </span>
+                  <div>
+                    <div className="font-mono text-[11px] font-bold text-primary">
+                      {item.step} / 05
+                    </div>
+                    <div className="mt-0.5 font-heading text-xs font-bold text-foreground sm:text-sm">
+                      {item.shortTitle}
+                    </div>
                   </div>
                 </button>
               );
             })}
           </div>
-
-          {/* Connected Two-Pane Deep-Dive Workbench */}
-          <div className="border-t border-border">
-            <AnimatePresence mode="wait">
-              <m.div
-                key={stage.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2, ease: ARCHITECTURAL_EASE }}
-                className="grid grid-cols-1 lg:grid-cols-12"
-              >
-                {/* Left 6 Cols: Human-Readable Engineering Specification */}
-                <div className="flex min-w-0 flex-col justify-between space-y-6 p-5 sm:p-8 lg:col-span-6 lg:border-r lg:border-border">
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="inline-flex items-center gap-2 border-l-2 border-primary bg-primary-soft px-3 py-1 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                        <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>
-                          Stage {stage.step} / 0{AI_WORKFLOW_STAGES.length}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveIdx(
-                              (prev) =>
-                                (prev - 1 + AI_WORKFLOW_STAGES.length) %
-                                AI_WORKFLOW_STAGES.length
-                            )
-                          }
-                          aria-label="Previous workflow stage"
-                          className="inline-flex h-9 w-9 items-center justify-center border border-border bg-surface-elevated text-foreground hover:border-primary hover:text-primary cursor-pointer"
-                        >
-                          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveIdx(
-                              (prev) => (prev + 1) % AI_WORKFLOW_STAGES.length
-                            )
-                          }
-                          aria-label="Next workflow stage"
-                          className="inline-flex h-9 w-9 items-center justify-center border border-border bg-surface-elevated text-foreground hover:border-primary hover:text-primary cursor-pointer"
-                        >
-                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                      {stage.title}
-                    </h3>
-                    <p className="font-mono text-xs uppercase tracking-[0.12em] text-accent">
-                      {stage.tagline}
-                    </p>
-                    <p className="text-sm leading-relaxed text-ink-secondary sm:text-base">
-                      {stage.description}
-                    </p>
-
-                    {/* Plain-English 3-Step Flow Summary (Effortless to Scan) */}
-                    <dl className="grid grid-cols-1 gap-2.5 border border-border bg-surface-elevated/45 p-4 text-xs sm:text-[13px]">
-                      <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-                        <dt className="w-20 shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-muted">
-                          1. Input
-                        </dt>
-                        <dd className="text-foreground leading-relaxed">
-                          {stage.readableFlow.input}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col gap-0.5 border-t border-border/60 pt-2 sm:flex-row sm:items-baseline sm:gap-3">
-                        <dt className="w-20 shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-accent">
-                          2. Engine
-                        </dt>
-                        <dd className="text-foreground leading-relaxed">
-                          {stage.readableFlow.process}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col gap-0.5 border-t border-border/60 pt-2 sm:flex-row sm:items-baseline sm:gap-3">
-                        <dt className="w-20 shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-sage">
-                          3. Proof
-                        </dt>
-                        <dd className="text-foreground leading-relaxed">
-                          {stage.readableFlow.verified}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                        <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Core Tooling</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {stage.tools.map((tool) => (
-                          <span
-                            key={tool}
-                            className="border border-border bg-surface-elevated px-2.5 py-1 font-mono text-xs font-medium text-foreground"
-                          >
-                            {tool}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2.5 border-l-2 border-sage bg-sage-soft/45 p-3.5">
-                      <CheckCircle2
-                        className="mt-0.5 h-4 w-4 shrink-0 text-sage"
-                        aria-hidden="true"
-                      />
-                      <p className="text-xs leading-relaxed text-foreground sm:text-sm">
-                        <strong className="font-semibold">Engineering Outcome: </strong>
-                        {stage.outcome}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right 6 Cols: Redesigned UX-Friendly Interactive Command Prompt Console */}
-                <div className="flex min-w-0 flex-col overflow-hidden bg-[#0b1015] text-[#eef3f7] lg:col-span-6">
-                  {/* Console Window Chrome + Readable/Raw Switcher + Copy Action */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 bg-[#121920] px-4 py-3 sm:px-5">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <div className="flex items-center gap-1.5" aria-hidden="true">
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#4ade80]/80" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#f5b942]/80" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#56ccf2]/80" />
-                      </div>
-                      <Terminal
-                        className="ml-1 h-4 w-4 shrink-0 text-[#c8f53c]"
-                        aria-hidden="true"
-                      />
-                      <span className="truncate font-mono text-xs font-semibold text-white">
-                        {stage.terminalTitle}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      {/* View Toggle: Guided Readable Output vs Raw Code */}
-                      <div
-                        className="inline-flex border border-white/15 bg-[#0b1015] p-0.5 font-mono text-[11px]"
-                        role="group"
-                        aria-label="Console output display format"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("readable")}
-                          className={`inline-flex min-h-8 items-center gap-1 px-2.5 py-1 transition-colors cursor-pointer ${
-                            viewMode === "readable"
-                              ? "bg-[#c8f53c] font-bold text-[#0b1015]"
-                              : "text-zinc-300 hover:text-white"
-                          }`}
-                        >
-                          <Eye className="h-3 w-3" aria-hidden="true" />
-                          <span>Guided</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("raw")}
-                          className={`inline-flex min-h-8 items-center gap-1 px-2.5 py-1 transition-colors cursor-pointer ${
-                            viewMode === "raw"
-                              ? "bg-[#56ccf2] font-bold text-[#0b1015]"
-                              : "text-zinc-300 hover:text-white"
-                          }`}
-                        >
-                          <Code2 className="h-3 w-3" aria-hidden="true" />
-                          <span>Raw</span>
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleCopyCommand}
-                        aria-label={isCopied ? "Command copied" : "Copy command"}
-                        className="inline-flex min-h-9 items-center gap-1.5 border border-white/15 bg-white/[0.06] px-2.5 py-1 font-mono text-[11px] font-medium text-zinc-100 hover:border-[#c8f53c] hover:text-[#c8f53c] cursor-pointer"
-                      >
-                        {isCopied ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 text-[#4ade80]" aria-hidden="true" />
-                            <span className="text-[#4ade80]">Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                            <span className="hidden sm:inline">Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Active Command Prompt Bar — Crisp, High-Contrast, Word-Wrapped for Mobile Readability */}
-                  <div className="border-b border-white/10 bg-[#0f161d] px-4 py-3.5 sm:px-5">
-                    <div className="mb-1 flex items-center justify-between font-mono text-[11px] text-zinc-400">
-                      <span>COMMAND PROMPT · {stage.artifactTitle}</span>
-                      <span className="text-[#56ccf2] font-semibold">
-                        {stage.artifactLanguage}
-                      </span>
-                    </div>
-                    <div className="flex min-w-0 items-start gap-2.5 font-mono text-xs leading-relaxed sm:text-[13px]">
-                      <span
-                        aria-hidden="true"
-                        className="shrink-0 select-none font-bold text-[#c8f53c]"
-                      >
-                        $
-                      </span>
-                      <code className="min-w-0 flex-1 break-words [overflow-wrap:anywhere] font-medium text-white">
-                        {stage.command}
-                      </code>
-                    </div>
-                  </div>
-
-                  {/* Console Body: Guided Structured Readout OR Clean Raw Code */}
-                  <div
-                    tabIndex={0}
-                    role="region"
-                    aria-label={`${stage.title} console execution output`}
-                    className="flex-1 p-4 sm:p-5"
-                  >
-                    {viewMode === "readable" ? (
-                      <ul className="space-y-2.5">
-                        {stage.consoleLines.map((line, idx) => (
-                          <ConsoleOutputRow key={`${stage.id}-${idx}`} line={line} />
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="overflow-x-auto border border-white/10 bg-[#080c10] p-4 font-mono text-xs leading-7 sm:text-[13px]">
-                        <pre className="m-0">
-                          <code>
-                            {stage.artifactLines.map((line, i) => (
-                              <div key={line} className="flex gap-3.5">
-                                <span
-                                  aria-hidden="true"
-                                  className="w-5 shrink-0 select-none text-right text-zinc-500"
-                                >
-                                  {i + 1}
-                                </span>
-                                <span
-                                  className={
-                                    line.startsWith("$")
-                                      ? "font-semibold text-[#c8f53c]"
-                                      : line.startsWith("//") || line.startsWith("#")
-                                      ? "text-zinc-400"
-                                      : line.startsWith("[PASS]")
-                                      ? "text-[#4ade80]"
-                                      : "text-zinc-100"
-                                  }
-                                >
-                                  {line}
-                                </span>
-                              </div>
-                            ))}
-                          </code>
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bottom Telemetry Footer + Quick Next Stage Trigger */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 bg-[#121920] px-4 py-3 font-mono text-[11px] sm:px-5">
-                    <div className="flex items-center gap-2 text-zinc-300">
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full bg-[#4ade80]"
-                        aria-hidden="true"
-                      />
-                      <span>{stage.statusLine}</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveIdx((prev) => (prev + 1) % AI_WORKFLOW_STAGES.length)
-                      }
-                      className="inline-flex min-h-8 items-center gap-1 font-semibold text-[#c8f53c] hover:underline cursor-pointer"
-                    >
-                      <span>
-                        {activeIdx < AI_WORKFLOW_STAGES.length - 1
-                          ? `Next: ${AI_WORKFLOW_STAGES[activeIdx + 1].shortTitle}`
-                          : "Restart Pipeline"}
-                      </span>
-                      <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-              </m.div>
-            </AnimatePresence>
-          </div>
         </div>
       </div>
-      <span className="sr-only" aria-live="polite">
-        {isCopied ? "Command copied to clipboard." : ""}
-      </span>
     </section>
-  );
-}
-
-function ConsoleOutputRow({ line }: { line: ConsoleLine }) {
-  if (line.kind === "comment") {
-    return (
-      <li className="font-mono text-xs leading-relaxed text-zinc-400">
-        {line.value}
-      </li>
-    );
-  }
-
-  if (line.kind === "pass") {
-    return (
-      <li className="flex flex-col gap-1.5 border-l-2 border-[#4ade80] bg-[#4ade80]/10 px-3.5 py-2.5 sm:flex-row sm:items-center sm:gap-3">
-        <span className="inline-flex w-fit shrink-0 items-center gap-1 bg-[#4ade80] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-[#08100c]">
-          ✓ {line.label ?? "PASS"}
-        </span>
-        <span className="font-mono text-xs leading-relaxed text-white sm:text-[13px]">
-          {line.value}
-        </span>
-      </li>
-    );
-  }
-
-  if (line.kind === "metric") {
-    return (
-      <li className="flex flex-col gap-1.5 border-l-2 border-[#f5b942] bg-[#f5b942]/10 px-3.5 py-2.5 sm:flex-row sm:items-center sm:gap-3">
-        <span className="inline-flex w-fit shrink-0 bg-[#f5b942] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-[#110d04]">
-          {line.label ?? "METRIC"}
-        </span>
-        <span className="font-mono text-xs leading-relaxed text-white sm:text-[13px]">
-          {line.value}
-        </span>
-      </li>
-    );
-  }
-
-  if (line.kind === "code") {
-    return (
-      <li className="overflow-x-auto border border-white/10 bg-[#080c10] px-3.5 py-2 font-mono text-xs leading-relaxed text-[#c8f53c] sm:text-[13px]">
-        <code>{line.value}</code>
-      </li>
-    );
-  }
-
-  return (
-    <li className="flex min-w-0 flex-col gap-1 border border-white/10 bg-white/[0.03] px-3.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-3">
-      {line.label ? (
-        <span className="w-28 shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-[#56ccf2]">
-          {line.label}
-        </span>
-      ) : null}
-      <span className="min-w-0 flex-1 break-words [overflow-wrap:anywhere] font-mono text-xs leading-relaxed text-zinc-100 sm:text-[13px]">
-        {line.value}
-      </span>
-    </li>
   );
 }

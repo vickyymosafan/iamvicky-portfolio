@@ -1,23 +1,7 @@
 /**
- * Main-thread yielding & scroll-idle scheduling helpers following Modern Web Guidance
- * (`performance` scheduler.yield + `defer-work-until-scroll-ends` scrollend).
+ * Scroll-idle scheduling helper (`scrollend` + idle callback fallback) so deferred
+ * dynamic imports never fire during active scroll gestures.
  */
-
-type SchedulerWithYield = {
-  yield?: () => Promise<void>;
-};
-
-export function yieldToMain(): Promise<void> {
-  if (typeof window !== "undefined") {
-    const sched = (window as Window & { scheduler?: SchedulerWithYield }).scheduler;
-    if (sched && typeof sched.yield === "function") {
-      return sched.yield();
-    }
-  }
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
 
 let isScrollingNow = false;
 let scrollIdleTimer: ReturnType<typeof setTimeout> | null = null;
