@@ -16,6 +16,7 @@ import {
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const METRIC_ICONS = [Briefcase, FolderKanban, Award] as const;
 
@@ -24,23 +25,22 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative overflow-x-clip pt-28 pb-12 sm:pt-32 sm:pb-16 lg:pt-36">
-      {/* Subtle Ambient Corner Orbs (Pure GPU CSS, zero green/pink) */}
+      {/* Reference-Matched Hero Atmospheric Backdrop (Orbital Arc, Studio Spotlight, Sparkles) */}
+      <SectionBackdrop variant="hero" />
+
+      {/* Delicate Vertical Scroll Down Rail on Ultra-Wide Screens (Matches redesign-hero-section.png) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-28 -left-28 h-[360px] w-[360px] rounded-full opacity-55"
-        style={{
-          background:
-            "radial-gradient(circle, var(--primary-glow) 0%, var(--primary-soft) 36%, transparent 72%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-20 -right-24 h-[380px] w-[380px] rounded-full opacity-45"
-        style={{
-          background:
-            "radial-gradient(circle, var(--accent-soft) 0%, var(--primary-soft) 45%, transparent 72%)",
-        }}
-      />
+        className="pointer-events-none absolute top-1/2 right-6 z-20 hidden -translate-y-1/2 flex-col items-center gap-3 2xl:flex"
+      >
+        <span className="[writing-mode:vertical-rl] font-mono text-[11px] tracking-[0.2em] uppercase text-muted">
+          Scroll Down
+        </span>
+        <span className="h-10 w-px bg-gradient-to-b from-primary/70 to-transparent" />
+        <span className="flex h-7 w-4 items-start justify-center rounded-full border border-border-strong p-1">
+          <span className="h-1.5 w-1 rounded-full bg-primary" />
+        </span>
+      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         {/* Main Hero Split Composition */}
@@ -182,8 +182,18 @@ export function HeroSection() {
               />
             </svg>
 
+            {/* Tilted Luminous Studio Spotlight Backing Panel (Matches redesign-hero-section.png) */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-2 -rotate-3 rounded-[34px] border border-primary/35 opacity-85"
+              style={{
+                background:
+                  "radial-gradient(circle at 46% 38%, var(--primary-glow) 0%, var(--primary-soft) 44%, transparent 76%)",
+              }}
+            />
+
             {/* Framed Obsidian Glass Portrait Card */}
-            <div className="studio-card-featured relative overflow-hidden rounded-[28px] bg-surface">
+            <div className="studio-card-featured relative overflow-hidden rounded-[28px]">
               {/* Warm Amber-Gold Studio Backlight Halo Behind Vicky's Portrait */}
               <div
                 aria-hidden="true"

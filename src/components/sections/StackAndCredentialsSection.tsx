@@ -33,6 +33,7 @@ import { VO_BEATS } from "@/data/voBeats";
 import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const BangMotionStackExplainer = dynamic(
   () =>
@@ -88,13 +89,27 @@ export function StackAndCredentialsSection() {
   return (
     <section
       aria-label="Engineering Process Film, Technical Stack, Education and Certifications"
-      className="relative border-t border-border bg-background"
+      className="relative border-t border-border"
     >
       {/* ====================================================================
           SECTION 04 — INTERACTIVE PROCESS WALKTHROUGH FILM (redesign-section-4.png)
          ==================================================================== */}
-      <div id="film" className="cv-auto-section scroll-mt-20 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl space-y-8 px-5 sm:px-8">
+      <div id="film" className="cv-auto-section relative scroll-mt-20 py-20 sm:py-28">
+        <SectionBackdrop variant="film" />
+
+        {/* Delicate Left Vertical Tech Showcase Rail (Matches redesign-section-4.png) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-6 z-20 hidden -translate-y-1/2 flex-col items-center gap-3 2xl:flex"
+        >
+          <span className="h-2 w-2 rounded-full bg-primary" />
+          <span className="h-8 w-px bg-gradient-to-b from-primary/60 to-transparent" />
+          <span className="[writing-mode:vertical-rl] rotate-180 font-mono text-[11px] tracking-[0.2em] uppercase text-muted">
+            Tech Showcase
+          </span>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl space-y-8 px-5 sm:px-8">
           {/* Header Row */}
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
@@ -126,8 +141,14 @@ export function StackAndCredentialsSection() {
 
           {/* 12-Col Film Theater + Core Tech Snapshot Sidebar (Exact layout of redesign-section-4.png) */}
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-            {/* Interactive Film Player */}
-            <div className="relative rounded-3xl border border-primary/35 bg-[#080a0f] p-2.5 shadow-2xl sm:p-4 lg:col-span-9">
+            {/* Interactive Film Player with Luminous Cinema Viewfinder Corner Brackets */}
+            <div className="relative rounded-3xl border border-primary/65 bg-[#080a0f] p-3 shadow-[0_0_42px_-12px_var(--primary-glow)] sm:p-4 lg:col-span-9">
+              {/* Viewfinder Corner Reticle Brackets (Matches redesign-section-4.png) */}
+              <span aria-hidden="true" className="pointer-events-none absolute top-2 left-2 h-4 w-4 rounded-tl-xl border-t-2 border-l-2 border-primary/80" />
+              <span aria-hidden="true" className="pointer-events-none absolute top-2 right-2 h-4 w-4 rounded-tr-xl border-t-2 border-r-2 border-primary/80" />
+              <span aria-hidden="true" className="pointer-events-none absolute bottom-2 left-2 h-4 w-4 rounded-bl-xl border-b-2 border-l-2 border-primary/80" />
+              <span aria-hidden="true" className="pointer-events-none absolute right-2 bottom-2 h-4 w-4 rounded-br-xl border-r-2 border-b-2 border-primary/80" />
+
               {explainerReady ? (
                 <BangMotionStackExplainer />
               ) : (
@@ -211,9 +232,11 @@ export function StackAndCredentialsSection() {
          ==================================================================== */}
       <div
         id="stack"
-        className="cv-auto-section scroll-mt-20 border-t border-border py-20 sm:py-28"
+        className="cv-auto-section relative scroll-mt-20 border-t border-border py-20 sm:py-28"
       >
-        <div className="mx-auto max-w-7xl space-y-16 px-5 sm:px-8">
+        <SectionBackdrop variant="stack" />
+
+        <div className="relative z-10 mx-auto max-w-7xl space-y-16 px-5 sm:px-8">
           {/* Top Hero Row */}
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
             <m.div
@@ -249,14 +272,23 @@ export function StackAndCredentialsSection() {
               </a>
             </m.div>
 
-            <div className="studio-card relative mx-auto w-full max-w-[440px] overflow-hidden rounded-3xl bg-[#080a0f] lg:col-span-5 lg:max-w-none">
-              <div className="relative aspect-[16/10] w-full">
+            {/* Borderless Seamlessly-Blended Workstation Visual (Matches top-right of redesign-section-4.1.png) */}
+            <div className="relative mx-auto w-full max-w-[480px] lg:col-span-5 lg:max-w-none">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-5 rounded-full opacity-75"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 52%, var(--primary-glow) 0%, var(--accent-soft) 45%, transparent 74%)",
+                }}
+              />
+              <div className="studio-visual-blend relative aspect-[16/10] w-full overflow-hidden">
                 <Image
                   src="/images/redesign/hero-stack-laptop.jpg"
                   alt="VM workstation displaying core technical stack badges"
                   fill
-                  sizes="(max-width: 1024px) 92vw, 460px"
-                  className="object-cover"
+                  sizes="(max-width: 1024px) 92vw, 500px"
+                  className="animate-studio-float scale-[1.06] object-cover"
                 />
               </div>
             </div>
@@ -401,6 +433,63 @@ export function StackAndCredentialsSection() {
                 </p>
               </div>
             </aside>
+          </div>
+
+          {/* Career Highlights Glass Telemetry Bar (Matches bottom bar of redesign-section-4.1.png) */}
+          <div className="studio-card-featured relative overflow-hidden rounded-2xl px-6 py-4">
+            <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-2.5">
+                <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span className="font-heading text-sm font-bold text-foreground">
+                  Career Highlights
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 sm:gap-8">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-heading text-xl font-bold text-primary tabular-nums">
+                    10+
+                  </span>
+                  <span className="font-mono text-[11px] text-muted">Shipped Systems</span>
+                </div>
+                <div className="flex items-center gap-2.5 border-l border-border pl-4 sm:pl-8">
+                  <span className="font-heading text-xl font-bold text-foreground tabular-nums">
+                    91.67%
+                  </span>
+                  <span className="font-mono text-[11px] text-muted">RAG Recall</span>
+                </div>
+                <div className="flex items-center gap-2.5 border-l border-border pl-4 sm:pl-8">
+                  <span className="font-heading text-xl font-bold text-accent tabular-nums">
+                    45+
+                  </span>
+                  <span className="font-mono text-[11px] text-muted">MCP Tools</span>
+                </div>
+              </div>
+
+              {/* Luminous Telemetry Node Wave SVG (Matches bottom-right of redesign-section-4.1.png) */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 220 36"
+                className="hidden h-9 w-48 shrink-0 lg:block"
+                fill="none"
+              >
+                <defs>
+                  <linearGradient id="ch-wave-grad" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stopColor="var(--orb-rim)" stopOpacity="0.1" />
+                    <stop offset="50%" stopColor="var(--orb-highlight)" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 4 28 C 44 26, 56 12, 92 14 C 128 16, 146 28, 178 24 C 196 22, 206 12, 216 6"
+                  stroke="url(#ch-wave-grad)"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <circle cx="92" cy="14" r="4.5" fill="var(--bg)" stroke="var(--primary)" strokeWidth="2" />
+                <circle cx="178" cy="24" r="4.5" fill="var(--bg)" stroke="var(--accent)" strokeWidth="2" />
+              </svg>
+            </div>
           </div>
 
           {/* ================================================================

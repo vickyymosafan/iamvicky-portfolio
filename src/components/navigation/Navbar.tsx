@@ -171,16 +171,13 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
           <button
             type="button"
             onClick={onOpenCommandPalette}
-            aria-label="Search"
+            aria-label="Search Ctrl K"
             title="Search portfolio (Ctrl+K)"
             className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground"
           >
             <Command className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            <span className="hidden xl:inline">Search</span>
-            <kbd
-              aria-hidden="true"
-              className="hidden rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[11px] text-muted sm:inline"
-            >
+            <span className="hidden xl:inline">Search</span>{" "}
+            <kbd className="hidden rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[11px] text-muted sm:inline">
               Ctrl K
             </kbd>
           </button>

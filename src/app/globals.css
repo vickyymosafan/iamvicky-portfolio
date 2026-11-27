@@ -3,27 +3,27 @@
 /* ==========================================================================
    Semantic Color System — Zero Green, Zero Pink · WCAG AA/AAA Dual Theme
    Default: Architectural Obsidian Dark + Electric Amber-Gold & Glacier Blue
-   Light: Warm Ivory Paper + Burnished Bronze-Amber & Deep Cobalt Blue
+   Light: Warm Ivory Paper + Deep Burnished Amber-Bronze & Deep Cobalt Blue
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  --bg: #080a0f;
-  --surface: #0f131b;
-  --surface-elevated: #161c27;
+  --bg: #07090e;
+  --surface: #0e121b;
+  --surface-elevated: #151b27;
 
   --ink: #f5f6f8;
   --ink-secondary: #cbd3de;
-  --ink-muted: #93a0b2;
+  --ink-muted: #96a3b5;
 
   --border: rgba(245, 246, 248, 0.10);
   --border-strong: rgba(245, 246, 248, 0.22);
 
   --primary: #f5a623;
   --primary-hover: #ffba42;
-  --primary-ink: #080a0f;
-  --primary-soft: rgba(245, 166, 35, 0.13);
-  --primary-glow: rgba(245, 166, 35, 0.28);
+  --primary-ink: #07090e;
+  --primary-soft: rgba(245, 166, 35, 0.14);
+  --primary-glow: rgba(245, 166, 35, 0.34);
 
   --accent: #38bdf8;
   --accent-soft: rgba(56, 189, 248, 0.14);
@@ -32,7 +32,29 @@
   --warm-soft: rgba(251, 146, 60, 0.14);
 
   --focus-ring: #f5a623;
-  --grid-line: rgba(245, 246, 248, 0.042);
+  --grid-line: rgba(245, 246, 248, 0.048);
+
+  /* Sculptural 3D Glass Orb & Translucent Card Tokens (Dark Obsidian) */
+  --orb-core: #07090f;
+  --orb-shell: #141925;
+  --orb-mid: #c87b16;
+  --orb-rim: #f5a623;
+  --orb-highlight: #ffe39e;
+
+  --glass-card-bg: linear-gradient(
+    155deg,
+    rgba(20, 25, 36, 0.78) 0%,
+    rgba(11, 14, 21, 0.88) 100%
+  );
+  --glass-featured-bg:
+    radial-gradient(280px circle at 14% 12%, rgba(245, 166, 35, 0.16), transparent 68%),
+    radial-gradient(240px circle at 88% 92%, rgba(56, 189, 248, 0.08), transparent 68%),
+    linear-gradient(155deg, rgba(22, 27, 38, 0.84) 0%, rgba(11, 14, 21, 0.92) 100%);
+  --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --glass-featured-shadow:
+    inset 0 1px 0 rgba(255, 227, 158, 0.22),
+    0 18px 46px -20px rgba(0, 0, 0, 0.75),
+    0 0 42px -12px rgba(245, 166, 35, 0.38);
 }
 
 :root[data-theme="light"],
@@ -54,7 +76,7 @@
   --primary-hover: #7c2d12;
   --primary-ink: #ffffff;
   --primary-soft: rgba(154, 52, 18, 0.10);
-  --primary-glow: rgba(154, 52, 18, 0.20);
+  --primary-glow: rgba(154, 52, 18, 0.22);
 
   --accent: #0369a1;
   --accent-soft: rgba(3, 105, 161, 0.11);
@@ -64,6 +86,27 @@
 
   --focus-ring: #9a3412;
   --grid-line: rgba(14, 19, 27, 0.055);
+
+  /* Sculptural Champagne-Alabaster Glass Orb & Porcelain Card Tokens (Light Mode) */
+  --orb-core: #f8f5ec;
+  --orb-shell: #ebe4d4;
+  --orb-mid: #d97706;
+  --orb-rim: #b45309;
+  --orb-highlight: #f59e0b;
+
+  --glass-card-bg: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(250, 247, 240, 0.94) 100%
+  );
+  --glass-featured-bg:
+    radial-gradient(280px circle at 14% 12%, rgba(180, 83, 9, 0.10), transparent 68%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.95) 0%, rgba(252, 248, 240, 0.96) 100%);
+  --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-featured-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 18px 40px -22px rgba(14, 19, 27, 0.16),
+    0 0 34px -12px rgba(154, 52, 18, 0.22);
 }
 
 :root[data-theme="dark"],
@@ -112,43 +155,81 @@ body {
   min-height: 100dvh;
 }
 
-/* Architectural grid + soft luminous obsidian ambient auras (GPU compositor isolated) */
-.bg-architectural-grid {
-  background-image:
-    radial-gradient(620px circle at 0% 0%, var(--primary-soft), transparent 62%),
-    radial-gradient(560px circle at 100% 18%, var(--accent-soft), transparent 64%),
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+/* Fixed GPU-isolated architectural grid + ambient depth */
+.studio-backdrop-root {
   transform: translate3d(0, 0, 0);
   contain: strict;
 }
 
-/* Studio obsidian glowing card grammar (layered in components so Tailwind utility overrides win cleanly) */
+.bg-architectural-grid {
+  background-image:
+    radial-gradient(740px circle at 4% 4%, var(--primary-soft), transparent 60%),
+    radial-gradient(660px circle at 96% 92%, var(--primary-soft), transparent 58%),
+    radial-gradient(540px circle at 92% 16%, var(--accent-soft), transparent 62%),
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 52px 52px, 52px 52px;
+}
+
+/* Translucent obsidian glass cards + seamless borderless studio visual mask */
 @layer components {
   .studio-card {
-    background: var(--surface);
+    background: var(--glass-card-bg);
     border: 1px solid var(--border);
+    box-shadow: var(--glass-specular);
     transition: border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
       transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .studio-card:hover {
-    border-color: color-mix(in srgb, var(--primary) 52%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 54%, transparent);
+    box-shadow:
+      var(--glass-specular),
+      0 14px 36px -18px var(--primary-glow);
   }
 
   .studio-card-featured {
-    background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--primary) 65%, transparent);
-    box-shadow: 0 0 36px -12px var(--primary-glow);
+    background: var(--glass-featured-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 68%, transparent);
+    box-shadow: var(--glass-featured-shadow);
   }
 
   .cta-glow {
-    box-shadow: 0 0 26px -6px var(--primary-glow);
+    box-shadow: 0 0 28px -4px var(--primary-glow);
+  }
+
+  /* Seamless borderless dissolve for studio 3D sculptures in Dark Mode (matches all 7 references) */
+  .studio-visual-blend {
+    mask-image: radial-gradient(
+      ellipse 50% 50% at 50% 50%,
+      #000 42%,
+      rgba(0, 0, 0, 0.55) 70%,
+      transparent 98%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 50% 50% at 50% 50%,
+      #000 42%,
+      rgba(0, 0, 0, 0.55) 70%,
+      transparent 98%
+    );
+  }
+
+  :root:not([data-theme="light"]) .studio-visual-blend {
+    mix-blend-mode: lighten;
+  }
+
+  :root[data-theme="light"] .studio-visual-blend {
+    mask-image: none;
+    -webkit-mask-image: none;
+    mix-blend-mode: normal;
+    border-radius: 1.5rem;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 22px 46px -22px rgba(14, 19, 27, 0.32);
   }
 }
 
-/* Subtle floating studio animation (compositor-only, respects reduced motion) */
+/* Subtle floating studio animations (compositor-only, respects reduced motion) */
 @keyframes studio-float {
   0%,
   100% {
@@ -168,13 +249,31 @@ body {
   }
 }
 
+@keyframes orb-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .animate-studio-float {
     animation: studio-float 6.5s ease-in-out infinite;
   }
 
   .animate-orbit-slow {
-    animation: orbit-spin 26s linear infinite;
+    animation: orbit-spin 28s linear infinite;
+  }
+
+  .animate-orb-drift {
+    animation: orb-drift 11s ease-in-out infinite;
+  }
+
+  .animate-orb-drift-slow {
+    animation: orb-drift 15s ease-in-out infinite reverse;
   }
 }
 
@@ -258,7 +357,7 @@ dialog.native-modal:modal {
 }
 
 dialog.native-modal::backdrop {
-  background: rgba(6, 8, 12, 0.76);
+  background: rgba(6, 8, 12, 0.78);
   backdrop-filter: blur(6px);
   overflow: hidden;
   overscroll-behavior: contain;

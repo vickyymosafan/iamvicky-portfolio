@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FeaturedProject } from "@/data/portfolio";
 import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
+import { StudioBackdrop } from "@/components/ui/StudioBackdrop";
 import { Navbar } from "@/components/navigation/Navbar";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { WorkSection } from "@/components/sections/WorkSection";
@@ -54,12 +55,9 @@ export function PortfolioShell() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
-      {/* Subtle Obsidian Architectural Grid + Soft Amber/Blue Ambient Auras */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-20 bg-architectural-grid"
-      />
+    <div className="relative min-h-screen text-foreground">
+      {/* Global Sculptural 3D Glass Orb, Silk Wave & Coordinate Grid Backdrop */}
+      <StudioBackdrop />
 
       {/* Native CSS Scroll-Driven Top Progress Bar */}
       <ScrollProgressBar />

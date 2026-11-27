@@ -22,6 +22,7 @@ import {
 } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 interface WorkSectionProps {
   onInspectProject: (project: FeaturedProject) => void;
@@ -71,15 +72,19 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
 
   return (
     <section id="projects" className="relative scroll-mt-20 py-20 sm:py-28">
-      {/* Subtle Ambient Corner Aura */}
+      {/* Reference-Matched Sweeping Silk Ribbon & Floating Micro-Sphere Backdrop */}
+      <SectionBackdrop variant="work" />
+
+      {/* Delicate Left Scroll Rail on Ultra-Wide Screens (Matches redesign-section-1.png) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 right-0 h-[420px] w-[420px] rounded-full opacity-35"
-        style={{
-          background:
-            "radial-gradient(circle, var(--primary-soft) 0%, transparent 68%)",
-        }}
-      />
+        className="pointer-events-none absolute top-72 left-6 z-20 hidden flex-col items-center gap-3 2xl:flex"
+      >
+        <span className="[writing-mode:vertical-rl] rotate-180 font-mono text-[11px] tracking-[0.2em] uppercase text-muted">
+          Scroll Down
+        </span>
+        <span className="h-10 w-px bg-gradient-to-b from-primary/60 to-transparent" />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl space-y-24 px-5 sm:px-8">
         {/* ================================================================
@@ -141,31 +146,40 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
               </div>
             </m.div>
 
-            {/* Right Studio 3D Monolith Hero Visual */}
+            {/* Right Borderless Seamlessly-Blended Studio 3D Monolith (Matches redesign-section-1.png) */}
             <m.div
               initial={{ y: 14, scale: 0.98 }}
               whileInView={{ y: 0, scale: 1 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.5, delay: 0.06, ease: ARCHITECTURAL_EASE }}
-              className="relative mx-auto w-full max-w-[460px] lg:col-span-5 lg:max-w-none"
+              className="relative mx-auto w-full max-w-[500px] lg:col-span-5 lg:max-w-none"
             >
-              <div className="studio-card relative overflow-hidden rounded-3xl bg-[#080a0f]">
-                <div className="relative aspect-[16/11] w-full">
+              {/* Soft Luminous Backlight Halo Directly Behind VM Monolith */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-6 rounded-full opacity-80"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 48%, var(--primary-glow) 0%, var(--accent-soft) 44%, transparent 72%)",
+                }}
+              />
+              <div className="relative overflow-visible">
+                <div className="studio-visual-blend relative aspect-[16/11] w-full overflow-hidden">
                   <Image
                     src="/images/redesign/hero-work-monolith.jpg"
                     alt="Obsidian VM engineering emblem surrounded by golden orbital rings"
                     fill
-                    sizes="(max-width: 1024px) 92vw, 480px"
-                    className="animate-studio-float object-cover"
+                    sizes="(max-width: 1024px) 92vw, 520px"
+                    className="animate-studio-float scale-[1.06] object-cover"
                   />
                 </div>
-                <div className="absolute right-4 bottom-4 flex items-center gap-2 rounded-2xl border border-white/15 bg-[#0b0e15]/90 px-3.5 py-2 backdrop-blur-sm">
-                  <span className="h-2 w-2 rounded-full bg-[#f5a623]" aria-hidden="true" />
+                <div className="studio-card absolute right-3 bottom-2 z-20 flex items-center gap-2 rounded-2xl px-3.5 py-2 backdrop-blur-sm">
+                  <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                   <div className="leading-tight">
-                    <p className="font-heading text-xs font-bold text-[#f5f6f8]">
+                    <p className="font-heading text-xs font-bold text-foreground">
                       7 Flagship Case Studies
                     </p>
-                    <p className="font-mono text-[11px] text-[#93a0b2]">
+                    <p className="font-mono text-[11px] text-muted">
                       Benchmarked · Shipped End-to-End
                     </p>
                   </div>
@@ -336,9 +350,14 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
         {/* ================================================================
             PART 2: ARCHIVE VAULT — ADDITIONAL SHIPPED SYSTEMS (redesign-section-1.1.png)
            ================================================================ */}
-        <div id="archive" className="cv-auto-section scroll-mt-24 space-y-10 border-t border-border pt-20">
+        <div
+          id="archive"
+          className="cv-auto-section relative scroll-mt-24 space-y-10 border-t border-border pt-20"
+        >
+          <SectionBackdrop variant="archive" />
+
           {/* Archive Hero Row */}
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+          <div className="relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
             <m.div
               initial={{ y: 12 }}
               whileInView={{ y: 0 }}
@@ -368,18 +387,24 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
               whileInView={{ y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.48, delay: 0.05, ease: ARCHITECTURAL_EASE }}
-              className="relative mx-auto w-full max-w-[440px] lg:col-span-5 lg:max-w-none"
+              className="relative mx-auto w-full max-w-[480px] lg:col-span-5 lg:max-w-none"
             >
-              <div className="studio-card relative overflow-hidden rounded-3xl bg-[#080a0f]">
-                <div className="relative aspect-[16/10] w-full">
-                  <Image
-                    src="/images/redesign/hero-archive-vault.jpg"
-                    alt="Obsidian VM archive vault surrounded by glowing amber orbital rings"
-                    fill
-                    sizes="(max-width: 1024px) 92vw, 460px"
-                    className="object-cover"
-                  />
-                </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-5 rounded-full opacity-75"
+                style={{
+                  background:
+                    "radial-gradient(circle at 52% 48%, var(--primary-glow) 0%, var(--primary-soft) 42%, transparent 72%)",
+                }}
+              />
+              <div className="studio-visual-blend relative aspect-[16/10] w-full overflow-hidden">
+                <Image
+                  src="/images/redesign/hero-archive-vault.jpg"
+                  alt="Obsidian VM archive vault surrounded by glowing amber orbital rings"
+                  fill
+                  sizes="(max-width: 1024px) 92vw, 500px"
+                  className="animate-studio-float scale-[1.06] object-cover"
+                />
               </div>
             </m.div>
           </div>

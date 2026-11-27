@@ -16,6 +16,7 @@ import {
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 export function ContactFooter() {
   const [copied, setCopied] = useState(false);
@@ -34,9 +35,11 @@ export function ContactFooter() {
   return (
     <footer
       id="contact"
-      className="cv-auto-footer relative border-t border-border bg-surface/30 py-16 sm:py-24"
+      className="cv-auto-footer relative z-10 border-t border-border py-16 sm:py-24"
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+      <SectionBackdrop variant="contact" />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         <div className="studio-card-featured relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12">
           {/* Subtle Ambient Corner Highlight */}
           <div

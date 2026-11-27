@@ -17,6 +17,7 @@ import {
 import { AI_WORKFLOW_STAGES, PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const INSPECTOR_TABS = ["Code", "Console", "Flow", "Outcome"] as const;
 type InspectorTab = (typeof INSPECTOR_TABS)[number];
@@ -56,15 +57,8 @@ export function AiWorkflowSection() {
       id="workflow"
       className="cv-auto-section relative scroll-mt-20 border-t border-border py-20 sm:py-28"
     >
-      {/* Subtle Ambient Corner Glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-10 -left-24 h-[380px] w-[380px] rounded-full opacity-35"
-        style={{
-          background:
-            "radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)",
-        }}
-      />
+      {/* Reference-Matched Diagonal Orbital Ribbon & Glow Backdrop */}
+      <SectionBackdrop variant="workflow" />
 
       <div className="relative z-10 mx-auto max-w-7xl space-y-12 px-5 sm:px-8">
         {/* ================================================================
@@ -130,7 +124,7 @@ export function AiWorkflowSection() {
             </div>
           </m.div>
 
-          {/* Right Live Obsidian IDE Visual (Modeled after redesign-section-2.png) */}
+          {/* Right Live 3D-Tilted Obsidian IDE Visual + Floating Glass Cubes (Matches redesign-section-2.png) */}
           <m.div
             initial={{ y: 14 }}
             whileInView={{ y: 0 }}
@@ -138,26 +132,54 @@ export function AiWorkflowSection() {
             transition={{ duration: 0.48, delay: 0.06, ease: ARCHITECTURAL_EASE }}
             className="relative lg:col-span-6"
           >
-            {/* Subtle Orbital SVG Accent Behind IDE */}
+            {/* Glowing Orbital Ring + Floating Translucent Glass Cubes Behind/Around IDE */}
             <svg
               aria-hidden="true"
-              viewBox="0 0 540 320"
-              className="pointer-events-none absolute -inset-4 h-[calc(100%+2rem)] w-[calc(100%+2rem)] opacity-60"
+              viewBox="0 0 600 360"
+              className="pointer-events-none absolute -inset-6 h-[calc(100%+3rem)] w-[calc(100%+3rem)] opacity-85"
               fill="none"
             >
+              <defs>
+                <linearGradient id="ide-ring-grad" x1="0%" y1="50%" x2="100%" y2="50%">
+                  <stop offset="0%" stopColor="var(--orb-rim)" stopOpacity="0.18" />
+                  <stop offset="48%" stopColor="var(--orb-highlight)" stopOpacity="0.82" />
+                  <stop offset="82%" stopColor="var(--accent)" stopOpacity="0.58" />
+                  <stop offset="100%" stopColor="var(--orb-rim)" stopOpacity="0.16" />
+                </linearGradient>
+              </defs>
               <ellipse
-                cx="270"
-                cy="165"
-                rx="246"
-                ry="82"
-                transform="rotate(-11 270 165)"
-                stroke="var(--primary)"
-                strokeOpacity="0.4"
-                strokeWidth="1.2"
+                cx="300"
+                cy="185"
+                rx="276"
+                ry="92"
+                transform="rotate(-10 300 185)"
+                stroke="url(#ide-ring-grad)"
+                strokeWidth="1.6"
               />
+              {/* Floating isometric frosted glass cube 1 (left-bottom) */}
+              <g transform="translate(22, 198)" opacity="0.82">
+                <polygon points="18,0 36,10 18,20 0,10" fill="rgba(56,189,248,0.22)" stroke="#38bdf8" strokeWidth="1" />
+                <polygon points="0,10 18,20 18,40 0,30" fill="rgba(14,19,30,0.85)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                <polygon points="36,10 18,20 18,40 36,30" fill="rgba(245,166,35,0.18)" stroke="rgba(245,166,35,0.55)" strokeWidth="1" />
+              </g>
+              {/* Floating isometric frosted glass cube 2 (top-right) */}
+              <g transform="translate(534, 92)" opacity="0.82">
+                <polygon points="16,0 32,9 16,18 0,9" fill="rgba(245,166,35,0.26)" stroke="#f5a623" strokeWidth="1" />
+                <polygon points="0,9 16,18 16,36 0,27" fill="rgba(14,19,30,0.85)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                <polygon points="32,9 16,18 16,36 32,27" fill="rgba(56,189,248,0.20)" stroke="rgba(56,189,248,0.55)" strokeWidth="1" />
+              </g>
             </svg>
 
-            <div className="studio-card-featured relative overflow-hidden rounded-2xl bg-[#0b0e15] text-[#f5f6f8] shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl border border-primary/65 bg-[#0b0e15] text-[#f5f6f8] shadow-[0_0_42px_-12px_var(--primary-glow)] transition-transform duration-500 lg:[transform:perspective(1200px)_rotateY(-8deg)_rotateX(3deg)] lg:hover:[transform:perspective(1200px)_rotateY(-2deg)_rotateX(1deg)]">
+              {/* Blazing Top & Bottom Edge Rim Light Lines */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-10 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#ffe39e] to-transparent opacity-80"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-12 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#f5a623] to-transparent opacity-75"
+              />
               {/* Editor Top Window Bar */}
               <div className="flex items-center justify-between border-b border-white/10 bg-[#10141e] px-4 py-3">
                 <div className="flex items-center gap-1.5" aria-hidden="true">

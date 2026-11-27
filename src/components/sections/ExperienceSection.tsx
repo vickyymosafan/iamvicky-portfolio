@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { EXPERIENCES, PROFILE } from "@/data/portfolio";
 import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const STAT_ICONS = [BarChart3, Rocket, Sparkles] as const;
 
@@ -27,15 +28,8 @@ export function ExperienceSection() {
       id="experience"
       className="cv-auto-section relative scroll-mt-20 border-t border-border py-20 sm:py-28"
     >
-      {/* Subtle Ambient Corner Aura */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 bottom-0 h-[420px] w-[420px] rounded-full opacity-30"
-        style={{
-          background:
-            "radial-gradient(circle, var(--primary-soft) 0%, transparent 70%)",
-        }}
-      />
+      {/* Reference-Matched Sculptural Side Glass Domes & Orbital Arc Backdrop */}
+      <SectionBackdrop variant="experience" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-10">
@@ -92,21 +86,29 @@ export function ExperienceSection() {
               </div>
             </m.div>
 
-            {/* Sleek Workstation Visual (Matches bottom-left of redesign-section-3.png) */}
+            {/* Borderless Seamlessly-Blended Workstation Visual (Matches bottom-left of redesign-section-3.png) */}
             <m.div
               initial={{ y: 12 }}
               whileInView={{ y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.48, delay: 0.06, ease: ARCHITECTURAL_EASE }}
-              className="studio-card relative hidden overflow-hidden rounded-3xl bg-[#080a0f] lg:block"
+              className="relative hidden lg:block"
             >
-              <div className="relative aspect-[16/10] w-full">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-4 rounded-full opacity-70"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 56%, var(--primary-glow) 0%, var(--primary-soft) 45%, transparent 74%)",
+                }}
+              />
+              <div className="studio-visual-blend relative aspect-[16/10] w-full overflow-hidden">
                 <Image
                   src="/images/redesign/hero-stack-laptop.jpg"
                   alt="VM developer workstation surrounded by floating tech stack tiles"
                   fill
-                  sizes="460px"
-                  className="object-cover"
+                  sizes="480px"
+                  className="animate-studio-float scale-[1.06] object-cover"
                 />
               </div>
             </m.div>
@@ -144,7 +146,7 @@ export function ExperienceSection() {
                       <span
                         className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
                           isExpanded
-                            ? "border-primary bg-primary shadow-[0_0_16px_var(--primary-glow)]"
+                            ? "border-primary bg-primary ring-4 ring-primary/25 shadow-[0_0_18px_var(--primary-glow)]"
                             : "border-primary/50 bg-background group-hover:border-primary"
                         }`}
                       >
