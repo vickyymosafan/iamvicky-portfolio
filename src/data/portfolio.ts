@@ -477,6 +477,46 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       { id: "fb", label: "Fallback Dataset", sublabel: "Zero-Downtime UI", layer: "data" },
     ],
   },
+  {
+    id: "nexapip-marketplace",
+    index: "08",
+    title: "NexaPip EA Marketplace",
+    subtitle: "vickyymosafan/nexapip-marketplace · MT5 Lifetime-License Store",
+    category: "Full-Stack",
+    year: "2026",
+    image: "/images/redesign/proj-nexapip-marketplace.jpg",
+    featuredTag: "Lifetime IDR · SHA-256 .ex5 Vault",
+    summary:
+      "Indonesian marketplace for MetaTrader 5 Expert Advisors sold as a one-time lifetime purchase in Rupiah, with a secure .ex5 vault, buyer library, and seller studio.",
+    problem:
+      "Indonesian traders buy EAs through scattered chats and rental schemes, with no trusted way to pay in Rupiah, verify the binary, or re-download purchases later.",
+    solution:
+      "Built a Next.js 16 + Prisma 7 + PostgreSQL storefront with Mayar IDR checkout (QRIS, e-wallet, virtual account), a validated .ex5 binary vault, a permanent buyer library, and an admin studio for catalog and version updates.",
+    engineeringDecisions: [
+      "Stored .ex5 files outside public/ and validated extension, binary header, size limit, and SHA-256 checksum, rejecting .ex4 and .mq5 uploads.",
+      "Split the codebase into domain, application, infrastructure, and app layers so pricing, checkout, and library logic stay testable without the framework.",
+      "Secured access with HTTP-only sessions, scrypt password hashing, and a route-guard proxy, and added an admin studio to publish new EA versions straight to buyers' libraries.",
+    ],
+    metrics: [
+      { label: "License", value: "Lifetime", detail: "One-time IDR price" },
+      { label: "Binary Check", value: "SHA-256", detail: ".ex5 only vault" },
+      { label: "Payments", value: "Mayar", detail: "QRIS · E-Wallet · VA" },
+    ],
+    tech: ["Next.js 16", "React 19", "Prisma 7", "PostgreSQL", "Zod", "Tailwind CSS 4"],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/vickyymosafan/nexapip-marketplace",
+        kind: "github",
+      },
+    ],
+    architecture: [
+      { id: "app", label: "Next.js 16 App Router", sublabel: "Store + Library", layer: "client" },
+      { id: "usecase", label: "Use-Case Layer", sublabel: "Checkout + Catalog", layer: "orchestration" },
+      { id: "mayar", label: "Mayar Payments", sublabel: "IDR Verification", layer: "ai" },
+      { id: "vault", label: "PostgreSQL + .ex5 Vault", sublabel: "SHA-256 Checksums", layer: "data" },
+    ],
+  },
 ];
 
 export const ADDITIONAL_PROJECTS: AdditionalProject[] = [
