@@ -290,29 +290,33 @@ export function WorkCardsWebGLCanvas({
     if (!host) return;
 
     let cancelled = false;
+    let cleanupFn: (() => void) | null = null;
 
-    const canvas = document.createElement("canvas");
-    canvas.className = "pointer-events-none block h-full w-full";
-    canvas.setAttribute("aria-hidden", "true");
-    host.appendChild(canvas);
+    const initWebGL = () => {
+      if (cancelled || !host) return;
 
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isNarrow = window.innerWidth < 640;
-    const dpr = Math.min(window.devicePixelRatio || 1, isNarrow ? 1.0 : 1.25);
+      const canvas = document.createElement("canvas");
+      canvas.className = "pointer-events-none block h-full w-full";
+      canvas.setAttribute("aria-hidden", "true");
+      host.appendChild(canvas);
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: false,
-        alpha: true,
-        stencil: false,
-        powerPreference: "high-performance",
-      });
-    } catch {
-      if (canvas.parentNode === host) host.removeChild(canvas);
-      return;
-    }
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isNarrow = window.innerWidth < 640;
+      const dpr = Math.min(window.devicePixelRatio || 1, isNarrow ? 1.0 : 1.25);
+
+      let renderer: THREE.WebGLRenderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: false,
+          alpha: true,
+          stencil: false,
+          powerPreference: "high-performance",
+        });
+      } catch {
+        if (canvas.parentNode === host) host.removeChild(canvas);
+        return;
+      }
 
     renderer.setPixelRatio(dpr);
     renderer.setClearColor(0x000000, 0);
@@ -590,33 +594,42 @@ export function WorkCardsWebGLCanvas({
 
     void buildAndCompile();
 
+      cleanupFn = () => {
+        syncThemeRef.current = null;
+        remeasureRef.current = null;
+        stopLoop();
+        unsubX();
+        io.disconnect();
+        ro.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
+
+        const geos = new Set<THREE.BufferGeometry>([sharedPlinthGeo, sharedRimGeo]);
+        entries.forEach((entry) => {
+          entry.root.traverse((obj) => {
+            if (obj instanceof THREE.Mesh) {
+              geos.add(obj.geometry);
+            }
+          });
+        });
+        geos.forEach((g) => g.dispose());
+        entries.clear();
+
+        sharedMats.primaryMat.dispose();
+        sharedMats.accentMat.dispose();
+        sharedMats.bodyMat.dispose();
+        sharedMats.wireMat.dispose();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        if (canvas.parentNode === host) host.removeChild(canvas);
+      };
+    };
+
+    const initRaf = requestAnimationFrame(initWebGL);
+
     return () => {
       cancelled = true;
-      syncThemeRef.current = null;
-      remeasureRef.current = null;
-      stopLoop();
-      unsubX();
-      io.disconnect();
-      ro.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
-
-      const geos = new Set<THREE.BufferGeometry>([sharedPlinthGeo, sharedRimGeo]);
-      entries.forEach((entry) => {
-        entry.root.traverse((obj) => {
-          if (obj instanceof THREE.Mesh) {
-            geos.add(obj.geometry);
-          }
-        });
-      });
-      geos.forEach((g) => g.dispose());
-      entries.clear();
-
-      sharedMats.primaryMat.dispose();
-      sharedMats.accentMat.dispose();
-      sharedMats.bodyMat.dispose();
-      sharedMats.wireMat.dispose();
-      renderer.dispose();
-      if (canvas.parentNode === host) host.removeChild(canvas);
+      cancelAnimationFrame(initRaf);
+      cleanupFn?.();
     };
   }, [slotsRef, xMotionValue]);
 

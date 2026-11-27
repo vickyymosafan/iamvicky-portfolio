@@ -273,6 +273,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
         ringGeo.dispose();
         ringMat.dispose();
         renderer.dispose();
+        renderer.forceContextLoss();
         if (renderer.domElement.parentNode === container) {
           container.removeChild(renderer.domElement);
         }

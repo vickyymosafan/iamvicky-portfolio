@@ -219,23 +219,27 @@ export const ExperienceStoryCanvas = React.memo(function ExperienceStoryCanvas({
     if (!container) return;
 
     let cancelled = false;
+    let cleanupFn: (() => void) | null = null;
 
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const initW = Math.max(1, container.clientWidth);
-    const initH = Math.max(1, container.clientHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, initW < 420 ? 1.0 : 1.25);
+    const initWebGL = () => {
+      if (cancelled || !container) return;
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        antialias: false,
-        alpha: true,
-        stencil: false,
-        powerPreference: "high-performance",
-      });
-    } catch {
-      return;
-    }
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const initW = Math.max(1, container.clientWidth);
+      const initH = Math.max(1, container.clientHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, initW < 420 ? 1.0 : 1.25);
+
+      let renderer: THREE.WebGLRenderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          antialias: false,
+          alpha: true,
+          stencil: false,
+          powerPreference: "high-performance",
+        });
+      } catch {
+        return;
+      }
 
     renderer.setPixelRatio(dpr);
     renderer.setSize(initW, initH);
@@ -487,41 +491,50 @@ export const ExperienceStoryCanvas = React.memo(function ExperienceStoryCanvas({
       drawOnce();
     }
 
+      cleanupFn = () => {
+        syncThemeRef.current = null;
+        wakeRenderRef.current = null;
+        if (rafId) cancelAnimationFrame(rafId);
+        io.disconnect();
+        ro.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
+        container.removeEventListener("pointerdown", onDown);
+        container.removeEventListener("pointerenter", onContainerEnter);
+        container.removeEventListener("pointermove", onContainerMove);
+        container.removeEventListener("pointerleave", onContainerLeave);
+        window.removeEventListener("pointermove", onWindowDragMove);
+        window.removeEventListener("pointerup", onUp);
+
+        const geos = new Set<THREE.BufferGeometry>();
+        chapters.forEach((grp) => {
+          grp.traverse((obj) => {
+            if (obj instanceof THREE.Mesh && !geos.has(obj.geometry)) {
+              geos.add(obj.geometry);
+              obj.geometry.dispose();
+            }
+          });
+        });
+        baseRingGeo.dispose();
+        baseRingMat.dispose();
+        mats.primaryMat.dispose();
+        mats.accentMat.dispose();
+        mats.amberMat.dispose();
+        mats.slateMat.dispose();
+        mats.wireMat.dispose();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        if (renderer.domElement.parentNode === container) {
+          container.removeChild(renderer.domElement);
+        }
+      };
+    };
+
+    const initRaf = requestAnimationFrame(initWebGL);
+
     return () => {
       cancelled = true;
-      syncThemeRef.current = null;
-      wakeRenderRef.current = null;
-      if (rafId) cancelAnimationFrame(rafId);
-      io.disconnect();
-      ro.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
-      container.removeEventListener("pointerdown", onDown);
-      container.removeEventListener("pointerenter", onContainerEnter);
-      container.removeEventListener("pointermove", onContainerMove);
-      container.removeEventListener("pointerleave", onContainerLeave);
-      window.removeEventListener("pointermove", onWindowDragMove);
-      window.removeEventListener("pointerup", onUp);
-
-      const geos = new Set<THREE.BufferGeometry>();
-      chapters.forEach((grp) => {
-        grp.traverse((obj) => {
-          if (obj instanceof THREE.Mesh && !geos.has(obj.geometry)) {
-            geos.add(obj.geometry);
-            obj.geometry.dispose();
-          }
-        });
-      });
-      baseRingGeo.dispose();
-      baseRingMat.dispose();
-      mats.primaryMat.dispose();
-      mats.accentMat.dispose();
-      mats.amberMat.dispose();
-      mats.slateMat.dispose();
-      mats.wireMat.dispose();
-      renderer.dispose();
-      if (renderer.domElement.parentNode === container) {
-        container.removeChild(renderer.domElement);
-      }
+      cancelAnimationFrame(initRaf);
+      cleanupFn?.();
     };
   }, []);
 
