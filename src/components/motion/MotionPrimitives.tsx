@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import React, { useEffect } from "react";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const ARCHITECTURAL_EASE = [0.22, 1, 0.36, 1] as const;
@@ -19,7 +19,7 @@ export function EditorialReveal({
   className,
   delay = 0,
   direction = "up",
-  distance = 18,
+  distance = 14,
 }: EditorialRevealProps) {
   const offset = {
     y: direction === "up" ? distance : direction === "down" ? -distance : 0,
@@ -27,41 +27,15 @@ export function EditorialReveal({
   };
 
   return (
-    <motion.div
-      initial={{ x: offset.x, y: offset.y, scale: 0.99 }}
-      whileInView={{ x: 0, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.08 }}
-      transition={{ duration: 0.56, delay, ease: ARCHITECTURAL_EASE }}
+    <m.div
+      initial={{ x: offset.x, y: offset.y }}
+      whileInView={{ x: 0, y: 0 }}
+      viewport={{ once: true, amount: 0.05 }}
+      transition={{ duration: 0.42, delay, ease: ARCHITECTURAL_EASE }}
       className={className}
     >
       {children}
-    </motion.div>
-  );
-}
-
-interface ParallaxFrameProps {
-  children: React.ReactNode;
-  className?: string;
-  offsetY?: number;
-}
-
-export function ParallaxFrame({ children, className, offsetY = 28 }: ParallaxFrameProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 26,
-    mass: 0.3,
-  });
-  const y = useTransform(smoothProgress, [0, 1], [offsetY, -offsetY]);
-
-  return (
-    <div ref={ref} className={cn("relative", className)}>
-      <motion.div style={{ y }}>{children}</motion.div>
-    </div>
+    </m.div>
   );
 }
 

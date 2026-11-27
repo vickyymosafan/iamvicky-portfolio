@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface BrandLogoProps {
+interface BrandLogoProps {
   size?: number;
   variant?: "framed" | "mark";
   tone?: "auto" | "dark" | "light";

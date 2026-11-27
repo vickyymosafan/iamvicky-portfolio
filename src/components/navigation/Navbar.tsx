@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import {
   Command,
   FileDown,
@@ -66,7 +66,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
           setActiveSection(visible[0].target.id);
         }
       },
-      { rootMargin: "-25% 0px -55% 0px", threshold: [0.1, 0.35, 0.6] }
+      { rootMargin: "-25% 0px -55% 0px", threshold: [0.1, 0.45] }
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -81,10 +81,10 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 border-b py-3 transition-colors duration-200 ${
         scrolled
-          ? "border-b border-border bg-[var(--surface-translucent)] backdrop-blur-sm py-2.5"
-          : "border-b border-transparent bg-transparent py-4"
+          ? "border-border bg-background/95"
+          : "border-transparent bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 sm:px-8">
@@ -111,7 +111,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
         {/* Desktop Navigation */}
         <nav
           aria-label="Primary navigation"
-          className="hidden items-center gap-1 rounded-xl border border-border bg-surface/85 p-1 lg:flex"
+          className="hidden items-center gap-1 rounded-xl border border-border bg-surface/90 p-1 lg:flex"
         >
           {NAV_ITEMS.map((item) => {
             const isActive = activeSection === item.id;
@@ -121,20 +121,13 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
                 href={`#${item.id}`}
                 onClick={(e) => handleNavClick(e, item.id)}
                 aria-current={isActive ? "location" : undefined}
-                className={`relative rounded-lg px-3.5 py-2 font-mono text-xs font-medium ${
+                className={`rounded-lg px-3.5 py-2 font-mono text-xs font-medium ${
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary font-semibold text-primary-foreground"
                     : "text-muted hover:text-foreground"
                 }`}
               >
-                {isActive ? (
-                  <motion.span
-                    layoutId="nav-active-pill"
-                    transition={{ type: "spring", stiffness: 360, damping: 32 }}
-                    className="absolute inset-0 rounded-lg bg-primary"
-                  />
-                ) : null}
-                <span className="relative z-10">{item.label}</span>
+                {item.label}
               </a>
             );
           })}
@@ -147,7 +140,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             type="button"
             onClick={onOpenCommandPalette}
             aria-label="Open quick navigation command palette"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground cursor-pointer"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground"
           >
             <Command className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
             <span className="hidden sm:inline">Search</span>
@@ -161,9 +154,11 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             type="button"
             onClick={toggleTheme}
             aria-label={
-              theme === "dark" ? "Switch to light editorial theme" : "Switch to dark obsidian theme"
+              theme === "dark"
+                ? "Switch to light editorial theme"
+                : "Switch to dark obsidian theme"
             }
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-foreground hover:border-primary hover:text-primary cursor-pointer"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-border bg-surface text-foreground hover:border-primary hover:text-primary"
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4" aria-hidden="true" />
@@ -190,7 +185,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-nav-drawer"
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-foreground hover:border-primary lg:hidden cursor-pointer"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-border bg-surface text-foreground hover:border-primary lg:hidden"
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -204,13 +199,13 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
       {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileMenuOpen ? (
-          <motion.nav
+          <m.nav
             id="mobile-nav-drawer"
             aria-label="Mobile navigation"
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: ARCHITECTURAL_EASE }}
+            transition={{ duration: 0.2, ease: ARCHITECTURAL_EASE }}
             className="mx-5 mt-3 rounded-2xl border border-border bg-surface p-4 shadow-2xl sm:mx-8 lg:hidden"
           >
             <ul className="flex flex-col gap-1">
@@ -223,7 +218,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
                       onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex min-h-11 items-center justify-between rounded-xl px-4 py-2.5 font-mono text-sm font-medium ${
                         isActive
-                          ? "bg-primary text-primary-foreground font-semibold"
+                          ? "bg-primary font-semibold text-primary-foreground"
                           : "text-foreground hover:bg-surface-elevated"
                       }`}
                     >
@@ -245,7 +240,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
                 <span>Download Full CV (PDF)</span>
               </a>
             </div>
-          </motion.nav>
+          </m.nav>
         ) : null}
       </AnimatePresence>
     </header>

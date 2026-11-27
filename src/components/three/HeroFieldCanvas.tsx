@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 
 interface HeroFieldCanvasProps {
   paused: boolean;
@@ -26,10 +27,11 @@ const WAVE_FRAGMENT_SHADER = /* glsl */ `
 `;
 
 /**
- * Persistent Zero-Freeze GPU-Shader WebGL Field behind Hero:
- * - Initializes ONCE during idle time after Hero LCP paints and NEVER destroys/recreates WebGL during scroll!
- * - Strictly pauses/resumes rAF via IntersectionObserver & visibilitychange (0% GPU/CPU when scrolled past Hero).
- * - Pre-compiles shaders via `compileAsync()` and uses a pure GLSL vertex shader wave (0ms CPU loop).
+ * Low-overhead GPU-Shader WebGL Field behind Hero:
+ * - Defers WebGL creation until after Hero LCP paint via requestIdleCallback.
+ * - Caps DPR (1.0 mobile / 1.25 desktop) and paces ambient animation at ~45fps so scroll frames never starve.
+ * - Renders a single static frame and halts rAF when `prefers-reduced-motion: reduce` is enabled.
+ * - Pauses strictly off-screen via IntersectionObserver + visibilitychange.
  */
 export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +62,9 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       if (cancelled || !container) return;
 
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.35);
+      const initW = Math.max(1, container.clientWidth);
+      const initH = Math.max(1, container.clientHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, initW < 640 ? 1.0 : 1.25);
 
       let renderer: THREE.WebGLRenderer;
       try {
@@ -76,8 +80,6 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       }
 
       renderer.setPixelRatio(dpr);
-      const initW = Math.max(1, container.clientWidth);
-      const initH = Math.max(1, container.clientHeight);
       renderer.setSize(initW, initH);
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
@@ -87,7 +89,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       camera.position.set(0, 1.4, initW < 640 ? 11.5 : 8.2);
       camera.lookAt(0, 0, 0);
 
-      const planeGeo = new THREE.PlaneGeometry(22, 26, 26, 28);
+      const planeGeo = new THREE.PlaneGeometry(22, 26, 22, 24);
       const wireMat = new THREE.ShaderMaterial({
         vertexShader: WAVE_VERTEX_SHADER,
         fragmentShader: WAVE_FRAGMENT_SHADER,
@@ -104,7 +106,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       terrain.rotation.x = -Math.PI * 0.22;
       scene.add(terrain);
 
-      const nodeCount = 80;
+      const nodeCount = 64;
       const nodePositions = new Float32Array(nodeCount * 3);
       for (let i = 0; i < nodeCount; i++) {
         const phi = (i * 1.61803398875) % 1;
@@ -124,7 +126,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       const points = new THREE.Points(pointsGeo, pointsMat);
       scene.add(points);
 
-      const ringGeo = new THREE.TorusGeometry(1.75, 0.03, 10, 48);
+      const ringGeo = new THREE.TorusGeometry(1.75, 0.03, 8, 40);
       const ringMat = new THREE.MeshBasicMaterial({
         color: themeRef.current === "dark" ? 0xc8f53c : 0x185c37,
         transparent: true,
@@ -138,7 +140,8 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       let isPageVisible = !document.hidden;
       let rafId = 0;
       let simTime = 0;
-      let lastTs = performance.now();
+      let lastDrawTs = performance.now();
+      const FRAME_INTERVAL_MS = 22; // ~45fps cap leaves GPU headroom open for smooth scroll
       const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
 
       const drawOnce = () => {
@@ -154,19 +157,25 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
 
       const renderFrame = (ts: number) => {
         rafId = 0;
-        if (!isInView || !isPageVisible) return;
+        if (!isInView || !isPageVisible || prefersReduced) return;
 
-        const dt = Math.min(0.05, (ts - lastTs) / 1000);
-        lastTs = ts;
+        const elapsedMs = ts - lastDrawTs;
+        if (elapsedMs < FRAME_INTERVAL_MS) {
+          rafId = requestAnimationFrame(renderFrame);
+          return;
+        }
+
+        const dt = Math.min(0.06, elapsedMs / 1000);
+        lastDrawTs = ts;
 
         if (!pausedRef.current) {
-          simTime += prefersReduced ? dt * 0.4 : dt;
+          simTime += dt;
         }
 
         const dx = pointer.tx - pointer.x;
         const dy = pointer.ty - pointer.y;
-        pointer.x += dx * 0.06;
-        pointer.y += dy * 0.06;
+        pointer.x += dx * 0.08;
+        pointer.y += dy * 0.08;
 
         drawOnce();
 
@@ -175,8 +184,9 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
 
       const ensureRunning = () => {
-        if (rafId === 0 && isInView && isPageVisible) {
-          lastTs = performance.now();
+        if (prefersReduced) return;
+        if (rafId === 0 && isInView && isPageVisible && !pausedRef.current) {
+          lastDrawTs = performance.now();
           rafId = requestAnimationFrame(renderFrame);
         }
       };
@@ -192,7 +202,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
 
       const onPointerMove = (e: PointerEvent) => {
-        if (pausedRef.current || !isInView) return;
+        if (pausedRef.current || prefersReduced || !isInView) return;
         pointer.tx = ((e.clientX / window.innerWidth) * 2 - 1) * 0.45;
         pointer.ty = ((e.clientY / window.innerHeight) * 2 - 1) * 0.28;
       };
@@ -208,7 +218,6 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
       document.addEventListener("visibilitychange", onVisChange);
 
-      // Pause/resume rAF strictly via IntersectionObserver — NEVER destroys WebGL during scroll!
       const io = new IntersectionObserver(
         (entries) => {
           isInView = entries.some((e) => e.isIntersecting);
@@ -219,7 +228,7 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
             rafId = 0;
           }
         },
-        { rootMargin: "120px 0px" }
+        { rootMargin: "80px 0px" }
       );
       io.observe(container);
 
@@ -270,24 +279,11 @@ export function HeroFieldCanvas({ paused }: HeroFieldCanvasProps) {
       };
     };
 
-    const win = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    let idleId = 0;
-    let timeoutId = 0;
-    if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(initWebGL, { timeout: 180 });
-    } else {
-      timeoutId = window.setTimeout(initWebGL, 40);
-    }
+    const cancelSchedule = scheduleWhenScrollIdle(initWebGL, 450);
 
     return () => {
       cancelled = true;
-      if (idleId && typeof win.cancelIdleCallback === "function") {
-        win.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) window.clearTimeout(timeoutId);
+      cancelSchedule();
       cleanupFn?.();
     };
   }, []);

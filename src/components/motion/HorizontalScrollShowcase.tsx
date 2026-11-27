@@ -2,13 +2,14 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+import { m, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Github, Layers } from "lucide-react";
 import { FeaturedProject } from "@/data/portfolio";
 import type { CardPointerState } from "@/components/three/architecturalLights";
 import type { CardSlotRegistration } from "@/components/three/WorkCardsWebGLCanvas";
+import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 
-// Code-split Three.js direct-swapchain scissor canvas so initial Hero LCP never downloads Three.js upfront
+// Code-split + lazy-mount Three.js direct-swapchain scissor canvas ONLY when near viewport!
 const WorkCardsWebGLCanvas = dynamic(
   () =>
     import("@/components/three/WorkCardsWebGLCanvas").then(
@@ -31,12 +32,10 @@ const CATEGORIES = [
 ] as const;
 
 /**
- * Compact 3D Interactive Horizontal-on-Vertical Scroll Showcase (Zero Arrow Buttons):
- * - ZERO React re-renders during scrolling! Counter HUD, active title, and active card borders
- *   update directly via DOM refs inside `useMotionValueEvent(scrollYProgress)`.
- * - Direct 1:1 GPU-composited `x` transform synced to Lenis via Motion `frame.setup` (0-frame lag).
- * - Powered by ONE direct-swapchain WebGL scissor canvas (`WorkCardsWebGLCanvas`) computing slot
- *   positions directly from `x.get()` (ZERO `ctx2d.drawImage` GPU stalls, ZERO per-frame `getBoundingClientRect()`).
+ * Compact 3D Interactive Horizontal-on-Vertical Scroll Showcase:
+ * - Lazy-mounts Three.js WebGL only when approaching Section 01 (0 WebGL/JS upfront at Hero load!).
+ * - Zero React re-renders during scrolling (counter HUD & active border update directly via refs).
+ * - Synced 1:1 with WorkCardsWebGLCanvas via Framer Motion `frame.postRender`.
  */
 export function HorizontalScrollShowcase({
   projects,
@@ -45,13 +44,13 @@ export function HorizontalScrollShowcase({
   const [activeCategory, setActiveCategory] =
     useState<(typeof CATEGORIES)[number]>("All");
   const [maxTranslate, setMaxTranslate] = useState(0);
+  const [webglMounted, setWebglMounted] = useState(false);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const slotsRef = useRef<Map<string, CardSlotRegistration>>(new Map());
 
-  // Direct DOM refs for zero-render HUD updates during scroll
   const topCounterRef = useRef<HTMLSpanElement>(null);
   const hudCounterRef = useRef<HTMLSpanElement>(null);
   const hudTitleRef = useRef<HTMLSpanElement>(null);
@@ -67,6 +66,15 @@ export function HorizontalScrollShowcase({
     () => filteredProjects.map((p) => p.id),
     [filteredProjects]
   );
+
+  // Warm up WorkCardsWebGLCanvas during post-Hero idle (NEVER mid-scroll!)
+  // so WebGL context + shared shaders are already compiled before the user scrolls into Section 01!
+  useEffect(() => {
+    if (webglMounted) return;
+    return scheduleWhenScrollIdle(() => {
+      setWebglMounted(true);
+    }, 850);
+  }, [webglMounted]);
 
   const filteredProjectsRef = useRef(filteredProjects);
   useEffect(() => {
@@ -98,12 +106,8 @@ export function HorizontalScrollShowcase({
     const ro = new ResizeObserver(measure);
     if (stickyRef.current) ro.observe(stickyRef.current);
     if (trackRef.current) ro.observe(trackRef.current);
-    window.addEventListener("resize", measure, { passive: true });
 
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-    };
+    return () => ro.disconnect();
   }, [filteredProjects.length]);
 
   const { scrollYProgress } = useScroll({
@@ -111,11 +115,9 @@ export function HorizontalScrollShowcase({
     offset: ["start start", "end end"],
   });
 
-  // Direct 1:1 GPU transform synced to Lenis smooth scroll via Motion `frame.setup`!
   const x = useTransform(scrollYProgress, [0, 1], [0, -maxTranslate]);
   const progressScaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-  // Zero-re-render active card indicator & HUD updates directly via DOM refs!
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const list = filteredProjectsRef.current;
     const count = list.length;
@@ -144,15 +146,15 @@ export function HorizontalScrollShowcase({
   });
 
   const trackHeightVh = useMemo(() => {
-    if (filteredProjects.length <= 1) return 105;
-    return Math.max(190, Math.round(115 + filteredProjects.length * 40));
+    if (filteredProjects.length <= 1) return 100;
+    return Math.max(175, Math.round(108 + filteredProjects.length * 34));
   }, [filteredProjects.length]);
 
   const totalPadded = String(filteredProjects.length).padStart(2, "0");
 
   return (
     <div className="space-y-4">
-      {/* Compact Architectural Category Filter Bar (Zero Arrow Buttons) */}
+      {/* Compact Architectural Category Filter Bar */}
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-3.5">
           <div
@@ -169,7 +171,7 @@ export function HorizontalScrollShowcase({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setActiveCategory(category)}
-                  className={`relative cursor-pointer px-3.5 py-2 font-mono text-xs font-medium transition-colors ${
+                  className={`relative cursor-pointer px-3.5 py-2 font-mono text-xs font-medium ${
                     isSelected
                       ? "bg-primary font-semibold text-primary-foreground"
                       : "border border-border bg-surface text-muted hover:border-border-strong hover:text-foreground"
@@ -182,10 +184,7 @@ export function HorizontalScrollShowcase({
           </div>
 
           <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            <span
-              ref={topCounterRef}
-              className="font-bold text-primary tabular-nums"
-            >
+            <span ref={topCounterRef} className="font-bold text-primary tabular-nums">
               {`01 / ${totalPadded}`}
             </span>
             <span className="hidden h-3 w-px bg-border sm:inline-block" aria-hidden="true" />
@@ -227,23 +226,25 @@ export function HorizontalScrollShowcase({
             </span>
           </div>
 
-          {/* Horizontal Translating Card Track + Direct-Swapchain Zero-Stall WebGL Scissor Layer */}
-          <div className="relative z-10 w-full overflow-hidden">
-            <WorkCardsWebGLCanvas
-              slotsRef={slotsRef}
-              projectIds={projectIds}
-              xMotionValue={x}
-            />
-            <motion.div
+          {/* Horizontal Translating Card Track + Lazy-Mounted Direct-Swapchain WebGL Scissor Layer */}
+          <div className="clip-contain relative z-10 w-full">
+            {webglMounted ? (
+              <WorkCardsWebGLCanvas
+                slotsRef={slotsRef}
+                projectIds={projectIds}
+                xMotionValue={x}
+              />
+            ) : null}
+            <m.div
               ref={trackRef}
+              data-horizontal-track="true"
               style={{ x }}
-              className="flex w-max items-stretch gap-5 px-[max(1.25rem,calc((100vw-80rem)/2+2rem))] will-change-transform"
+              className="flex w-max items-stretch gap-5 px-[max(1.25rem,calc((100vw-80rem)/2+2rem))]"
             >
               {filteredProjects.map((project, idx) => (
                 <Compact3DProjectCard
                   key={project.id}
                   project={project}
-                  index={idx}
                   initialActive={idx === 0}
                   onInspectProject={onInspectProject}
                   slotsRef={slotsRef}
@@ -252,15 +253,15 @@ export function HorizontalScrollShowcase({
                   }}
                 />
               ))}
-            </motion.div>
+            </m.div>
           </div>
 
           {/* Continuous Scroll Progress Bar */}
           <div className="relative z-10 mx-auto mt-7 w-full max-w-7xl px-5 sm:px-8">
             <div className="h-[3px] w-full overflow-hidden bg-surface-elevated">
-              <motion.div
+              <m.div
                 style={{ scaleX: progressScaleX }}
-                className="h-full origin-left bg-primary will-change-transform"
+                className="h-full origin-left bg-primary"
               />
             </div>
             <div className="mt-2.5 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
@@ -285,7 +286,6 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
   registerArticleRef,
 }: {
   project: FeaturedProject;
-  index: number;
   initialActive: boolean;
   onInspectProject: (project: FeaturedProject) => void;
   slotsRef: React.MutableRefObject<Map<string, CardSlotRegistration>>;
@@ -317,7 +317,7 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
     rectRef.current = e.currentTarget.getBoundingClientRect();
   };
 
-  // Pure DOM ref transform — ZERO React re-renders during high-frequency pointermove!
+  // Apply 3D perspective tilt ONLY during active hover (no idle 3D layers while scrolling!)
   const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
     const rect = rectRef.current ?? e.currentTarget.getBoundingClientRect();
     rectRef.current = rect;
@@ -326,9 +326,9 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
     pointerRef.current = { x: nx, y: ny, hovered: true };
 
     if (articleRef.current) {
-      articleRef.current.style.transform = `rotateX(${(-ny * 5.2).toFixed(2)}deg) rotateY(${(
-        nx * 6.2
-      ).toFixed(2)}deg)`;
+      articleRef.current.style.transform = `perspective(1000px) rotateX(${(-ny * 4.8).toFixed(
+        2
+      )}deg) rotateY(${(nx * 5.6).toFixed(2)}deg)`;
     }
   };
 
@@ -336,15 +336,12 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
     rectRef.current = null;
     pointerRef.current = { x: 0, y: 0, hovered: false };
     if (articleRef.current) {
-      articleRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
+      articleRef.current.style.transform = "";
     }
   };
 
   return (
-    <div
-      style={{ perspective: 1000 }}
-      className="w-[300px] shrink-0 snap-start sm:w-[335px] lg:w-[356px]"
-    >
+    <div className="w-[300px] shrink-0 snap-start sm:w-[335px] lg:w-[356px]">
       <article
         ref={articleRef}
         data-active={initialActive ? "true" : "false"}
@@ -352,8 +349,8 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         style={{
-          transform: "rotateX(0deg) rotateY(0deg)",
-          transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease",
+          transition:
+            "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease",
         }}
         className="group relative flex h-full flex-col justify-between border border-border bg-surface/95 hover:border-border-strong data-[active=true]:border-primary/70"
       >
@@ -362,23 +359,14 @@ const Compact3DProjectCard = React.memo(function Compact3DProjectCard({
           <span className="text-muted">{project.year}</span>
         </div>
 
-        {/* Interactive 3D Three.js Stage Slot (Rendered via direct-swapchain WorkCardsWebGLCanvas) */}
-        <div className="relative border-b border-border bg-surface-elevated/35">
+        {/* Interactive 3D Three.js Stage Slot */}
+        <div className="relative border-b border-border bg-surface-elevated/45">
           <div
             ref={stageRef}
             role="img"
             aria-label={`Interactive 3D model representing ${project.title}`}
             className="relative h-[144px] w-full overflow-hidden"
-          >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  "radial-gradient(circle at 50% 62%, var(--primary-soft) 0%, transparent 72%)",
-              }}
-            />
-          </div>
+          />
         </div>
 
         {/* Compact Architectural Info Deck */}

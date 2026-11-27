@@ -40,13 +40,9 @@ const LAYER_STYLES: Record<
 
 interface ProjectArchitectureDiagramProps {
   nodes: ArchitectureNode[];
-  compact?: boolean;
 }
 
-export function ProjectArchitectureDiagram({
-  nodes,
-  compact = false,
-}: ProjectArchitectureDiagramProps) {
+export function ProjectArchitectureDiagram({ nodes }: ProjectArchitectureDiagramProps) {
   return (
     <div
       className="rounded-xl border border-border bg-surface-elevated/70 p-3.5 sm:p-4"
@@ -59,13 +55,7 @@ export function ProjectArchitectureDiagram({
         <span className="font-mono text-[11px] text-muted">{nodes.length} stages</span>
       </div>
 
-      <div
-        className={
-          compact
-            ? "grid grid-cols-1 gap-2 sm:grid-cols-2"
-            : "grid grid-cols-1 gap-2 sm:grid-cols-2"
-        }
-      >
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {nodes.map((node, idx) => {
           const style = LAYER_STYLES[node.layer];
           const Icon = style.Icon;
@@ -92,12 +82,10 @@ export function ProjectArchitectureDiagram({
                     />
                   ) : null}
                 </div>
-                <p className="truncate text-xs font-semibold text-foreground mt-0.5">
+                <p className="mt-0.5 truncate text-xs font-semibold text-foreground">
                   {node.label}
                 </p>
-                <p className="truncate font-mono text-[11px] text-muted">
-                  {node.sublabel}
-                </p>
+                <p className="truncate font-mono text-[11px] text-muted">{node.sublabel}</p>
               </div>
             </div>
           );

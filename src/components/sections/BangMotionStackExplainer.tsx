@@ -11,16 +11,14 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { useAudioGate } from "@/components/providers/AudioGateProvider";
 import { EXPLAINER_TOTAL_DURATION, VO_BEATS } from "@/data/voBeats";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 
-const STAGE_W = 1920;
-const STAGE_H = 1080;
+const STAGE_W = 960;
+const STAGE_H = 540;
 const TOTAL_DURATION = EXPLAINER_TOTAL_DURATION;
 
-// Pre-baked tiny 128x128 static noise SVG tile — 100% GPU compositor, ZERO per-frame <feTurbulence> CPU rasterization!
-const STATIC_GRAIN_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")`;
 
 const VIEWPORT_PROFILES = [
   "320", "360", "375", "390", "414", "430",
@@ -53,12 +51,10 @@ export function BangMotionStackExplainer({
   portalReady = false,
 }: BangMotionStackExplainerProps) {
   const { scrollTo } = useSmoothScroll();
-  const { unlockAudio } = useAudioGate();
 
   const viewportBoxRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
-  const grainRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const clockRef = useRef<HTMLSpanElement>(null);
@@ -100,27 +96,15 @@ export function BangMotionStackExplainer({
     }
   }, []);
 
+  // Revoke any in-memory audio Blob URL cleanly on unmount (audio is loaded ONLY when playback starts!)
   useEffect(() => {
-    const box = viewportBoxRef.current;
-    if (!box) return;
-    const loader = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          void ensureAudioLoaded();
-          loader.disconnect();
-        }
-      },
-      { rootMargin: "640px 0px" }
-    );
-    loader.observe(box);
     return () => {
-      loader.disconnect();
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
         blobUrlRef.current = null;
       }
     };
-  }, [ensureAudioLoaded]);
+  }, []);
 
   // Scale 1920x1080 internal stage crisply to fit container width/height
   useEffect(() => {
@@ -198,7 +182,6 @@ export function BangMotionStackExplainer({
     const redisEl = q("#bm-redis-val");
 
     const CAM = { s: 1, fx: STAGE_W / 2, fy: STAGE_H / 2 };
-    let lastGrainStep = -1;
 
     const applyCam = (t: number) => {
       const breath = 1 + 0.006 * Math.sin(t * 0.85);
@@ -208,13 +191,6 @@ export function BangMotionStackExplainer({
       tx = Math.min(0, Math.max(STAGE_W - STAGE_W * s, tx));
       ty = Math.min(0, Math.max(STAGE_H - STAGE_H * s, ty));
       world.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
-
-      // Lightweight stepped static-tile grain drift (8 fps, GPU translate3d only — zero filter rasterization!)
-      const k = Math.floor(t * 8);
-      if (k !== lastGrainStep && grainRef.current) {
-        lastGrainStep = k;
-        grainRef.current.style.transform = `translate3d(${((k * 37) % 64) - 32}px, ${((k * 61) % 64) - 32}px, 0)`;
-      }
 
       if (orbitRingEl) {
         orbitRingEl.style.transform = `rotate3d(0, 0, 1, ${(t * 5.0).toFixed(2)}deg)`;
@@ -276,16 +252,16 @@ export function BangMotionStackExplainer({
       tl.to(CAM, { s, fx, fy, duration: dur, ease }, at);
     };
 
-    // Reset all views cleanly at t = 0
-    tl.set(CAM, { s: 1.05, fx: 960, fy: 540 }, 0);
-    tl.set(["#bm-v2", "#bm-v3", "#bm-v4", "#bm-v5", "#bm-v6"], { autoAlpha: 0 }, 0);
-    tl.set("#bm-v1", { autoAlpha: 1 }, 0);
+    // Reset all views cleanly at t = 0 — inactive views use display:none (6x less paint area!)
+    tl.set(CAM, { s: 1.05, fx: 480, fy: 270 }, 0);
+    tl.set(["#bm-v2", "#bm-v3", "#bm-v4", "#bm-v5", "#bm-v6"], { autoAlpha: 0, display: "none" }, 0);
+    tl.set("#bm-v1", { display: "flex", autoAlpha: 1 }, 0);
     tl.set("#bm-wipe", { scaleX: 0, transformOrigin: "0% 50%" }, 0);
 
     // =========================================================================
     // VIEW 1 (0.00s – 7.76s): HOOK — AI-AUGMENTED ENGINEERING CORE (Obsidian)
     // =========================================================================
-    shot(0, 1.35, 1.0, 960, 540, "power3.out");
+    shot(0, 1.35, 1.0, 480, 270, "power3.out");
     tl.fromTo(
       "#bm-v1-kicker",
       { opacity: 0, y: 36 },
@@ -327,21 +303,21 @@ export function BangMotionStackExplainer({
       { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.14, ease: "back.out(1.6)" },
       3.95
     );
-    shot(4.8, 2.5, 1.08, 980, 555, "sine.inOut");
+    shot(4.8, 2.5, 1.08, 490, 278, "sine.inOut");
 
     // Precision Shutter Wipe Transition (Obsidian → Warm Blueprint Ivory) at 7.42s
     tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#c8f53c" }, 7.38);
     tl.to("#bm-wipe", { scaleX: 1, duration: 0.34, ease: "power3.in" }, 7.38);
-    tl.set("#bm-v1", { autoAlpha: 0 }, 7.73);
-    tl.set("#bm-v2", { autoAlpha: 1 }, 7.73);
-    tl.set(CAM, { s: 1.22, fx: 620, fy: 460 }, 7.73);
+    tl.set("#bm-v1", { autoAlpha: 0, display: "none" }, 7.73);
+    tl.set("#bm-v2", { display: "block", autoAlpha: 1 }, 7.73);
+    tl.set(CAM, { s: 1.22, fx: 310, fy: 230 }, 7.73);
     tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 7.74);
     tl.to("#bm-wipe", { scaleX: 0, duration: 0.4, ease: "power3.out" }, 7.74);
 
     // =========================================================================
     // VIEW 2 (7.76s – 22.64s): DETERMINISTIC PRDs · BUILDFLOW ERP · 21 AGENT SKILLS
     // =========================================================================
-    shot(7.76, 1.25, 1.14, 620, 480, "power2.out");
+    shot(7.76, 1.25, 1.14, 310, 240, "power2.out");
     tl.fromTo(
       "#bm-v2-head",
       { opacity: 0, y: 44 },
@@ -363,7 +339,7 @@ export function BangMotionStackExplainer({
     );
 
     // Camera glides right to 21 Modular Agent Skills right as narrator speaks it (18.2–19.5s)
-    shot(17.6, 1.4, 1.14, 1340, 560, "power2.inOut");
+    shot(17.6, 1.4, 1.14, 670, 280, "power2.inOut");
     tl.fromTo(
       "#bm-v2-skills-panel",
       { opacity: 0, x: 84 },
@@ -376,14 +352,15 @@ export function BangMotionStackExplainer({
       { opacity: 1, scale: 1, duration: 0.34, stagger: 0.08, ease: "back.out(1.7)" },
       18.9
     );
-    shot(20.6, 1.25, 1.0, 960, 540, "power2.inOut");
+    shot(20.6, 1.25, 1.0, 480, 270, "power2.inOut");
 
     // 3D Motivated Push-Through Dive into Obsidian Multi-Agent Core (22.2s → 22.64s)
-    shot(22.18, 0.46, 2.0, 960, 540, "power2.in");
+    shot(22.18, 0.46, 2.0, 480, 270, "power2.in");
     tl.to("#bm-v2", { autoAlpha: 0, duration: 0.2 }, 22.44);
-    tl.set("#bm-v3", { autoAlpha: 1 }, 22.63);
-    tl.set(CAM, { s: 1.38, fx: 960, fy: 540 }, 22.63);
-    shot(22.64, 0.92, 1.0, 960, 540, "power3.out");
+    tl.set("#bm-v2", { display: "none" }, 22.64);
+    tl.set("#bm-v3", { display: "block", autoAlpha: 1 }, 22.63);
+    tl.set(CAM, { s: 1.38, fx: 480, fy: 270 }, 22.63);
+    shot(22.64, 0.92, 1.0, 480, 270, "power3.out");
 
     // =========================================================================
     // VIEW 3 (22.64s – 39.88s): CLAUDE CODE · ANTIGRAVITY · CRAFTRIG MCP (45+ TOOLS)
@@ -409,7 +386,7 @@ export function BangMotionStackExplainer({
     );
 
     // Craftrig MCP Core rises right when narrator says "Craftrig MCP" (29.86s)
-    shot(29.2, 1.15, 1.12, 960, 680, "power2.inOut");
+    shot(29.2, 1.15, 1.12, 480, 340, "power2.inOut");
     tl.fromTo(
       "#bm-v3-mcp-core",
       { opacity: 0, y: 72, scale: 0.9 },
@@ -443,11 +420,12 @@ export function BangMotionStackExplainer({
       { opacity: 1, y: 0, duration: 0.52, stagger: 0.52, ease: "power3.out" },
       34.6
     );
-    shot(37.6, 1.4, 1.0, 960, 540, "power2.inOut");
+    shot(37.6, 1.4, 1.0, 480, 270, "power2.inOut");
 
     // GPU-Composited Directional Whip-Pan (View 3 → View 4) at 39.55s (zero SVG blur!)
     tl.to("#bm-v3", { x: -160, skewX: -6, autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 39.56);
-    tl.set("#bm-v4", { autoAlpha: 1, x: 160, skewX: 6 }, 39.87);
+    tl.set("#bm-v3", { display: "none" }, 39.87);
+    tl.set("#bm-v4", { display: "block", autoAlpha: 1, x: 160, skewX: 6 }, 39.87);
     tl.to("#bm-v4", { x: 0, skewX: 0, duration: 0.48, ease: "power3.out" }, 39.87);
 
     // =========================================================================
@@ -485,7 +463,7 @@ export function BangMotionStackExplainer({
     );
 
     // Camera focuses right onto Telemetry Odometer: 75.00% → 91.67% Recall (48.66s)
-    shot(47.9, 1.05, 1.15, 1340, 480, "power2.inOut");
+    shot(47.9, 1.05, 1.15, 670, 240, "power2.inOut");
     tl.fromTo(
       "#bm-v4-metrics",
       { opacity: 0, y: 38 },
@@ -528,7 +506,7 @@ export function BangMotionStackExplainer({
     );
 
     // Multi-Hop Self-Critic Grounding Loop ignites right at 55.9s
-    shot(55.4, 0.95, 1.0, 960, 540, "power2.inOut");
+    shot(55.4, 0.95, 1.0, 480, 270, "power2.inOut");
     tl.fromTo(
       "#bm-v4-critic",
       { opacity: 0, y: 34 },
@@ -539,9 +517,9 @@ export function BangMotionStackExplainer({
     // Precision Shutter Wipe Transition (View 4 → View 5 Full-Stack Matrix) at 57.58s
     tl.set("#bm-wipe", { transformOrigin: "0% 50%", scaleX: 0, backgroundColor: "#56ccf2" }, 57.58);
     tl.to("#bm-wipe", { scaleX: 1, duration: 0.3, ease: "power3.in" }, 57.58);
-    tl.set("#bm-v4", { autoAlpha: 0 }, 57.9);
-    tl.set("#bm-v5", { autoAlpha: 1 }, 57.9);
-    tl.set(CAM, { s: 1.14, fx: 540, fy: 420 }, 57.9);
+    tl.set("#bm-v4", { autoAlpha: 0, display: "none" }, 57.9);
+    tl.set("#bm-v5", { display: "block", autoAlpha: 1 }, 57.9);
+    tl.set(CAM, { s: 1.14, fx: 270, fy: 210 }, 57.9);
     tl.set("#bm-wipe", { transformOrigin: "100% 50%" }, 57.92);
     tl.to("#bm-wipe", { scaleX: 0, duration: 0.36, ease: "power3.out" }, 57.92);
 
@@ -554,32 +532,33 @@ export function BangMotionStackExplainer({
       { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
       58.7
     );
-    shot(64.6, 1.15, 1.14, 1380, 420, "power2.inOut");
+    shot(64.6, 1.15, 1.14, 690, 210, "power2.inOut");
     tl.fromTo(
       "#bm-stack-be",
       { opacity: 0, y: 46 },
       { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
       65.2
     );
-    shot(68.4, 1.15, 1.14, 540, 760, "power2.inOut");
+    shot(68.4, 1.15, 1.14, 270, 380, "power2.inOut");
     tl.fromTo(
       "#bm-stack-db",
       { opacity: 0, y: 46 },
       { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
       68.9
     );
-    shot(75.0, 1.15, 1.14, 1380, 760, "power2.inOut");
+    shot(75.0, 1.15, 1.14, 690, 380, "power2.inOut");
     tl.fromTo(
       "#bm-stack-lang",
       { opacity: 0, y: 46 },
       { opacity: 1, y: 0, duration: 0.68, ease: "power4.out" },
       75.6
     );
-    shot(78.6, 1.35, 1.0, 960, 540, "power2.inOut");
+    shot(78.6, 1.35, 1.0, 480, 270, "power2.inOut");
 
     // Motivated Push-Through into Verification & Global Edge Ship (80.62s → 80.96s)
     tl.to("#bm-v5", { scale: 0.92, autoAlpha: 0, duration: 0.32, ease: "power2.in" }, 80.62);
-    tl.set("#bm-v6", { autoAlpha: 1, scale: 1.08 }, 80.95);
+    tl.set("#bm-v5", { display: "none" }, 80.95);
+    tl.set("#bm-v6", { display: "block", autoAlpha: 1, scale: 1.08 }, 80.95);
     tl.to("#bm-v6", { scale: 1, duration: 0.6, ease: "power3.out" }, 80.95);
 
     // =========================================================================
@@ -609,7 +588,7 @@ export function BangMotionStackExplainer({
       { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" },
       90.6
     );
-    shot(90.8, 3.8, 1.06, 960, 560, "sine.inOut");
+    shot(90.8, 3.8, 1.06, 480, 280, "sine.inOut");
     tl.to({}, { duration: 0.01 }, TOTAL_DURATION);
 
     tlRef.current = tl;
@@ -624,14 +603,18 @@ export function BangMotionStackExplainer({
     };
   }, [scrollTo]);
 
-  // Trigger smooth automatic playback immediately when 03→04 Portal delivers the Outer World Theater!
+  // Trigger smooth automatic playback ONLY after scrolling rests (`scrollend`) so fast wheel flings never stall!
   useEffect(() => {
     if (!portalReady || hasAutoPlayedRef.current || userPausedRef.current) return;
-    hasAutoPlayedRef.current = true;
-    const id = requestAnimationFrame(() => {
+    return scheduleWhenScrollIdle(() => {
+      if (hasAutoPlayedRef.current || userPausedRef.current) return;
+      const box = viewportBoxRef.current;
+      if (!box) return;
+      const rect = box.getBoundingClientRect();
+      if (rect.bottom < 80 || rect.top > window.innerHeight - 80) return;
+      hasAutoPlayedRef.current = true;
       startPlayback(true);
-    });
-    return () => cancelAnimationFrame(id);
+    }, 280);
   }, [portalReady, startPlayback]);
 
   // Pause cleanly when scrolling away from the theater or switching browser tabs
@@ -673,7 +656,6 @@ export function BangMotionStackExplainer({
   }, []);
 
   const handleTogglePlay = () => {
-    unlockAudio();
     const tl = tlRef.current;
     const audio = audioRef.current;
     if (!tl) return;
@@ -694,7 +676,6 @@ export function BangMotionStackExplainer({
   };
 
   const handleToggleMute = () => {
-    unlockAudio();
     const audio = audioRef.current;
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
@@ -711,7 +692,6 @@ export function BangMotionStackExplainer({
   };
 
   const handleUnlockAudioClick = () => {
-    unlockAudio();
     setIsMuted(false);
     const audio = audioRef.current;
     const tl = tlRef.current;
@@ -726,7 +706,6 @@ export function BangMotionStackExplainer({
   };
 
   const handleSeekBeat = (startSec: number, idx: number) => {
-    unlockAudio();
     const tl = tlRef.current;
     const audio = audioRef.current;
     if (!tl) return;
@@ -774,7 +753,7 @@ export function BangMotionStackExplainer({
 
       {/* Widescreen 16:9 Cinema Frame — Responsively bounded so it ALWAYS clears the Navbar & fits cleanly inside 100dvh! */}
       <div
-        className="isolate-stage relative mx-auto w-full overflow-hidden border border-border-strong bg-[#080b0f] shadow-2xl"
+        className="isolate-stage relative mx-auto w-full overflow-hidden border border-border-strong bg-[#080b0f]"
         style={{
           maxWidth: "min(100%, calc((100dvh - 280px) * 16 / 9))",
         }}
@@ -806,7 +785,7 @@ export function BangMotionStackExplainer({
           ref={viewportBoxRef}
           className="relative aspect-video w-full overflow-hidden bg-[#080b0f]"
         >
-          {/* Fixed 1920x1080 GPU-Composited Bang-Motion Stage */}
+          {/* Fixed 1920x1080 Bang-Motion Stage (lean GPU promotion — only worldRef promotes while active) */}
           <div
             ref={stageRef}
             style={{
@@ -815,9 +794,8 @@ export function BangMotionStackExplainer({
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate3d(-50%, -50%, 0) scale(0.5)",
+              transform: "translate3d(-50%, -50%, 0) scale(1)",
               transformOrigin: "center center",
-              willChange: "transform",
             }}
             className="overflow-hidden bg-[#080b0f] text-[#f3f5f2] select-none"
           >
@@ -828,34 +806,31 @@ export function BangMotionStackExplainer({
                 position: "absolute",
                 inset: 0,
                 transformOrigin: "0 0",
-                willChange: "transform",
               }}
             >
-              {/* Multi-Layer Architectural Living Background */}
+              {/* Clean Architectural Backdrop (single lightweight layer — zero heavy multi-gradient raster stall) */}
               <div
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  inset: -240,
-                  background:
-                    "radial-gradient(68% 46% at 50% 106%, rgba(200,245,60,0.20), rgba(86,204,242,0.08) 48%, transparent 72%), linear-gradient(180deg, #05070a 0%, #090d12 58%, #0e151d 100%)",
+                  inset: 0,
+                  background: "linear-gradient(180deg, #06090d 0%, #0b1117 100%)",
                 }}
               />
-              {/* Slowly Rotating Architectural Blueprint Compass */}
+              {/* Slowly Rotating Architectural Blueprint Compass (solid paths — zero dashed-path Skia tessellation!) */}
               <svg
                 id="bm-bg-orbit"
                 viewBox="0 0 1920 1080"
                 style={{
                   position: "absolute",
                   inset: 0,
-                  width: 1920,
-                  height: 1080,
-                  opacity: 0.14,
-                  transformOrigin: "960px 540px",
-                  willChange: "transform",
+                  width: 960,
+                  height: 540,
+                  opacity: 0.12,
+                  transformOrigin: "480px 270px",
                 }}
               >
-                <circle cx="960" cy="540" r="460" fill="none" stroke="#c8f53c" strokeWidth="1.5" strokeDasharray="10 14" />
+                <circle cx="960" cy="540" r="460" fill="none" stroke="#c8f53c" strokeWidth="1.5" />
                 <circle cx="960" cy="540" r="680" fill="none" stroke="#56ccf2" strokeWidth="1.2" />
                 <line x1="0" y1="540" x2="1920" y2="540" stroke="#f3f5f2" strokeWidth="1" opacity="0.25" />
                 <line x1="960" y1="0" x2="960" y2="1080" stroke="#f3f5f2" strokeWidth="1" opacity="0.25" />
@@ -865,26 +840,26 @@ export function BangMotionStackExplainer({
               <div
                 id="bm-v1"
                 style={{ position: "absolute", inset: 0 }}
-                className="flex flex-col items-center justify-center px-28"
+                className="flex flex-col items-center justify-center px-14"
               >
                 <div
                   id="bm-v1-kicker"
-                  style={{ fontSize: 34, letterSpacing: "0.24em" }}
-                  className="mb-8 inline-flex items-center gap-6 font-mono font-semibold uppercase text-[#56ccf2]"
+                  style={{ fontSize: 17, letterSpacing: "0.24em" }}
+                  className="mb-4 inline-flex items-center gap-3 font-mono font-semibold uppercase text-[#56ccf2]"
                 >
-                  <BrandLogo size={68} tone="dark" className="shrink-0" />
+                  <BrandLogo size={34} tone="dark" className="shrink-0" />
                   <span>BEYOND RAW CHAT PROMPTING</span>
                 </div>
 
                 <div
                   id="bm-v1-title-1"
-                  style={{ fontSize: 96, lineHeight: 1.08 }}
+                  style={{ fontSize: 48, lineHeight: 1.08 }}
                   className="font-heading font-medium text-[#cfd7dc]"
                 >
                   Deterministic Architecture ×
                 </div>
 
-                <div id="bm-v1-title-2" className="relative mt-4 inline-block px-10 py-4">
+                <div id="bm-v1-title-2" className="relative mt-4 inline-block px-2.5 py-2">
                   <svg
                     viewBox="0 0 1420 190"
                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
@@ -904,7 +879,7 @@ export function BangMotionStackExplainer({
                     />
                   </svg>
                   <div
-                    style={{ fontSize: 120, lineHeight: 1.04 }}
+                    style={{ fontSize: 60, lineHeight: 1.04 }}
                     className="relative font-heading font-semibold tracking-tight text-white"
                   >
                     AI-Augmented Engineering
@@ -913,16 +888,16 @@ export function BangMotionStackExplainer({
 
                 <div
                   id="bm-v1-rail"
-                  className="mt-14 h-[4px] w-[1240px] bg-gradient-to-r from-[#c8f53c] via-[#56ccf2] to-[#4ade80]"
+                  className="mt-3.5 h-[4px] w-[620px] bg-gradient-to-r from-[#c8f53c] via-[#56ccf2] to-[#4ade80]"
                 />
 
-                <div id="bm-v1-nodes" className="mt-10 flex items-center gap-8">
+                <div id="bm-v1-nodes" className="mt-2.5 flex items-center gap-2">
                   {["Deterministic PRDs", "Craftrig MCP", "Autonomous Agents", "Verified Delivery"].map(
                     (item) => (
                       <div
                         key={item}
-                        style={{ fontSize: 32 }}
-                        className="bm-pill border border-white/20 bg-[#121820]/95 px-7 py-3.5 font-mono font-semibold text-[#f3f5f2]"
+                        style={{ fontSize: 16 }}
+                        className="bm-pill border border-white/20 bg-[#121820]/95 px-3.5 py-1.5 font-mono font-semibold text-[#f3f5f2]"
                       >
                         {item}
                       </div>
@@ -936,29 +911,30 @@ export function BangMotionStackExplainer({
                 id="bm-v2"
                 style={{
                   position: "absolute",
-                  inset: -120,
-                  padding: "170px 210px",
+                  inset: 0,
+                  padding: "38px 52px",
+                  display: "none",
                   background:
                     "radial-gradient(60% 50% at 80% 18%, rgba(24,92,55,0.14), transparent 65%), linear-gradient(155deg, #f6f3eb 0%, #ede8dc 62%, #e6e0d1 100%)",
                   color: "#0e151a",
                 }}
               >
-                <div id="bm-v2-head" className="mb-10 flex items-end justify-between border-b-2 border-[#0e151a]/20 pb-6">
+                <div id="bm-v2-head" className="mb-5 flex items-end justify-between border-b-2 border-[#0e151a]/20 pb-3">
                   <div>
-                    <div style={{ fontSize: 32, letterSpacing: "0.18em" }} className="font-mono font-bold uppercase text-[#185c37]">
+                    <div style={{ fontSize: 16, letterSpacing: "0.18em" }} className="font-mono font-bold uppercase text-[#185c37]">
                       PHASE 01 // SPECIFICATION LOCK
                     </div>
-                    <div style={{ fontSize: 78, lineHeight: 1.05 }} className="mt-2 font-heading font-bold tracking-tight text-[#0e151a]">
+                    <div style={{ fontSize: 39, lineHeight: 1.05 }} className="mt-2 font-heading font-bold tracking-tight text-[#0e151a]">
                       Deterministic PRDs &amp; 21 Agent Skills
                     </div>
                   </div>
-                  <div style={{ fontSize: 32 }} className="bg-[#185c37] px-6 py-3 font-mono font-bold text-white">
+                  <div style={{ fontSize: 16 }} className="bg-[#185c37] px-3 py-1.5 font-mono font-bold text-white">
                     BUILDFLOW ERP · 12 MODULES
                   </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-12 pt-4">
-                  <div className="col-span-6 space-y-6">
+                <div className="grid grid-cols-12 gap-3 pt-4">
+                  <div className="col-span-6 space-y-3">
                     <svg
                       id="bm-v2-blueprint"
                       viewBox="0 0 760 360"
@@ -991,7 +967,7 @@ export function BangMotionStackExplainer({
                       </text>
                     </svg>
 
-                    <div id="bm-v2-locks" className="grid grid-cols-3 gap-5">
+                    <div id="bm-v2-locks" className="grid grid-cols-3 gap-2.5">
                       {[
                         { tag: "ERD LOCKED", sub: "Schema Invariants" },
                         { tag: "OPENAPI", sub: "End-to-End Types" },
@@ -999,12 +975,12 @@ export function BangMotionStackExplainer({
                       ].map((lock) => (
                         <div
                           key={lock.tag}
-                          className="bm-lock border-2 border-[#185c37] bg-white px-5 py-5"
+                          className="bm-lock border-2 border-[#185c37] bg-white px-2.5 py-1"
                         >
-                          <div style={{ fontSize: 30 }} className="font-mono font-bold text-[#185c37]">
+                          <div style={{ fontSize: 15 }} className="font-mono font-bold text-[#185c37]">
                             {lock.tag}
                           </div>
-                          <div style={{ fontSize: 24 }} className="mt-1 font-body text-[#252e35]">
+                          <div style={{ fontSize: 12 }} className="mt-1 font-body text-[#252e35]">
                             {lock.sub}
                           </div>
                         </div>
@@ -1012,17 +988,17 @@ export function BangMotionStackExplainer({
                     </div>
                   </div>
 
-                  <div id="bm-v2-skills-panel" className="col-span-6 border-2 border-[#0e151a]/25 bg-[#0f161c] p-9 text-white">
-                    <div className="flex items-center justify-between border-b border-white/15 pb-5">
-                      <span style={{ fontSize: 34 }} className="font-heading font-bold text-[#c8f53c]">
+                  <div id="bm-v2-skills-panel" className="col-span-6 border-2 border-[#0e151a]/25 bg-[#0f161c] p-4 text-white">
+                    <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
+                      <span style={{ fontSize: 17 }} className="font-heading font-bold text-[#c8f53c]">
                         Agent Skills Prompt Engineering
                       </span>
-                      <span style={{ fontSize: 36 }} className="font-mono font-bold text-white tabular-nums">
+                      <span style={{ fontSize: 18 }} className="font-mono font-bold text-white tabular-nums">
                         21 SKILLS
                       </span>
                     </div>
 
-                    <div id="bm-v2-skill-chips" className="mt-7 grid grid-cols-2 gap-4">
+                    <div id="bm-v2-skill-chips" className="mt-3.5 grid grid-cols-2 gap-2">
                       {[
                         "Clean Architecture",
                         "Design Direction",
@@ -1035,8 +1011,8 @@ export function BangMotionStackExplainer({
                       ].map((skill) => (
                         <div
                           key={skill}
-                          style={{ fontSize: 28 }}
-                          className="bm-chip border border-white/15 bg-white/[0.06] px-5 py-4 font-mono font-semibold text-[#f3f5f2]"
+                          style={{ fontSize: 14 }}
+                          className="bm-chip border border-white/15 bg-white/[0.06] px-2.5 py-2 font-mono font-semibold text-[#f3f5f2]"
                         >
                           ▸ {skill}
                         </div>
@@ -1049,50 +1025,50 @@ export function BangMotionStackExplainer({
               {/* VIEW 3: CLAUDE CODE · GOOGLE ANTIGRAVITY · CRAFTRIG MCP (vickyymosafan/mcp-craftrig) */}
               <div
                 id="bm-v3"
-                style={{ position: "absolute", inset: 0, padding: "86px 110px", perspective: 1400 }}
+                style={{ position: "absolute", inset: 0, padding: "43px 55px", perspective: 1400, display: "none" }}
               >
-                <div className="mb-8 flex items-center justify-between">
-                  <div style={{ fontSize: 32, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#56ccf2]">
+                <div className="mb-4 flex items-center justify-between">
+                  <div style={{ fontSize: 16, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#56ccf2]">
                     PHASE 02 // PARALLEL MULTI-AGENT ORCHESTRATION
                   </div>
-                  <div style={{ fontSize: 30 }} className="font-mono font-bold text-[#c8f53c]">
+                  <div style={{ fontSize: 15 }} className="font-mono font-bold text-[#c8f53c]">
                     GITHUB: VICKYYMOSAFAN/MCP-CRAFTRIG
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-16">
+                <div className="grid grid-cols-2 gap-2">
                   <div
                     id="bm-v3-claude"
-                    className="border-2 border-[#c8f53c]/70 bg-[#10161c]/95 p-8"
+                    className="border-2 border-[#c8f53c]/70 bg-[#10161c]/95 p-4"
                   >
-                    <div style={{ fontSize: 28 }} className="font-mono font-bold uppercase text-[#c8f53c]">
+                    <div style={{ fontSize: 14 }} className="font-mono font-bold uppercase text-[#c8f53c]">
                       AGENT ENGINE A
                     </div>
-                    <div style={{ fontSize: 64 }} className="mt-1 font-heading font-bold text-white">
+                    <div style={{ fontSize: 32 }} className="mt-1 font-heading font-bold text-white">
                       Claude Code
                     </div>
-                    <div style={{ fontSize: 30 }} className="mt-2 font-mono text-[#cfd7dc]">
+                    <div style={{ fontSize: 15 }} className="mt-2 font-mono text-[#cfd7dc]">
                       Autonomous Refactor · Backend &amp; Tests
                     </div>
                   </div>
 
                   <div
                     id="bm-v3-antigravity"
-                    className="border-2 border-[#56ccf2]/70 bg-[#10161c]/95 p-8"
+                    className="border-2 border-[#56ccf2]/70 bg-[#10161c]/95 p-4"
                   >
-                    <div style={{ fontSize: 28 }} className="font-mono font-bold uppercase text-[#56ccf2]">
+                    <div style={{ fontSize: 14 }} className="font-mono font-bold uppercase text-[#56ccf2]">
                       AGENT ENGINE B
                     </div>
-                    <div style={{ fontSize: 64 }} className="mt-1 font-heading font-bold text-white">
+                    <div style={{ fontSize: 32 }} className="mt-1 font-heading font-bold text-white">
                       Google Antigravity
                     </div>
-                    <div style={{ fontSize: 30 }} className="mt-2 font-mono text-[#cfd7dc]">
+                    <div style={{ fontSize: 15 }} className="mt-2 font-mono text-[#cfd7dc]">
                       Parallel Subagents · UI &amp; Browser QA
                     </div>
                   </div>
                 </div>
 
-                <svg id="bm-v3-conduits" viewBox="0 0 1700 130" className="my-2 h-[115px] w-full">
+                <svg id="bm-v3-conduits" viewBox="0 0 1700 130" className="my-2 h-[58px] w-full">
                   <path
                     d="M 420 0 C 420 75, 850 55, 850 130"
                     fill="none"
@@ -1113,32 +1089,32 @@ export function BangMotionStackExplainer({
 
                 <div
                   id="bm-v3-mcp-core"
-                  className="border-2 border-white/25 bg-[#0e141b]/95 p-9"
+                  className="border-2 border-white/25 bg-[#0e141b]/95 p-4"
                 >
-                  <div className="flex items-center justify-between border-b border-white/15 pb-6">
+                  <div className="flex items-center justify-between border-b border-white/15 pb-3">
                     <div>
-                      <div style={{ fontSize: 30 }} className="font-mono uppercase tracking-[0.16em] text-[#f5b942]">
+                      <div style={{ fontSize: 15 }} className="font-mono uppercase tracking-[0.16em] text-[#f5b942]">
                         CUSTOM TYPESCRIPT MCP SERVER DEVELOPMENT · SDK v2
                       </div>
-                      <div style={{ fontSize: 56 }} className="mt-1 font-heading font-bold text-white">
+                      <div style={{ fontSize: 28 }} className="mt-1 font-heading font-bold text-white">
                         Craftrig MCP &amp; Three.js Visual QA
                       </div>
                     </div>
-                    <div className="bg-[#c8f53c] px-8 py-4 text-center text-[#080b0f]">
+                    <div className="bg-[#c8f53c] px-4 py-2 text-center text-[#080b0f]">
                       <div
                         id="bm-mcp-count"
-                        style={{ fontSize: 72, lineHeight: 1 }}
+                        style={{ fontSize: 36, lineHeight: 1 }}
                         className="min-w-[3.2ch] font-heading font-extrabold tabular-nums"
                       >
                         45+
                       </div>
-                      <div style={{ fontSize: 24 }} className="font-mono font-bold uppercase">
+                      <div style={{ fontSize: 12 }} className="font-mono font-bold uppercase">
                         MCP TOOLS
                       </div>
                     </div>
                   </div>
 
-                  <div id="bm-v3-gates" className="mt-7 grid grid-cols-3 gap-6">
+                  <div id="bm-v3-gates" className="mt-3.5 grid grid-cols-3 gap-3">
                     {[
                       { title: "Topological DAG", detail: "Kahn algorithm & critical-path waves", accent: "#c8f53c" },
                       { title: "Exclusive File Locks", detail: "Path write locks + stale recovery", accent: "#56ccf2" },
@@ -1147,12 +1123,12 @@ export function BangMotionStackExplainer({
                       <div
                         key={g.title}
                         style={{ borderTopColor: g.accent }}
-                        className="bm-gate border border-white/15 border-t-4 bg-white/[0.04] p-6"
+                        className="bm-gate border border-white/15 border-t-4 bg-white/[0.04] p-3"
                       >
-                        <div style={{ fontSize: 34, color: g.accent }} className="font-heading font-bold">
+                        <div style={{ fontSize: 17, color: g.accent }} className="font-heading font-bold">
                           {g.title}
                         </div>
-                        <div style={{ fontSize: 26 }} className="mt-2 font-body text-[#cfd7dc]">
+                        <div style={{ fontSize: 13 }} className="mt-2 font-body text-[#cfd7dc]">
                           {g.detail}
                         </div>
                       </div>
@@ -1162,43 +1138,43 @@ export function BangMotionStackExplainer({
               </div>
 
               {/* VIEW 4: HYBRID & AGENTIC RAG TELEMETRY ENGINE */}
-              <div id="bm-v4" style={{ position: "absolute", inset: 0, padding: "84px 108px" }}>
-                <div id="bm-v4-head" className="mb-8 flex items-end justify-between border-b border-white/15 pb-5">
+              <div id="bm-v4" style={{ position: "absolute", inset: 0, padding: "42px 54px", display: "none" }}>
+                <div id="bm-v4-head" className="mb-4 flex items-end justify-between border-b border-white/15 pb-2.5">
                   <div>
-                    <div style={{ fontSize: 30, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#56ccf2]">
+                    <div style={{ fontSize: 15, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#56ccf2]">
                       PHASE 03 // INTELLIGENT RETRIEVAL ENGINE
                     </div>
-                    <div style={{ fontSize: 74, lineHeight: 1.04 }} className="mt-1 font-heading font-bold text-white">
+                    <div style={{ fontSize: 37, lineHeight: 1.04 }} className="mt-1 font-heading font-bold text-white">
                       Hybrid &amp; Agentic RAG Pipeline
                     </div>
                   </div>
-                  <div style={{ fontSize: 30 }} className="border border-[#c8f53c]/60 bg-[#c8f53c]/10 px-6 py-2.5 font-mono font-bold text-[#c8f53c]">
+                  <div style={{ fontSize: 15 }} className="border border-[#c8f53c]/60 bg-[#c8f53c]/10 px-3 py-1 font-mono font-bold text-[#c8f53c]">
                     WEIGHTED RRF · SELF-CRITIC
                   </div>
                 </div>
 
-                <div className="grid grid-cols-12 items-center gap-8">
-                  <div className="col-span-4 space-y-6">
-                    <div id="bm-v4-pgvector" className="border-2 border-[#56ccf2]/70 bg-[#101820] p-7">
-                      <div style={{ fontSize: 26 }} className="font-mono font-bold text-[#56ccf2]">
+                <div className="grid grid-cols-12 items-center gap-2">
+                  <div className="col-span-4 space-y-3">
+                    <div id="bm-v4-pgvector" className="border-2 border-[#56ccf2]/70 bg-[#101820] p-3.5">
+                      <div style={{ fontSize: 13 }} className="font-mono font-bold text-[#56ccf2]">
                         DENSE SEMANTIC SEARCH
                       </div>
-                      <div style={{ fontSize: 44 }} className="mt-1 font-heading font-bold text-white">
+                      <div style={{ fontSize: 22 }} className="mt-1 font-heading font-bold text-white">
                         Supabase pgvector
                       </div>
-                      <div style={{ fontSize: 28 }} className="mt-2 font-mono text-[#cfd7dc]">
+                      <div style={{ fontSize: 14 }} className="mt-2 font-mono text-[#cfd7dc]">
                         Gemini Embeddings · Top-50 Chunks
                       </div>
                     </div>
 
-                    <div id="bm-v4-bm25" className="border-2 border-[#f5b942]/70 bg-[#101820] p-7">
-                      <div style={{ fontSize: 26 }} className="font-mono font-bold text-[#f5b942]">
+                    <div id="bm-v4-bm25" className="border-2 border-[#f5b942]/70 bg-[#101820] p-3.5">
+                      <div style={{ fontSize: 13 }} className="font-mono font-bold text-[#f5b942]">
                         SPARSE LEXICAL RERANK
                       </div>
-                      <div style={{ fontSize: 44 }} className="mt-1 font-heading font-bold text-white">
+                      <div style={{ fontSize: 22 }} className="mt-1 font-heading font-bold text-white">
                         BM25 Exact Match
                       </div>
-                      <div style={{ fontSize: 28 }} className="mt-2 font-mono text-[#cfd7dc]">
+                      <div style={{ fontSize: 14 }} className="mt-2 font-mono text-[#cfd7dc]">
                         Course Codes &amp; Policy Clauses
                       </div>
                     </div>
@@ -1211,62 +1187,62 @@ export function BangMotionStackExplainer({
                     </svg>
                     <div
                       id="bm-v4-wrrf"
-                      className="my-3 w-full border-2 border-[#c8f53c] bg-[#c8f53c]/15 px-6 py-8 text-center"
+                      className="my-3 w-full border-2 border-[#c8f53c] bg-[#c8f53c]/15 px-3 py-2 text-center"
                     >
-                      <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#c8f53c]">
+                      <div style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#c8f53c]">
                         FUSION ENGINE
                       </div>
-                      <div style={{ fontSize: 54 }} className="mt-1 font-heading font-extrabold text-white">
+                      <div style={{ fontSize: 27 }} className="mt-1 font-heading font-extrabold text-white">
                         wRRF
                       </div>
-                      <div style={{ fontSize: 26 }} className="mt-1 font-mono text-[#cfd7dc]">
+                      <div style={{ fontSize: 13 }} className="mt-1 font-mono text-[#cfd7dc]">
                         Top-5 Grounded Context
                       </div>
                     </div>
                   </div>
 
-                  <div id="bm-v4-metrics" className="col-span-5 space-y-6">
-                    <div className="grid grid-cols-2 gap-5">
-                      <div className="border border-white/20 bg-[#0e151c] p-6">
-                        <div style={{ fontSize: 24 }} className="font-mono uppercase text-[#9aa7b0]">
+                  <div id="bm-v4-metrics" className="col-span-5 space-y-3">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="border border-white/20 bg-[#0e151c] p-3">
+                        <div style={{ fontSize: 12 }} className="font-mono uppercase text-[#9aa7b0]">
                           RECALL SCORE
                         </div>
                         <div
                           id="bm-recall-val"
-                          style={{ fontSize: 72, lineHeight: 1.05 }}
+                          style={{ fontSize: 36, lineHeight: 1.05 }}
                           className="mt-2 min-w-[6ch] font-heading font-extrabold text-[#c8f53c] tabular-nums"
                         >
                           91.67%
                         </div>
-                        <div style={{ fontSize: 24 }} className="mt-1 font-mono text-[#4ade80]">
+                        <div style={{ fontSize: 12 }} className="mt-1 font-mono text-[#4ade80]">
                           ▲ up from 75.0%
                         </div>
                       </div>
 
-                      <div className="border border-white/20 bg-[#0e151c] p-6">
-                        <div style={{ fontSize: 24 }} className="font-mono uppercase text-[#9aa7b0]">
+                      <div className="border border-white/20 bg-[#0e151c] p-3">
+                        <div style={{ fontSize: 12 }} className="font-mono uppercase text-[#9aa7b0]">
                           RANK PRECISION
                         </div>
                         <div
-                          style={{ fontSize: 72, lineHeight: 1.05 }}
+                          style={{ fontSize: 36, lineHeight: 1.05 }}
                           className="mt-2 font-heading font-extrabold text-[#56ccf2] tabular-nums"
                         >
                           1.00
                         </div>
-                        <div style={{ fontSize: 24 }} className="mt-1 font-mono text-[#cfd7dc]">
+                        <div style={{ fontSize: 12 }} className="mt-1 font-mono text-[#cfd7dc]">
                           MRR (up from 0.71)
                         </div>
                       </div>
                     </div>
 
-                    <div className="border border-white/20 bg-[#0e151c] p-6">
+                    <div className="border border-white/20 bg-[#0e151c] p-3">
                       <div className="flex items-baseline justify-between">
-                        <span style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#f5b942]">
+                        <span style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#f5b942]">
                           REDIS CACHE · 26× FASTER
                         </span>
                         <span
                           id="bm-redis-val"
-                          style={{ fontSize: 52 }}
+                          style={{ fontSize: 26 }}
                           className="min-w-[5.5ch] text-right font-heading font-extrabold text-white tabular-nums"
                         >
                           694ms
@@ -1275,7 +1251,7 @@ export function BangMotionStackExplainer({
                       <div className="mt-4 h-5 w-full bg-white/10">
                         <div id="bm-redis-bar" className="h-full w-full bg-gradient-to-r from-[#4ade80] to-[#c8f53c]" />
                       </div>
-                      <div style={{ fontSize: 22 }} className="mt-2 flex justify-between font-mono text-[#9aa7b0]">
+                      <div style={{ fontSize: 11 }} className="mt-2 flex justify-between font-mono text-[#9aa7b0]">
                         <span>694ms Cached Fast Path</span>
                         <span>vs 18,300ms Uncached</span>
                       </div>
@@ -1285,42 +1261,42 @@ export function BangMotionStackExplainer({
 
                 <div
                   id="bm-v4-critic"
-                  className="mt-8 flex items-center justify-between border-2 border-[#4ade80]/60 bg-[#0e1815] px-8 py-5"
+                  className="mt-4 flex items-center justify-between border-2 border-[#4ade80]/60 bg-[#0e1815] px-4 py-1"
                 >
-                  <div style={{ fontSize: 34 }} className="font-heading font-bold text-[#4ade80]">
+                  <div style={{ fontSize: 17 }} className="font-heading font-bold text-[#4ade80]">
                     Agentic Multi-Hop Self-Critic Grounding Loop
                   </div>
-                  <div style={{ fontSize: 28 }} className="font-mono text-white">
+                  <div style={{ fontSize: 14 }} className="font-mono text-white">
                     Cloudflare Workers · Gemini → Groq → Cohere → OpenRouter
                   </div>
                 </div>
               </div>
 
               {/* VIEW 5: FULL-STACK PRODUCTION MATRIX */}
-              <div id="bm-v5" style={{ position: "absolute", inset: 0, padding: "74px 96px" }}>
-                <div className="mb-8 flex items-end justify-between border-b border-white/15 pb-4">
+              <div id="bm-v5" style={{ position: "absolute", inset: 0, padding: "37px 48px", display: "none" }}>
+                <div className="mb-4 flex items-end justify-between border-b border-white/15 pb-4">
                   <div>
-                    <div style={{ fontSize: 28, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#c8f53c]">
+                    <div style={{ fontSize: 14, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#c8f53c]">
                       PHASE 04 // COMPLETE TECHNICAL STACK
                     </div>
-                    <div style={{ fontSize: 68, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
+                    <div style={{ fontSize: 34, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
                       Full-Stack Production Architecture
                     </div>
                   </div>
-                  <div style={{ fontSize: 28 }} className="font-mono text-[#56ccf2]">
+                  <div style={{ fontSize: 14 }} className="font-mono text-[#56ccf2]">
                     END-TO-END TYPED BOUNDARIES
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
-                  <div id="bm-stack-fe" className="border-2 border-[#c8f53c]/60 bg-[#0f151b]/95 p-7">
-                    <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#c8f53c]">
+                <div className="grid grid-cols-2 gap-2">
+                  <div id="bm-stack-fe" className="border-2 border-[#c8f53c]/60 bg-[#0f151b]/95 p-3.5">
+                    <div style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#c8f53c]">
                       01 // FRONTEND ARCHITECTURE
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-3.5">
+                    <div className="mt-2.5 flex flex-wrap gap-2">
                       {["React 19", "Next.js 16", "Vue.js", "Tailwind CSS 4", "Framer Motion", "PWA & Recharts"].map(
                         (s) => (
-                          <span key={s} style={{ fontSize: 30 }} className="border border-white/20 bg-white/[0.06] px-5 py-2.5 font-mono font-semibold text-white">
+                          <span key={s} style={{ fontSize: 15 }} className="border border-white/20 bg-white/[0.06] px-2.5 py-1 font-mono font-semibold text-white">
                             {s}
                           </span>
                         )
@@ -1328,14 +1304,14 @@ export function BangMotionStackExplainer({
                     </div>
                   </div>
 
-                  <div id="bm-stack-be" className="border-2 border-[#56ccf2]/60 bg-[#0f151b]/95 p-7">
-                    <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#56ccf2]">
+                  <div id="bm-stack-be" className="border-2 border-[#56ccf2]/60 bg-[#0f151b]/95 p-3.5">
+                    <div style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#56ccf2]">
                       02 // BACKEND &amp; EDGE APIS
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-3.5">
+                    <div className="mt-2.5 flex flex-wrap gap-2">
                       {["Node.js", "NestJS", "Express.js", "Hono", "Laravel", "OpenAPI & RBAC"].map(
                         (s) => (
-                          <span key={s} style={{ fontSize: 30 }} className="border border-white/20 bg-white/[0.06] px-5 py-2.5 font-mono font-semibold text-white">
+                          <span key={s} style={{ fontSize: 15 }} className="border border-white/20 bg-white/[0.06] px-2.5 py-1 font-mono font-semibold text-white">
                             {s}
                           </span>
                         )
@@ -1343,14 +1319,14 @@ export function BangMotionStackExplainer({
                     </div>
                   </div>
 
-                  <div id="bm-stack-db" className="border-2 border-[#4ade80]/60 bg-[#0f151b]/95 p-7">
-                    <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#4ade80]">
+                  <div id="bm-stack-db" className="border-2 border-[#4ade80]/60 bg-[#0f151b]/95 p-3.5">
+                    <div style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#4ade80]">
                       03 // DATABASE, VECTOR &amp; CACHE
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-3">
+                    <div className="mt-2.5 flex flex-wrap gap-3">
                       {["PostgreSQL", "MySQL", "Prisma ORM", "Supabase pgvector", "Neon", "Redis + BullMQ", "Dexie Offline"].map(
                         (s) => (
-                          <span key={s} style={{ fontSize: 28 }} className="border border-white/20 bg-white/[0.06] px-4 py-2 font-mono font-semibold text-white">
+                          <span key={s} style={{ fontSize: 14 }} className="border border-white/20 bg-white/[0.06] px-4 py-2 font-mono font-semibold text-white">
                             {s}
                           </span>
                         )
@@ -1358,14 +1334,14 @@ export function BangMotionStackExplainer({
                     </div>
                   </div>
 
-                  <div id="bm-stack-lang" className="border-2 border-[#f5b942]/60 bg-[#0f151b]/95 p-7">
-                    <div style={{ fontSize: 26 }} className="font-mono font-bold uppercase text-[#f5b942]">
+                  <div id="bm-stack-lang" className="border-2 border-[#f5b942]/60 bg-[#0f151b]/95 p-3.5">
+                    <div style={{ fontSize: 13 }} className="font-mono font-bold uppercase text-[#f5b942]">
                       04 // POLYGLOT LANGUAGES
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-3.5">
+                    <div className="mt-2.5 flex flex-wrap gap-2">
                       {["TypeScript", "JavaScript", "Python", "PHP", "Kotlin", "MQL5", "HTML / CSS"].map(
                         (s) => (
-                          <span key={s} style={{ fontSize: 30 }} className="border border-white/20 bg-white/[0.06] px-5 py-2.5 font-mono font-semibold text-white">
+                          <span key={s} style={{ fontSize: 15 }} className="border border-white/20 bg-white/[0.06] px-2.5 py-1 font-mono font-semibold text-white">
                             {s}
                           </span>
                         )
@@ -1376,48 +1352,48 @@ export function BangMotionStackExplainer({
               </div>
 
               {/* VIEW 6: CRAFTRIG 13-VP PLAYWRIGHT QA & GRAND FINALE */}
-              <div id="bm-v6" style={{ position: "absolute", inset: 0, padding: "86px 110px" }}>
-                <div id="bm-v6-tests" className="flex items-end justify-between border-b border-white/15 pb-6">
+              <div id="bm-v6" style={{ position: "absolute", inset: 0, padding: "43px 55px", display: "none" }}>
+                <div id="bm-v6-tests" className="flex items-end justify-between border-b border-white/15 pb-3">
                   <div>
-                    <div style={{ fontSize: 30, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#4ade80]">
+                    <div style={{ fontSize: 15, letterSpacing: "0.2em" }} className="font-mono font-bold uppercase text-[#4ade80]">
                       PHASE 05 // CRAFTRIG VERIFICATION &amp; EDGE SHIP
                     </div>
-                    <div style={{ fontSize: 68, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
+                    <div style={{ fontSize: 34, lineHeight: 1.05 }} className="mt-1 font-heading font-bold text-white">
                       Jest · Supertest · Craftrig 13-Viewport QA
                     </div>
                   </div>
-                  <div style={{ fontSize: 32 }} className="bg-[#4ade80] px-6 py-2.5 font-mono font-bold text-[#080b0f]">
+                  <div style={{ fontSize: 16 }} className="bg-[#4ade80] px-3 py-1 font-mono font-bold text-[#080b0f]">
                     50/50 PASS
                   </div>
                 </div>
 
                 <div
                   id="bm-v6-viewports"
-                  className="mt-9 grid gap-3"
+                  className="mt-4 grid gap-3"
                   style={{ gridTemplateColumns: "repeat(13, minmax(0, 1fr))" }}
                 >
                   {VIEWPORT_PROFILES.map((vp) => (
                     <div
                       key={vp}
-                      className="bm-vp border-2 border-[#4ade80] bg-[#4ade80]/15 py-5 text-center"
+                      className="bm-vp border-2 border-[#4ade80] bg-[#4ade80]/15 py-1 text-center"
                     >
-                      <div style={{ fontSize: 26 }} className="font-mono font-bold text-[#4ade80] tabular-nums">
+                      <div style={{ fontSize: 13 }} className="font-mono font-bold text-[#4ade80] tabular-nums">
                         {vp}
                       </div>
-                      <div style={{ fontSize: 18 }} className="mt-1 font-mono text-white">
+                      <div style={{ fontSize: 10 }} className="mt-1 font-mono text-white">
                         OK
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div id="bm-v6-deploy" className="mt-8 grid grid-cols-4 gap-6">
+                <div id="bm-v6-deploy" className="mt-4 grid grid-cols-4 gap-3">
                   {["GitHub Actions CI/CD", "Vercel Edge", "Cloudflare Workers", "Hostinger & Railway"].map(
                     (dep) => (
                       <div
                         key={dep}
-                        style={{ fontSize: 30 }}
-                        className="border border-[#56ccf2]/55 bg-[#101820] px-6 py-5 text-center font-mono font-semibold text-[#f3f5f2]"
+                        style={{ fontSize: 15 }}
+                        className="border border-[#56ccf2]/55 bg-[#101820] px-3 py-1 text-center font-mono font-semibold text-[#f3f5f2]"
                       >
                         {dep}
                       </div>
@@ -1425,13 +1401,13 @@ export function BangMotionStackExplainer({
                   )}
                 </div>
 
-                <div id="bm-v6-finale" className="mt-12 text-center">
-                  <div style={{ fontSize: 92, lineHeight: 1.05 }} className="font-heading font-bold tracking-tight text-white">
+                <div id="bm-v6-finale" className="mt-6 text-center">
+                  <div style={{ fontSize: 46, lineHeight: 1.05 }} className="font-heading font-bold tracking-tight text-white">
                     Engineered to ship.{" "}
                     <span className="text-[#c8f53c]">Verified to last.</span>
                   </div>
-                  <div style={{ fontSize: 32, letterSpacing: "0.2em" }} className="mt-5 inline-flex items-center justify-center gap-5 font-mono uppercase text-[#9aa7b0]">
-                    <BrandLogo size={60} tone="dark" className="shrink-0" />
+                  <div style={{ fontSize: 16, letterSpacing: "0.2em" }} className="mt-2.5 inline-flex items-center justify-center gap-2.5 font-mono uppercase text-[#9aa7b0]">
+                    <BrandLogo size={30} tone="dark" className="shrink-0" />
                     <span>M. VICKY MOSAFAN · FULL-STACK &amp; AI-AUGMENTED ENGINEER</span>
                   </div>
                 </div>
@@ -1448,36 +1424,6 @@ export function BangMotionStackExplainer({
                 backgroundColor: "#c8f53c",
                 zIndex: 30,
                 pointerEvents: "none",
-                willChange: "transform",
-              }}
-            />
-
-            {/* Ultra-Lightweight Static-Tile Film Grain Overlay (GPU translate3d, ZERO SVG filter recompute!) */}
-            <div
-              ref={grainRef}
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: -64,
-                pointerEvents: "none",
-                backgroundImage: STATIC_GRAIN_BG,
-                backgroundRepeat: "repeat",
-                opacity: 0.055,
-                zIndex: 35,
-                willChange: "transform",
-              }}
-            />
-
-            {/* Edge Vignette outside Camera Rig */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                pointerEvents: "none",
-                background:
-                  "radial-gradient(92% 90% at 50% 50%, transparent 62%, rgba(5,7,10,0.45) 100%)",
-                zIndex: 36,
               }}
             />
           </div>
@@ -1528,12 +1474,9 @@ export function BangMotionStackExplainer({
 
             <button
               type="button"
-              onClick={() => {
-                unlockAudio();
-                startPlayback(true);
-              }}
+              onClick={() => startPlayback(true)}
               aria-label="Restart explainer video from beginning"
-              className="inline-flex min-h-10 items-center gap-1.5 border border-border bg-background px-3 py-1.5 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground cursor-pointer"
+              className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 border border-border bg-background px-3 py-1.5 font-mono text-xs font-medium text-ink-secondary hover:border-primary hover:text-foreground"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="hidden sm:inline">Restart</span>
@@ -1554,7 +1497,7 @@ export function BangMotionStackExplainer({
         <div className="mt-2.5 h-1.5 w-full overflow-hidden bg-surface-elevated">
           <div
             ref={progressBarRef}
-            className="h-full origin-left bg-primary will-change-transform"
+            className="h-full origin-left bg-primary"
             style={{ transform: "scaleX(0.05)" }}
           />
         </div>

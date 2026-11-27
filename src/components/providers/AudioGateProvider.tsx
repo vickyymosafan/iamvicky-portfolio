@@ -1,72 +1,50 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
-interface AudioGateContextValue {
-  audioUnlocked: boolean;
-  unlockAudio: () => void;
+interface WelcomeContextValue {
   welcomeVisible: boolean;
-  welcomeCompleted: boolean;
   dismissWelcome: () => void;
   replayWelcome: () => void;
 }
 
-const AudioGateContext = createContext<AudioGateContextValue>({
-  audioUnlocked: false,
-  unlockAudio: () => {},
+const WelcomeContext = createContext<WelcomeContextValue>({
   welcomeVisible: false,
-  welcomeCompleted: true,
   dismissWelcome: () => {},
   replayWelcome: () => {},
 });
 
+/**
+ * Lightweight on-demand Welcome Screen state provider:
+ * - Zero initial load blocking (Hero renders & accepts scroll at 0ms).
+ * - Zero dead gesture listeners or root re-renders on first click/keypress.
+ * - Replay Intro button mounts the code-split WelcomeScreen on demand.
+ */
 export function AudioGateProvider({ children }: { children: React.ReactNode }) {
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-  const [welcomeVisible, setWelcomeVisible] = useState(true);
-  const [welcomeCompleted, setWelcomeCompleted] = useState(false);
-
-  const unlockAudio = useCallback(() => {
-    setAudioUnlocked(true);
-  }, []);
-
-  useEffect(() => {
-    const onGesture = () => {
-      setAudioUnlocked(true);
-    };
-    window.addEventListener("pointerdown", onGesture, { passive: true, once: true });
-    window.addEventListener("keydown", onGesture, { passive: true, once: true });
-    return () => {
-      window.removeEventListener("pointerdown", onGesture);
-      window.removeEventListener("keydown", onGesture);
-    };
-  }, []);
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
 
   const dismissWelcome = useCallback(() => {
     setWelcomeVisible(false);
-    setWelcomeCompleted(true);
   }, []);
 
   const replayWelcome = useCallback(() => {
     setWelcomeVisible(true);
-    setWelcomeCompleted(false);
   }, []);
 
-  return (
-    <AudioGateContext.Provider
-      value={{
-        audioUnlocked,
-        unlockAudio,
-        welcomeVisible,
-        welcomeCompleted,
-        dismissWelcome,
-        replayWelcome,
-      }}
-    >
-      {children}
-    </AudioGateContext.Provider>
+  const value = useMemo(
+    () => ({ welcomeVisible, dismissWelcome, replayWelcome }),
+    [welcomeVisible, dismissWelcome, replayWelcome]
   );
+
+  return <WelcomeContext.Provider value={value}>{children}</WelcomeContext.Provider>;
 }
 
 export function useAudioGate() {
-  return useContext(AudioGateContext);
+  return useContext(WelcomeContext);
 }

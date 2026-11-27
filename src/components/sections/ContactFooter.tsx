@@ -59,11 +59,11 @@ export function ContactFooter() {
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <a
                   href={`mailto:${PROFILE.email}`}
-                  className="inline-flex min-h-12 items-center gap-2 bg-primary px-5 py-3 font-mono text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
+                  className="inline-flex min-h-12 max-w-full items-center gap-2 bg-primary px-3.5 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:px-5 sm:text-sm"
                 >
-                  <Mail className="h-4 w-4" aria-hidden="true" />
-                  <span>{PROFILE.email}</span>
-                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{PROFILE.email}</span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </a>
 
                 <button

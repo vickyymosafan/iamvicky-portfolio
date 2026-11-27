@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useSyncExternalStore,
 } from "react";
 
@@ -13,13 +14,11 @@ type ThemeMode = "dark" | "light";
 interface ThemeContextValue {
   theme: ThemeMode;
   toggleTheme: () => void;
-  setTheme: (next: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "dark",
   toggleTheme: () => {},
-  setTheme: () => {},
 });
 
 const STORAGE_KEY = "vicky-portfolio-theme";
@@ -75,7 +74,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyThemeToDocument(theme);
   }, [theme]);
 
-  const setTheme = useCallback((next: ThemeMode) => {
+  const toggleTheme = useCallback(() => {
+    const next: ThemeMode = theme === "dark" ? "light" : "dark";
     applyThemeToDocument(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
@@ -83,17 +83,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // Storage blocked in restricted browsing mode — theme still applies live to document
     }
     window.dispatchEvent(new Event(THEME_EVENT));
-  }, []);
+  }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [setTheme, theme]);
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

@@ -2,12 +2,13 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion, useScroll } from "framer-motion";
+import { m, useScroll } from "framer-motion";
 import { Briefcase, ExternalLink, Github, Star } from "lucide-react";
 import { EXPERIENCES, ExperienceItem } from "@/data/portfolio";
 import { EditorialReveal, SectionHeader } from "@/components/motion/MotionPrimitives";
+import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 
-// Code-split Three.js diorama canvas with exact height skeleton (0 CLS)
+// Code-split + lazy-mount Three.js diorama canvas ONLY when near viewport (exact 304px height = 0 CLS)
 const ExperienceStoryCanvas = dynamic(
   () =>
     import("@/components/three/ExperienceStoryCanvas").then(
@@ -22,17 +23,36 @@ const ExperienceStoryCanvas = dynamic(
 );
 
 export function ExperienceSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const activeIdxRef = useRef(0);
   const [activeChapter, setActiveChapter] = useState(0);
+  const [canvasMounted, setCanvasMounted] = useState(false);
 
-  // Direct 1:1 scroll progress synced to Lenis smooth scroll via Motion frame.setup
   const { scrollYProgress: spineScaleY } = useScroll({
     target: timelineRef,
     offset: ["start 75%", "end 65%"],
   });
 
-  // Sync active 3D storytelling chapter automatically as the user scrolls through each role
+  // Warm up ExperienceStoryCanvas during idle (NEVER mid-scroll!)
+  useEffect(() => {
+    if (canvasMounted) return;
+    return scheduleWhenScrollIdle(() => {
+      setCanvasMounted(true);
+    }, 1100);
+  }, [canvasMounted]);
+
+  const setActiveChapterFast = useCallback((idx: number) => {
+    if (idx === activeIdxRef.current) return;
+    const prevEl = itemRefs.current[activeIdxRef.current];
+    if (prevEl) prevEl.dataset.active = "false";
+    activeIdxRef.current = idx;
+    const nextEl = itemRefs.current[idx];
+    if (nextEl) nextEl.dataset.active = "true";
+    setActiveChapter(idx);
+  }, []);
+
   useEffect(() => {
     const els = itemRefs.current.filter((el): el is HTMLLIElement => Boolean(el));
     if (!els.length) return;
@@ -45,20 +65,16 @@ export function ExperienceSection() {
         if (visible[0]) {
           const idx = Number((visible[0].target as HTMLElement).dataset.chapterIndex);
           if (!Number.isNaN(idx)) {
-            setActiveChapter((prev) => (prev === idx ? prev : idx));
+            setActiveChapterFast(idx);
           }
         }
       },
-      { rootMargin: "-26% 0px -42% 0px", threshold: [0.15, 0.4, 0.7] }
+      { rootMargin: "-26% 0px -42% 0px", threshold: [0.15, 0.5] }
     );
 
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
-
-  const handleSelectChapter = useCallback((idx: number) => {
-    setActiveChapter((prev) => (prev === idx ? prev : idx));
-  }, []);
+  }, [setActiveChapterFast]);
 
   const registerItemRef = useCallback((idx: number, el: HTMLLIElement | null) => {
     itemRefs.current[idx] = el;
@@ -67,10 +83,10 @@ export function ExperienceSection() {
   const currentExp = EXPERIENCES[activeChapter] ?? EXPERIENCES[0];
 
   return (
-    <section id="experience" className="relative py-20 sm:py-28">
+    <section ref={sectionRef} id="experience" className="relative py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10">
-          {/* Left Sticky Header + Live Three.js 3D Interactive Storytelling Diorama */}
+          {/* Left Sticky Header + Lazy-Mounted Three.js 3D Interactive Storytelling Diorama */}
           <div className="lg:col-span-4">
             <div className="space-y-5 lg:sticky lg:top-24">
               <SectionHeader
@@ -80,12 +96,21 @@ export function ExperienceSection() {
                 description="Scroll through each career milestone to drive the live 3D storytelling diorama — from copytrading portals and 11 MQL5 releases to offline healthcare PWAs."
               />
 
-              {/* Live Three.js 3D Interactive Chapter Storytelling Stage */}
-              <ExperienceStoryCanvas
-                activeIndex={activeChapter}
-                chapterLabel={currentExp.company}
-                chapterPeriod={currentExp.period}
-              />
+              {/* Exact-height container prevents any layout shift when WebGL mounts */}
+              <div className="min-h-[304px]">
+                {canvasMounted ? (
+                  <ExperienceStoryCanvas
+                    activeIndex={activeChapter}
+                    chapterLabel={currentExp.company}
+                    chapterPeriod={currentExp.period}
+                  />
+                ) : (
+                  <div
+                    className="h-[304px] border border-border-strong bg-surface/95"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
 
               {/* Quick Chapter Selector + Highlights */}
               <div className="space-y-3 border border-border bg-surface/85 p-4">
@@ -94,12 +119,15 @@ export function ExperienceSection() {
                     <Star className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Career Highlights</span>
                   </div>
-                  <div className="flex items-center gap-1" aria-label="Select 3D experience chapter">
+                  <div
+                    className="flex items-center gap-1"
+                    aria-label="Select 3D experience chapter"
+                  >
                     {EXPERIENCES.map((exp, idx) => (
                       <button
                         key={exp.id}
                         type="button"
-                        onClick={() => handleSelectChapter(idx)}
+                        onClick={() => setActiveChapterFast(idx)}
                         aria-label={`Preview 3D chapter ${idx + 1}: ${exp.company}`}
                         className={`h-8 w-8 cursor-pointer font-mono text-[11px] font-bold ${
                           activeChapter === idx
@@ -121,16 +149,16 @@ export function ExperienceSection() {
             </div>
           </div>
 
-          {/* Right Vertical Scroll-Driven 3D-Lifted Timeline */}
+          {/* Right Vertical Scroll-Driven Timeline (ZERO card re-renders during scroll via data-active!) */}
           <div ref={timelineRef} className="relative lg:col-span-8">
             <div
               aria-hidden="true"
               className="absolute top-2 bottom-2 left-4 w-px bg-border sm:left-5"
             />
-            <motion.div
+            <m.div
               aria-hidden="true"
               style={{ scaleY: spineScaleY }}
-              className="absolute top-2 bottom-2 left-4 w-[2px] origin-top bg-primary will-change-transform sm:left-5"
+              className="absolute top-2 bottom-2 left-4 w-[2px] origin-top bg-primary sm:left-5"
             />
 
             <ol className="space-y-7 pl-11 sm:pl-14">
@@ -139,8 +167,8 @@ export function ExperienceSection() {
                   key={exp.id}
                   exp={exp}
                   idx={idx}
-                  isActive={idx === activeChapter}
-                  onSelect={handleSelectChapter}
+                  initialActive={idx === 0}
+                  onSelect={setActiveChapterFast}
                   registerRef={registerItemRef}
                 />
               ))}
@@ -155,13 +183,13 @@ export function ExperienceSection() {
 const ExperienceTimelineCard = React.memo(function ExperienceTimelineCard({
   exp,
   idx,
-  isActive,
+  initialActive,
   onSelect,
   registerRef,
 }: {
   exp: ExperienceItem;
   idx: number;
-  isActive: boolean;
+  initialActive: boolean;
   onSelect: (idx: number) => void;
   registerRef: (idx: number, el: HTMLLIElement | null) => void;
 }) {
@@ -169,33 +197,19 @@ const ExperienceTimelineCard = React.memo(function ExperienceTimelineCard({
     <li
       ref={(el) => registerRef(idx, el)}
       data-chapter-index={idx}
+      data-active={initialActive ? "true" : "false"}
       onMouseEnter={() => onSelect(idx)}
-      className="relative"
-      style={{ perspective: 1000 }}
+      className="group/exp relative"
     >
       <span
         aria-hidden="true"
-        className={`absolute top-6 -left-[35px] flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors sm:-left-[43px] ${
-          isActive
-            ? "border-primary bg-primary shadow-[0_0_10px_var(--primary)]"
-            : "border-primary/60 bg-background"
-        }`}
+        className="absolute top-6 -left-[35px] flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary/60 bg-background transition-colors group-data-[active=true]/exp:border-primary group-data-[active=true]/exp:bg-primary sm:-left-[43px]"
       >
-        <span
-          className={`h-1.5 w-1.5 rounded-full ${
-            isActive ? "bg-primary-foreground" : "bg-primary"
-          }`}
-        />
+        <span className="h-1.5 w-1.5 rounded-full bg-primary group-data-[active=true]/exp:bg-primary-foreground" />
       </span>
 
-      <EditorialReveal delay={idx * 0.04}>
-        <article
-          className={`border bg-surface/92 p-5 transition-colors duration-200 sm:p-6 ${
-            isActive
-              ? "border-primary/75"
-              : "border-border hover:border-border-strong"
-          }`}
-        >
+      <EditorialReveal delay={idx * 0.03}>
+        <article className="border border-border bg-surface/92 p-5 transition-colors duration-200 hover:border-border-strong group-data-[active=true]/exp:border-primary/75 sm:p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">

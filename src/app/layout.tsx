@@ -4,10 +4,11 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 
+// Variable fonts: single WOFF2 file per family instead of 11 static weight slices.
+// Only preload primary above-the-fold display/body faces to avoid starving LCP image fetch.
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
   display: "swap",
   preload: true,
 });
@@ -15,7 +16,6 @@ const spaceGrotesk = Space_Grotesk({
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
   preload: true,
 });
@@ -23,7 +23,6 @@ const plusJakarta = Plus_Jakarta_Sans({
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
   preload: true,
 });
@@ -74,7 +73,7 @@ export default function RootLayout({
       <body className="antialiased bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
         <a
           href="#main-content"
-          className="pointer-events-none fixed top-4 left-4 z-100 -translate-y-28 rounded-lg bg-primary px-4 py-2.5 font-mono text-sm font-semibold text-primary-foreground opacity-0 transition-all focus:pointer-events-auto focus:translate-y-0 focus:opacity-100"
+          className="pointer-events-none fixed top-4 left-4 z-100 -translate-y-28 rounded-lg bg-primary px-4 py-2.5 font-mono text-sm font-semibold text-primary-foreground opacity-0 transition-transform focus:pointer-events-auto focus:translate-y-0 focus:opacity-100"
         >
           Skip to main content
         </a>

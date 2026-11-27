@@ -3,9 +3,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { FeaturedProject } from "@/data/portfolio";
-import { AudioGateProvider } from "@/components/providers/AudioGateProvider";
+import { AudioGateProvider, useAudioGate } from "@/components/providers/AudioGateProvider";
 import { ScrollProgressBar } from "@/components/motion/ScrollProgressBar";
-import { WelcomeScreen } from "@/components/motion/WelcomeScreen";
 import { Navbar } from "@/components/navigation/Navbar";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { WorkSection } from "@/components/sections/WorkSection";
@@ -15,7 +14,12 @@ import { ExperienceSection } from "@/components/sections/ExperienceSection";
 import { StackAndCredentialsSection } from "@/components/sections/StackAndCredentialsSection";
 import { ContactFooter } from "@/components/sections/ContactFooter";
 
-// Code-split on-demand native <dialog> modals so they cost 0 bytes until opened!
+// Code-split on-demand overlays & native <dialog> modals: 0 bytes until triggered!
+const WelcomeScreen = dynamic(
+  () => import("@/components/motion/WelcomeScreen").then((m) => m.WelcomeScreen),
+  { ssr: false }
+);
+
 const CommandPalette = dynamic(
   () => import("@/components/navigation/CommandPalette").then((m) => m.CommandPalette),
   { ssr: false }
@@ -28,6 +32,11 @@ const ProjectCaseStudyDialog = dynamic(
     ),
   { ssr: false }
 );
+
+function OnDemandWelcomeOverlay() {
+  const { welcomeVisible } = useAudioGate();
+  return welcomeVisible ? <WelcomeScreen /> : null;
+}
 
 export function PortfolioShell() {
   const [commandOpen, setCommandOpen] = useState(false);
@@ -66,13 +75,13 @@ export function PortfolioShell() {
           className="pointer-events-none fixed inset-0 -z-20 bg-architectural-grid"
         />
 
-        {/* Signature Full-Stack × AI-Assisted / AI-Augmented Welcome Boot Screen */}
-        <WelcomeScreen />
+        {/* On-demand Welcome Boot Sequence (replayed via Hero button — 0ms initial load cost) */}
+        <OnDemandWelcomeOverlay />
 
         {/* Native CSS Scroll-Driven Top Progress Bar */}
         <ScrollProgressBar />
 
-        {/* Preserved Editorial Glass Navbar (untouched per user request) */}
+        {/* Editorial Glass Navbar */}
         <Navbar onOpenCommandPalette={openCommand} />
 
         {/* Primary Page Flow */}
@@ -87,7 +96,7 @@ export function PortfolioShell() {
 
         <ContactFooter />
 
-        {/* Native <dialog> Command Palette (lazy-loaded on first Ctrl+K / click, keeps exit transition) */}
+        {/* Native <dialog> Command Palette (lazy-loaded on first Ctrl+K / click) */}
         {commandLoaded ? (
           <CommandPalette
             open={commandOpen}
@@ -96,7 +105,7 @@ export function PortfolioShell() {
           />
         ) : null}
 
-        {/* Native <dialog> Architecture Case Study Modal (lazy-loaded on first inspect, keeps exit transition) */}
+        {/* Native <dialog> Architecture Case Study Modal (lazy-loaded on first inspect) */}
         {dialogLoaded ? (
           <ProjectCaseStudyDialog
             project={activeProject}

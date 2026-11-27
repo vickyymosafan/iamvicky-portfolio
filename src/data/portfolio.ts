@@ -1,10 +1,10 @@
-export interface ProjectMetric {
+interface ProjectMetric {
   label: string;
   value: string;
   detail?: string;
 }
 
-export interface ProjectLink {
+interface ProjectLink {
   label: string;
   href: string;
   kind: "live" | "github" | "profile";
@@ -63,7 +63,7 @@ export interface ConsoleLine {
   note?: string;
 }
 
-export interface AiWorkflowStage {
+interface AiWorkflowStage {
   id: string;
   step: string;
   title: string;
@@ -86,14 +86,14 @@ export interface AiWorkflowStage {
   outcome: string;
 }
 
-export interface SkillGroup {
+interface SkillGroup {
   id: string;
   label: string;
   description: string;
   items: string[];
 }
 
-export interface LeadershipItem {
+interface LeadershipItem {
   role: string;
   organization: string;
   period: string;

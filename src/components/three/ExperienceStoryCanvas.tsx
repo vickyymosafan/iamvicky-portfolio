@@ -12,25 +12,26 @@ interface ExperienceStoryCanvasProps {
 }
 
 function createExperienceMaterials(isDark: boolean) {
-  const primaryMat = new THREE.MeshStandardMaterial({
+  const spec = isDark ? 0x67e8f9 : 0x2c6e58;
+  const primaryMat = new THREE.MeshPhongMaterial({
     color: isDark ? 0xc8f53c : 0x185c37,
-    roughness: 0.24,
-    metalness: 0.56,
+    specular: spec,
+    shininess: 68,
   });
-  const accentMat = new THREE.MeshStandardMaterial({
+  const accentMat = new THREE.MeshPhongMaterial({
     color: isDark ? 0x56ccf2 : 0x035e8c,
-    roughness: 0.22,
-    metalness: 0.62,
+    specular: 0x9be7ff,
+    shininess: 76,
   });
-  const amberMat = new THREE.MeshStandardMaterial({
+  const amberMat = new THREE.MeshPhongMaterial({
     color: isDark ? 0xf5b942 : 0x8a5600,
-    roughness: 0.24,
-    metalness: 0.66,
+    specular: 0xfde68a,
+    shininess: 70,
   });
-  const slateMat = new THREE.MeshStandardMaterial({
+  const slateMat = new THREE.MeshPhongMaterial({
     color: isDark ? 0x26313b : 0x3b4954,
-    roughness: 0.36,
-    metalness: 0.72,
+    specular: 0x526473,
+    shininess: 48,
   });
   const wireMat = new THREE.MeshBasicMaterial({
     color: isDark ? 0xc8f53c : 0x185c37,
@@ -74,9 +75,9 @@ function createChapterGroup(
               new THREE.Vector3(-0.1, 0.14, 0.38),
               new THREE.Vector3(0.84, 0.66, 0.28),
             ]),
-            18,
+            14,
             0.032,
-            8,
+            6,
             false
           ),
           primaryMat
@@ -86,10 +87,10 @@ function createChapterGroup(
     }
     case 1: {
       g.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), amberMat));
-      const gyro1 = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.024, 10, 38), primaryMat);
+      const gyro1 = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.024, 8, 30), primaryMat);
       gyro1.rotation.x = Math.PI * 0.38;
       g.add(gyro1);
-      const gyro2 = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.02, 10, 34), accentMat);
+      const gyro2 = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.02, 8, 28), accentMat);
       gyro2.rotation.y = Math.PI * 0.45;
       g.add(gyro2);
 
@@ -114,12 +115,14 @@ function createChapterGroup(
     case 2: {
       const ptsA: THREE.Vector3[] = [];
       const ptsB: THREE.Vector3[] = [];
-      for (let i = 0; i <= 12; i++) {
-        const a = (i / 12) * Math.PI * 2.4;
-        const y = -0.78 + (i / 12) * 1.56;
+      for (let i = 0; i <= 10; i++) {
+        const a = (i / 10) * Math.PI * 2.4;
+        const y = -0.78 + (i / 10) * 1.56;
         ptsA.push(new THREE.Vector3(Math.cos(a) * 0.46, y, Math.sin(a) * 0.46));
-        ptsB.push(new THREE.Vector3(Math.cos(a + Math.PI) * 0.46, y, Math.sin(a + Math.PI) * 0.46));
-        if (i % 3 === 0) {
+        ptsB.push(
+          new THREE.Vector3(Math.cos(a + Math.PI) * 0.46, y, Math.sin(a + Math.PI) * 0.46)
+        );
+        if (i % 2 === 0) {
           g.add(
             new THREE.Mesh(
               new THREE.TubeGeometry(new THREE.LineCurve3(ptsA[i], ptsB[i]), 2, 0.022, 6, false),
@@ -129,18 +132,12 @@ function createChapterGroup(
         }
       }
       g.add(
-        new THREE.Mesh(
-          new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsA), 24, 0.044, 8, false),
-          primaryMat
-        )
+        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsA), 20, 0.044, 6, false), primaryMat)
       );
       g.add(
-        new THREE.Mesh(
-          new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsB), 24, 0.044, 8, false),
-          accentMat
-        )
+        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsB), 20, 0.044, 6, false), accentMat)
       );
-      const syncHalo = new THREE.Mesh(new THREE.TorusGeometry(0.94, 0.02, 8, 32), wireMat);
+      const syncHalo = new THREE.Mesh(new THREE.TorusGeometry(0.94, 0.02, 8, 28), wireMat);
       syncHalo.rotation.x = Math.PI / 2;
       g.add(syncHalo);
       break;
@@ -190,10 +187,10 @@ function createChapterGroup(
 }
 
 /**
- * Direct-Swapchain Persistent 3D Experience Storytelling Diorama:
- * - Initializes ONCE during idle after Hero paint (NEVER destroys/recreates WebGL during scroll!).
- * - Direct WebGL swapchain render (ZERO `ctx2d.drawImage` GPU-sync barrier, ZERO `PMREMGenerator` stall!).
- * - Uses `compileAsync()` and strictly pauses rAF when scrolled off-screen (0% idle CPU/GPU).
+ * Lazy-Mounted Direct-Swapchain 3D Experience Storytelling Diorama:
+ * - Mounted ONLY when Section 03 approaches viewport (0 WebGL/CPU cost at Hero load).
+ * - Paced ambient spin (~38fps) with full-rate response while dragging or switching chapters.
+ * - Static single-frame render on `prefers-reduced-motion: reduce`.
  */
 export const ExperienceStoryCanvas = React.memo(function ExperienceStoryCanvas({
   activeIndex,
@@ -205,9 +202,11 @@ export const ExperienceStoryCanvas = React.memo(function ExperienceStoryCanvas({
   const { theme } = useTheme();
   const themeRef = useRef(theme);
   const syncThemeRef = useRef<(() => void) | null>(null);
+  const wakeRenderRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     activeIdxRef.current = activeIndex;
+    wakeRenderRef.current?.();
   }, [activeIndex]);
 
   useEffect(() => {
@@ -220,282 +219,309 @@ export const ExperienceStoryCanvas = React.memo(function ExperienceStoryCanvas({
     if (!container) return;
 
     let cancelled = false;
-    let cleanupFn: (() => void) | null = null;
 
-    const init = () => {
-      if (cancelled || !container) return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const initW = Math.max(1, container.clientWidth);
+    const initH = Math.max(1, container.clientHeight);
+    const dpr = Math.min(window.devicePixelRatio || 1, initW < 420 ? 1.0 : 1.25);
 
-      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        alpha: true,
+        stencil: false,
+        powerPreference: "high-performance",
+      });
+    } catch {
+      return;
+    }
 
-      let renderer: THREE.WebGLRenderer;
-      try {
-        renderer = new THREE.WebGLRenderer({
-          antialias: dpr < 1.5,
-          alpha: true,
-          stencil: false,
-          powerPreference: "high-performance",
-        });
-      } catch {
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(initW, initH);
+    renderer.setClearColor(0x000000, 0);
+    renderer.domElement.className = "pointer-events-none block h-full w-full";
+    renderer.domElement.setAttribute("aria-hidden", "true");
+    container.appendChild(renderer.domElement);
+
+    const isDarkInit = themeRef.current === "dark";
+    const scene = new THREE.Scene();
+    const lights = attachArchitecturalLights(scene, isDarkInit);
+
+    const camera = new THREE.PerspectiveCamera(38, initW / initH, 0.1, 40);
+    camera.position.set(0, 0.45, 3.85);
+    camera.lookAt(0, -0.05, 0);
+
+    const mats = createExperienceMaterials(isDarkInit);
+
+    const baseRingGeo = new THREE.TorusGeometry(1.26, 0.016, 8, 36);
+    const baseRingMat = new THREE.MeshBasicMaterial({
+      color: isDarkInit ? 0xc8f53c : 0x185c37,
+      transparent: true,
+      opacity: 0.4,
+    });
+    const baseRing = new THREE.Mesh(baseRingGeo, baseRingMat);
+    baseRing.rotation.x = Math.PI / 2;
+    baseRing.position.y = -0.96;
+    scene.add(baseRing);
+
+    const stagePivot = new THREE.Group();
+    scene.add(stagePivot);
+
+    const chapters = [0, 1, 2, 3, 4].map((idx) => {
+      const grp = createChapterGroup(idx, mats);
+      const isCurrent = idx === activeIdxRef.current;
+      grp.scale.setScalar(isCurrent ? 1 : 0.001);
+      grp.visible = isCurrent;
+      stagePivot.add(grp);
+      return grp;
+    });
+
+    const orbit = {
+      dragging: false,
+      lastX: 0,
+      lastY: 0,
+      userY: 0,
+      userX: 0,
+      hoverX: 0,
+      hoverY: 0,
+    };
+    let cachedRect: DOMRect | null = null;
+
+    let isInView = false;
+    let isPageVisible = !document.hidden;
+    let rafId = 0;
+    let simTime = 0;
+    let lastDrawTs = performance.now();
+
+    const drawOnce = (): boolean => {
+      const targetIdx = activeIdxRef.current;
+      let morphing = false;
+
+      for (let idx = 0; idx < chapters.length; idx++) {
+        const grp = chapters[idx];
+        const wantScale = idx === targetIdx ? 1 : 0.001;
+        const cur = grp.scale.x;
+        const diff = wantScale - cur;
+        if (Math.abs(diff) > 0.008) {
+          morphing = true;
+          const next = prefersReduced ? wantScale : cur + diff * 0.16;
+          grp.scale.setScalar(next);
+          grp.visible = next > 0.02;
+        } else {
+          grp.scale.setScalar(wantScale);
+          grp.visible = idx === targetIdx;
+        }
+        if (grp.visible) {
+          grp.position.y = prefersReduced ? 0 : Math.sin(simTime * 1.15 + idx) * 0.05;
+        }
+      }
+
+      const targetRotY =
+        (prefersReduced ? 0.35 : simTime * 0.35) + orbit.userY + orbit.hoverX * 0.4;
+      const targetRotX =
+        orbit.userX + orbit.hoverY * 0.35 + (prefersReduced ? 0 : Math.sin(simTime * 0.5) * 0.06);
+
+      stagePivot.rotation.y += (targetRotY - stagePivot.rotation.y) * 0.12;
+      stagePivot.rotation.x += (targetRotX - stagePivot.rotation.x) * 0.12;
+      baseRing.rotation.z = prefersReduced ? 0 : simTime * 0.18;
+
+      renderer.render(scene, camera);
+      return morphing;
+    };
+
+    const tick = (ts: number) => {
+      rafId = 0;
+      if (!isInView || !isPageVisible) return;
+
+      const elapsedMs = ts - lastDrawTs;
+      const interval = orbit.dragging ? 14 : 26; // ~38fps idle, full-rate while dragging
+      if (elapsedMs < interval) {
+        rafId = requestAnimationFrame(tick);
         return;
       }
 
-      const initW = Math.max(1, container.clientWidth);
-      const initH = Math.max(1, container.clientHeight);
-      renderer.setPixelRatio(dpr);
-      renderer.setSize(initW, initH);
-      renderer.setClearColor(0x000000, 0);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
-      renderer.domElement.className = "pointer-events-none block h-full w-full";
-      renderer.domElement.setAttribute("aria-hidden", "true");
-      container.appendChild(renderer.domElement);
+      const dt = Math.min(0.06, Math.max(0, elapsedMs / 1000));
+      lastDrawTs = ts;
+      if (!prefersReduced) {
+        simTime += dt;
+      }
 
-      const isDarkInit = themeRef.current === "dark";
-      const scene = new THREE.Scene();
-      const lights = attachArchitecturalLights(scene, isDarkInit);
+      const morphing = drawOnce();
+      if (prefersReduced && !morphing && !orbit.dragging) return;
+      rafId = requestAnimationFrame(tick);
+    };
 
-      const camera = new THREE.PerspectiveCamera(38, initW / initH, 0.1, 40);
-      camera.position.set(0, 0.45, 3.85);
-      camera.lookAt(0, -0.05, 0);
-
-      const mats = createExperienceMaterials(isDarkInit);
-
-      const baseRingGeo = new THREE.TorusGeometry(1.26, 0.016, 8, 44);
-      const baseRingMat = new THREE.MeshBasicMaterial({
-        color: isDarkInit ? 0xc8f53c : 0x185c37,
-        transparent: true,
-        opacity: 0.4,
-      });
-      const baseRing = new THREE.Mesh(baseRingGeo, baseRingMat);
-      baseRing.rotation.x = Math.PI / 2;
-      baseRing.position.y = -0.96;
-      scene.add(baseRing);
-
-      const stagePivot = new THREE.Group();
-      scene.add(stagePivot);
-
-      const chapters = [0, 1, 2, 3, 4].map((idx) => {
-        const grp = createChapterGroup(idx, mats);
-        const isCurrent = idx === activeIdxRef.current;
-        grp.scale.setScalar(isCurrent ? 1 : 0.001);
-        grp.visible = isCurrent;
-        stagePivot.add(grp);
-        return grp;
-      });
-
-      const orbit = { dragging: false, lastX: 0, lastY: 0, userY: 0, userX: 0, hoverX: 0, hoverY: 0 };
-      let cachedRect: DOMRect | null = null;
-
-      const onWindowDragMove = (e: PointerEvent) => {
-        if (!orbit.dragging) return;
-        orbit.userY += (e.clientX - orbit.lastX) * 0.01;
-        orbit.userX = Math.max(-0.55, Math.min(0.55, orbit.userX + (e.clientY - orbit.lastY) * 0.008));
-        orbit.lastX = e.clientX;
-        orbit.lastY = e.clientY;
-      };
-
-      const onUp = () => {
-        orbit.dragging = false;
-        window.removeEventListener("pointermove", onWindowDragMove);
-        window.removeEventListener("pointerup", onUp);
-      };
-
-      const onDown = (e: PointerEvent) => {
-        orbit.dragging = true;
-        orbit.lastX = e.clientX;
-        orbit.lastY = e.clientY;
-        window.addEventListener("pointermove", onWindowDragMove, { passive: true });
-        window.addEventListener("pointerup", onUp, { once: true });
-      };
-
-      const onContainerEnter = () => {
-        cachedRect = container.getBoundingClientRect();
-      };
-
-      const onContainerMove = (e: PointerEvent) => {
-        if (!cachedRect) cachedRect = container.getBoundingClientRect();
-        if (cachedRect.width > 0 && cachedRect.height > 0) {
-          orbit.hoverX = ((e.clientX - cachedRect.left) / cachedRect.width - 0.5) * 0.9;
-          orbit.hoverY = ((e.clientY - cachedRect.top) / cachedRect.height - 0.5) * 0.55;
-        }
-      };
-
-      const onContainerLeave = () => {
-        cachedRect = null;
-        orbit.hoverX = 0;
-        orbit.hoverY = 0;
-      };
-
-      container.addEventListener("pointerdown", onDown);
-      container.addEventListener("pointerenter", onContainerEnter, { passive: true });
-      container.addEventListener("pointermove", onContainerMove, { passive: true });
-      container.addEventListener("pointerleave", onContainerLeave, { passive: true });
-
-      let isInView = false;
-      let isPageVisible = !document.hidden;
-      let rafId = 0;
-      let simTime = 0;
-      let lastTs = performance.now();
-
-      const drawOnce = () => {
-        const targetIdx = activeIdxRef.current;
-        for (let idx = 0; idx < chapters.length; idx++) {
-          const grp = chapters[idx];
-          const wantScale = idx === targetIdx ? 1 : 0.001;
-          const cur = grp.scale.x;
-          const next = cur + (wantScale - cur) * 0.14;
-          grp.scale.setScalar(next);
-          grp.visible = next > 0.02;
-          if (grp.visible) {
-            grp.position.y = Math.sin(simTime * 1.15 + idx) * 0.06;
-          }
-        }
-
-        const targetRotY = (prefersReduced ? 0.35 : simTime * 0.35) + orbit.userY + orbit.hoverX * 0.4;
-        const targetRotX = orbit.userX + orbit.hoverY * 0.35 + Math.sin(simTime * 0.5) * 0.07;
-
-        stagePivot.rotation.y += (targetRotY - stagePivot.rotation.y) * 0.1;
-        stagePivot.rotation.x += (targetRotX - stagePivot.rotation.x) * 0.1;
-        baseRing.rotation.z = simTime * 0.18;
-
-        renderer.render(scene, camera);
-      };
-
-      const tick = (ts: number) => {
-        rafId = 0;
-        if (!isInView || !isPageVisible) return;
-        const dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));
-        lastTs = ts;
-        simTime += prefersReduced ? dt * 0.45 : dt;
-        drawOnce();
+    const ensureRunning = () => {
+      if (rafId === 0 && isInView && isPageVisible) {
+        lastDrawTs = performance.now();
         rafId = requestAnimationFrame(tick);
-      };
+      }
+    };
 
-      const ensureRunning = () => {
-        if (rafId === 0 && isInView && isPageVisible) {
-          lastTs = performance.now();
-          rafId = requestAnimationFrame(tick);
-        }
-      };
-
-      syncThemeRef.current = () => {
-        const nextDark = themeRef.current === "dark";
-        lights.updateTheme(nextDark);
-        const p = nextDark ? 0xc8f53c : 0x185c37;
-        const a = nextDark ? 0x56ccf2 : 0x035e8c;
-        const am = nextDark ? 0xf5b942 : 0x8a5600;
-        const s = nextDark ? 0x26313b : 0x3b4954;
-        mats.primaryMat.color.setHex(p);
-        mats.accentMat.color.setHex(a);
-        mats.amberMat.color.setHex(am);
-        mats.slateMat.color.setHex(s);
-        mats.wireMat.color.setHex(p);
-        baseRingMat.color.setHex(p);
+    wakeRenderRef.current = () => {
+      if (isInView) {
         drawOnce();
-      };
+        ensureRunning();
+      }
+    };
 
-      const resize = () => {
-        if (!container) return;
-        cachedRect = null;
-        const w = Math.max(1, container.clientWidth);
-        const h = Math.max(1, container.clientHeight);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-        drawOnce();
-      };
-      const ro = new ResizeObserver(resize);
-      ro.observe(container);
-
-      const io = new IntersectionObserver(
-        (entries) => {
-          isInView = entries.some((e) => e.isIntersecting);
-          if (isInView) {
-            drawOnce();
-            ensureRunning();
-          } else if (rafId) {
-            cancelAnimationFrame(rafId);
-            rafId = 0;
-          }
-        },
-        { rootMargin: "220px 0px" }
+    const onWindowDragMove = (e: PointerEvent) => {
+      if (!orbit.dragging) return;
+      orbit.userY += (e.clientX - orbit.lastX) * 0.01;
+      orbit.userX = Math.max(
+        -0.55,
+        Math.min(0.55, orbit.userX + (e.clientY - orbit.lastY) * 0.008)
       );
-      io.observe(container);
+      orbit.lastX = e.clientX;
+      orbit.lastY = e.clientY;
+      ensureRunning();
+    };
 
-      const onVis = () => {
-        isPageVisible = !document.hidden;
-        if (isPageVisible) ensureRunning();
-        else if (rafId) {
+    const onUp = () => {
+      orbit.dragging = false;
+      window.removeEventListener("pointermove", onWindowDragMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+
+    const onDown = (e: PointerEvent) => {
+      orbit.dragging = true;
+      orbit.lastX = e.clientX;
+      orbit.lastY = e.clientY;
+      window.addEventListener("pointermove", onWindowDragMove, { passive: true });
+      window.addEventListener("pointerup", onUp, { once: true });
+      ensureRunning();
+    };
+
+    const onContainerEnter = () => {
+      cachedRect = container.getBoundingClientRect();
+    };
+
+    const onContainerMove = (e: PointerEvent) => {
+      if (!cachedRect) cachedRect = container.getBoundingClientRect();
+      if (cachedRect.width > 0 && cachedRect.height > 0) {
+        orbit.hoverX = ((e.clientX - cachedRect.left) / cachedRect.width - 0.5) * 0.9;
+        orbit.hoverY = ((e.clientY - cachedRect.top) / cachedRect.height - 0.5) * 0.55;
+      }
+    };
+
+    const onContainerLeave = () => {
+      cachedRect = null;
+      orbit.hoverX = 0;
+      orbit.hoverY = 0;
+    };
+
+    container.addEventListener("pointerdown", onDown);
+    container.addEventListener("pointerenter", onContainerEnter, { passive: true });
+    container.addEventListener("pointermove", onContainerMove, { passive: true });
+    container.addEventListener("pointerleave", onContainerLeave, { passive: true });
+
+    syncThemeRef.current = () => {
+      const nextDark = themeRef.current === "dark";
+      lights.updateTheme(nextDark);
+      const p = nextDark ? 0xc8f53c : 0x185c37;
+      const a = nextDark ? 0x56ccf2 : 0x035e8c;
+      const am = nextDark ? 0xf5b942 : 0x8a5600;
+      const s = nextDark ? 0x26313b : 0x3b4954;
+      mats.primaryMat.color.setHex(p);
+      mats.accentMat.color.setHex(a);
+      mats.amberMat.color.setHex(am);
+      mats.slateMat.color.setHex(s);
+      mats.wireMat.color.setHex(p);
+      baseRingMat.color.setHex(p);
+      drawOnce();
+    };
+
+    const resize = () => {
+      if (!container) return;
+      cachedRect = null;
+      const w = Math.max(1, container.clientWidth);
+      const h = Math.max(1, container.clientHeight);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      if (isInView) drawOnce();
+    };
+    const ro = new ResizeObserver(resize);
+    ro.observe(container);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        isInView = entries.some((e) => e.isIntersecting);
+        if (isInView) {
+          drawOnce();
+          ensureRunning();
+        } else if (rafId) {
           cancelAnimationFrame(rafId);
           rafId = 0;
         }
-      };
-      document.addEventListener("visibilitychange", onVis);
+      },
+      { rootMargin: "180px 0px" }
+    );
+    io.observe(container);
 
-      if (typeof renderer.compileAsync === "function") {
-        void renderer.compileAsync(scene, camera).then(() => {
-          if (!cancelled) drawOnce();
-        });
-      } else {
-        drawOnce();
+    const onVis = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) ensureRunning();
+      else if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
       }
+    };
+    document.addEventListener("visibilitychange", onVis);
 
-      cleanupFn = () => {
-        syncThemeRef.current = null;
-        if (rafId) cancelAnimationFrame(rafId);
-        io.disconnect();
-        ro.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        container.removeEventListener("pointerdown", onDown);
-        container.removeEventListener("pointerenter", onContainerEnter);
-        container.removeEventListener("pointermove", onContainerMove);
-        container.removeEventListener("pointerleave", onContainerLeave);
-        window.removeEventListener("pointermove", onWindowDragMove);
-        window.removeEventListener("pointerup", onUp);
-
-        const geos = new Set<THREE.BufferGeometry>();
-        chapters.forEach((grp) => {
-          grp.traverse((obj) => {
-            if (obj instanceof THREE.Mesh && !geos.has(obj.geometry)) {
-              geos.add(obj.geometry);
-              obj.geometry.dispose();
-            }
-          });
+    if (typeof renderer.compileAsync === "function") {
+      // Temporarily show all 5 chapters for compile + 1-frame warm-up VBO upload during idle
+      chapters.forEach((c) => {
+        c.visible = true;
+      });
+      void renderer.compileAsync(scene, camera).then(() => {
+        if (cancelled) return;
+        renderer.render(scene, camera);
+        chapters.forEach((c, idx) => {
+          c.visible = idx === activeIdxRef.current;
         });
-        baseRingGeo.dispose();
-        baseRingMat.dispose();
-        mats.primaryMat.dispose();
-        mats.accentMat.dispose();
-        mats.amberMat.dispose();
-        mats.slateMat.dispose();
-        mats.wireMat.dispose();
-        renderer.dispose();
-        if (renderer.domElement.parentNode === container) {
-          container.removeChild(renderer.domElement);
-        }
-      };
-    };
-
-    const win = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    let idleId = 0;
-    let timerId = 0;
-    if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(init, { timeout: 850 });
+        drawOnce();
+      });
     } else {
-      timerId = window.setTimeout(init, 450);
+      drawOnce();
     }
 
     return () => {
       cancelled = true;
-      if (idleId && typeof win.cancelIdleCallback === "function") {
-        win.cancelIdleCallback(idleId);
+      syncThemeRef.current = null;
+      wakeRenderRef.current = null;
+      if (rafId) cancelAnimationFrame(rafId);
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+      container.removeEventListener("pointerdown", onDown);
+      container.removeEventListener("pointerenter", onContainerEnter);
+      container.removeEventListener("pointermove", onContainerMove);
+      container.removeEventListener("pointerleave", onContainerLeave);
+      window.removeEventListener("pointermove", onWindowDragMove);
+      window.removeEventListener("pointerup", onUp);
+
+      const geos = new Set<THREE.BufferGeometry>();
+      chapters.forEach((grp) => {
+        grp.traverse((obj) => {
+          if (obj instanceof THREE.Mesh && !geos.has(obj.geometry)) {
+            geos.add(obj.geometry);
+            obj.geometry.dispose();
+          }
+        });
+      });
+      baseRingGeo.dispose();
+      baseRingMat.dispose();
+      mats.primaryMat.dispose();
+      mats.accentMat.dispose();
+      mats.amberMat.dispose();
+      mats.slateMat.dispose();
+      mats.wireMat.dispose();
+      renderer.dispose();
+      if (renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement);
       }
-      if (timerId) window.clearTimeout(timerId);
-      cleanupFn?.();
     };
   }, []);
 

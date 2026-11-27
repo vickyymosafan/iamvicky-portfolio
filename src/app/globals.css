@@ -26,7 +26,6 @@
   --bg: #0b0d0f;
   --surface: #12161a;
   --surface-elevated: #181e24;
-  --surface-translucent: rgba(11, 13, 15, 0.84);
 
   --ink: #f3f5f2;
   --ink-secondary: #cfd7dc;
@@ -51,7 +50,6 @@
 
   --focus-ring: #c8f53c;
   --grid-line: rgba(243, 245, 242, 0.045);
-  --shadow-card: 0 14px 32px -22px rgba(0, 0, 0, 0.62);
 }
 
 :root[data-theme="light"],
@@ -61,7 +59,6 @@
   --bg: #f6f4ee;
   --surface: #ffffff;
   --surface-elevated: #ebe8de;
-  --surface-translucent: rgba(246, 244, 238, 0.88);
 
   --ink: #111518;
   --ink-secondary: #252e35;
@@ -86,7 +83,6 @@
 
   --focus-ring: #185c37;
   --grid-line: rgba(17, 21, 24, 0.055);
-  --shadow-card: 0 14px 32px -22px rgba(17, 21, 24, 0.16);
 }
 
 :root[data-theme="dark"],
@@ -136,8 +132,6 @@ body {
   font-family: var(--font-body);
   overflow-x: clip;
   min-height: 100dvh;
-  text-rendering: optimizeLegibility;
-  transition: background-color 220ms ease, color 220ms ease;
 }
 
 /* Subtle architectural grid canvas (isolated GPU compositor layer — zero repaint during scroll) */
@@ -150,27 +144,18 @@ body {
   contain: strict;
 }
 
-/* Accessible focus outlines (Modern Web Guidance: natural-interactions) */
+/* Accessible focus outlines */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
   border-radius: 0.375rem;
 }
 
-/* Interactive tactile press states */
+/* Lightweight color-only interactive transitions (avoids global box-shadow/layout churn) */
 :where(button, a) {
-  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 180ms;
+  transition-property: color, background-color, border-color;
+  transition-duration: 160ms;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Card action triggers keep full WCAG contrast at rest and elevate on hover/focus */
-.reveal-on-interact {
-  opacity: 1;
-}
-.group:hover .reveal-on-interact,
-.group:focus-within .reveal-on-interact {
-  border-color: var(--border-strong);
 }
 
 /* ==========================================================================
@@ -197,6 +182,85 @@ body {
     .scroll-progress-bar {
       animation: root-scroll-grow auto linear;
       animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* ==========================================================================
+   Modern Web Guidance: Pure CSS Scroll-Driven Bridge (02 Workflow <-> 03 3D)
+   Runs 100% off the main thread on the GPU compositor with zero JS listeners.
+   ========================================================================== */
+.bridge-spine {
+  transform-origin: 50% 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .bridge-root {
+      view-timeline: --bridge-tl block;
+    }
+
+    @keyframes bridge-spine-grow {
+      from {
+        transform: scaleY(0);
+      }
+      to {
+        transform: scaleY(1);
+      }
+    }
+
+    @keyframes bridge-packet-glide {
+      0% {
+        transform: translate3d(0, -34%, 0) scale(0.92);
+      }
+      50% {
+        transform: translate3d(0, 0, 0) scale(1.04);
+      }
+      100% {
+        transform: translate3d(0, 34%, 0) scale(0.94);
+      }
+    }
+
+    @keyframes bridge-rail-left {
+      from {
+        transform: translate3d(-6%, 0, 0);
+      }
+      to {
+        transform: translate3d(6%, 0, 0);
+      }
+    }
+
+    @keyframes bridge-rail-right {
+      from {
+        transform: translate3d(6%, 0, 0);
+      }
+      to {
+        transform: translate3d(-6%, 0, 0);
+      }
+    }
+
+    .bridge-spine {
+      animation: bridge-spine-grow auto linear both;
+      animation-timeline: --bridge-tl;
+      animation-range: cover 12% cover 86%;
+    }
+
+    .bridge-packet {
+      animation: bridge-packet-glide auto linear both;
+      animation-timeline: --bridge-tl;
+      animation-range: cover 10% cover 90%;
+    }
+
+    .bridge-rail-left {
+      animation: bridge-rail-left auto linear both;
+      animation-timeline: --bridge-tl;
+      animation-range: cover 0% cover 100%;
+    }
+
+    .bridge-rail-right {
+      animation: bridge-rail-right auto linear both;
+      animation-timeline: --bridge-tl;
+      animation-range: cover 0% cover 100%;
     }
   }
 }
@@ -264,7 +328,7 @@ body {
 }
 
 /* ==========================================================================
-   Modern Web Guidance: Opt-in Marquee Motion (prefers-reduced-motion safe)
+   Modern Web Guidance: Pure GPU Compositor Marquee (Zero JS rAF Loop!)
    ========================================================================== */
 @keyframes capability-marquee {
   from {
@@ -275,15 +339,19 @@ body {
   }
 }
 
+.marquee-clip {
+  overflow: hidden;
+  contain: layout paint;
+}
+
 .marquee-track {
   display: flex;
   width: max-content;
-  will-change: transform;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .marquee-track {
-    animation: capability-marquee 38s linear infinite;
+    animation: capability-marquee 42s linear infinite;
   }
   .marquee-track[data-paused="true"],
   .marquee-track:hover,
@@ -306,6 +374,15 @@ dialog.native-modal {
   max-height: calc(100dvh - 2rem);
   margin: auto;
   overflow: visible;
+  opacity: 0;
+  translate: 0 10px;
+  transition:
+    display,
+    overlay,
+    opacity ease-out,
+    translate ease-out;
+  transition-duration: 200ms;
+  transition-behavior: allow-discrete;
 }
 
 dialog.native-modal.native-modal-sm {
@@ -316,6 +393,8 @@ dialog.native-modal.native-modal-sm {
 dialog.native-modal[open] {
   display: flex;
   flex-direction: column;
+  opacity: 1;
+  translate: 0 0;
 }
 
 dialog.native-modal:modal {
@@ -324,26 +403,9 @@ dialog.native-modal:modal {
 
 dialog.native-modal::backdrop {
   background: rgba(7, 10, 12, 0.72);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(6px);
   overflow: hidden;
   overscroll-behavior: contain;
-}
-
-dialog.native-modal {
-  opacity: 0;
-  translate: 0 10px;
-  transition:
-    display,
-    overlay,
-    opacity ease-out,
-    translate ease-out;
-  transition-duration: 220ms;
-  transition-behavior: allow-discrete;
-}
-
-dialog.native-modal[open] {
-  opacity: 1;
-  translate: 0 0;
 }
 
 @starting-style {
@@ -367,49 +429,21 @@ dialog.native-modal[open] {
 }
 
 /* ==========================================================================
-   Spotlight Card Surface (Compositor-safe CSS custom property pointer glow)
+   CSS Layout & Style Containment for below-the-fold static editorial sections
+   (avoids mid-scroll content-visibility raster pileups while keeping reflows isolated)
    ========================================================================== */
-.surface-card {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
-}
-
-.surface-card-interactive {
-  position: relative;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
-}
-
-.surface-card-interactive:hover {
-  border-color: var(--border-strong);
-}
-
-/* ==========================================================================
-   Modern Web Guidance: Defer rendering off-screen below-the-fold static blocks
-   (defer-rendering-heavy-content + interactions-in-complex-layouts)
-   Paired with contain-intrinsic-size to guarantee zero CLS & scrollbar jumps.
-   ========================================================================== */
-.cv-auto-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto none auto 620px;
-}
-
+.cv-auto-section,
 .cv-auto-footer {
-  content-visibility: auto;
-  contain-intrinsic-size: auto none auto 420px;
-}
-
-@supports not (content-visibility: auto) {
-  .cv-auto-section,
-  .cv-auto-footer {
-    contain: layout style paint;
-  }
+  contain: layout style;
 }
 
 .isolate-stage {
   contain: layout style paint;
+}
+
+.clip-contain {
+  overflow: hidden;
+  contain: layout paint;
 }
 
 /* Reduced-motion final-state safeguard for 03 -> 04 Portal-to-Theater transition */
@@ -429,22 +463,4 @@ dialog.native-modal[open] {
   .portal-bg-veil {
     opacity: 1 !important;
   }
-}
-
-/* Lenis recommended utility states */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-  overflow: clip;
 }

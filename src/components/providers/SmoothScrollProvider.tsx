@@ -1,9 +1,16 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { ReactLenis } from "lenis/react";
 import type { LenisRef } from "lenis/react";
-import { MotionConfig, cancelFrame, frame } from "framer-motion";
+import { LazyMotion, MotionConfig, cancelFrame, domAnimation, frame } from "framer-motion";
 import "lenis/dist/lenis.css";
 
 interface SmoothScrollContextValue {
@@ -21,39 +28,75 @@ const SmoothScrollContext = createContext<SmoothScrollContextValue>({
 });
 
 /**
- * Unified Zero-Desync Smooth Scroll Provider (Motion + Lenis):
- * - Drives Lenis inside Motion's `frame.setup` step (BEFORE `frame.read` measures scrollY)
- *   per official Motion docs (https://motion.dev/docs/lenis), eliminating 1-frame scroll-tracking stutter.
- * - Uses native 120Hz touch physics on mobile (`syncTouch: false`) and silky desktop wheel inertia (`lerp: 0.1`).
- * - Syncs Lenis document bounds automatically via rAF-throttled `ResizeObserver(document.body)`
- *   whenever collapsible sections (e.g. ShippedFolderVault) change page height.
+ * On-Demand Zero-Desync Smooth Scroll Provider (Motion LazyMotion + Lenis):
+ * - Uses `<LazyMotion features={domAnimation} strict>` to cut Framer Motion client bundle dramatically.
+ * - Respects user reduced-motion preferences (`reducedMotion="user"` + Lenis `respectReducedMotion: true`).
+ * - Runs Lenis inside Motion's `frame.setup` (BEFORE `frame.read` measures scrollY for 0-frame desync),
+ *   and automatically sleeps the frameloop once scrolling settles (0% idle CPU/GPU overhead).
+ * - Relies on Lenis's built-in `autoResize: true` instead of a duplicate body ResizeObserver.
  */
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<LenisRef>(null);
+  const wakeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    function update(data: { timestamp: number }) {
-      lenisRef.current?.lenis?.raf(data.timestamp);
-    }
+    let active = false;
+    let idleFrames = 0;
 
-    // Critical: `frame.setup` executes BEFORE Motion's `read` phase so useScroll
-    // always receives the exact current frame's scroll position (zero 1-frame lag/jitter).
-    frame.setup(update, true);
+    const update = (data: { timestamp: number }) => {
+      const lenis = lenisRef.current?.lenis;
+      if (!lenis) return;
 
-    let resizeRaf = 0;
-    const ro = new ResizeObserver(() => {
-      if (resizeRaf) return;
-      resizeRaf = requestAnimationFrame(() => {
-        resizeRaf = 0;
-        lenisRef.current?.lenis?.resize();
-      });
-    });
-    ro.observe(document.body);
+      lenis.raf(data.timestamp);
+
+      if (lenis.isScrolling) {
+        idleFrames = 0;
+      } else {
+        idleFrames++;
+        // Sleep the Motion frameloop cleanly once inertia completely settles (~200ms)
+        if (idleFrames >= 12) {
+          active = false;
+          cancelFrame(update);
+        }
+      }
+    };
+
+    const wake = () => {
+      idleFrames = 0;
+      if (!active) {
+        active = true;
+        frame.setup(update, true);
+      }
+    };
+
+    wakeRef.current = wake;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "PageDown" ||
+        e.key === "PageUp" ||
+        e.key === "Home" ||
+        e.key === "End" ||
+        e.key === " "
+      ) {
+        wake();
+      }
+    };
+
+    window.addEventListener("wheel", wake, { passive: true });
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("touchmove", wake, { passive: true });
+    window.addEventListener("keydown", onKeyDown, { passive: true });
 
     return () => {
-      cancelFrame(update);
-      ro.disconnect();
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      wakeRef.current = null;
+      if (active) cancelFrame(update);
+      window.removeEventListener("wheel", wake);
+      window.removeEventListener("scroll", wake);
+      window.removeEventListener("touchmove", wake);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
 
@@ -61,9 +104,10 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     const lenis = lenisRef.current?.lenis;
 
     if (lenis) {
+      wakeRef.current?.();
       lenis.scrollTo(target, {
         offset,
-        duration: 1.0,
+        duration: 0.78,
       });
       return;
     }
@@ -90,28 +134,36 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     lenisRef.current?.lenis?.resize();
   }, []);
 
+  const value = useMemo(
+    () => ({ scrollTo, pauseScroll, resumeScroll, resizeScroll }),
+    [scrollTo, pauseScroll, resumeScroll, resizeScroll]
+  );
+
   return (
-    <MotionConfig reducedMotion="never">
-      <SmoothScrollContext.Provider
-        value={{ scrollTo, pauseScroll, resumeScroll, resizeScroll }}
-      >
-        <ReactLenis
-          root
-          ref={lenisRef}
-          options={{
-            autoRaf: false,
-            lerp: 0.1,
-            smoothWheel: true,
-            syncTouch: false,
-            wheelMultiplier: 0.95,
-            touchMultiplier: 1.0,
-            anchors: { offset: -76 },
-          }}
-        >
-          {children}
-        </ReactLenis>
-      </SmoothScrollContext.Provider>
-    </MotionConfig>
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user">
+        <SmoothScrollContext.Provider value={value}>
+          <ReactLenis
+            root
+            ref={lenisRef}
+            options={{
+              autoRaf: false,
+              autoResize: true,
+              lerp: 0.14,
+              smoothWheel: true,
+              syncTouch: false,
+              wheelMultiplier: 1.15,
+              touchMultiplier: 1.0,
+              respectReducedMotion: true,
+              stopInertiaOnNavigate: true,
+              anchors: { offset: -76 },
+            }}
+          >
+            {children}
+          </ReactLenis>
+        </SmoothScrollContext.Provider>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
 

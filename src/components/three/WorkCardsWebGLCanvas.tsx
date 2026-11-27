@@ -2,12 +2,13 @@
 
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import type { MotionValue } from "framer-motion";
+import { cancelFrame, frame, type MotionValue } from "framer-motion";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   attachArchitecturalLights,
   type CardPointerState,
 } from "@/components/three/architecturalLights";
+import { yieldToMain } from "@/lib/scrollIdle";
 
 export interface CardSlotRegistration {
   id: string;
@@ -21,39 +22,54 @@ interface WorkCardsWebGLCanvasProps {
   xMotionValue: MotionValue<number>;
 }
 
-function buildCardSculpture(projectId: string, isDark: boolean) {
+interface SharedMaterials {
+  primaryMat: THREE.MeshPhongMaterial;
+  accentMat: THREE.MeshPhongMaterial;
+  bodyMat: THREE.MeshPhongMaterial;
+  wireMat: THREE.MeshBasicMaterial;
+}
+
+function createSharedCardMaterials(isDark: boolean): SharedMaterials {
+  const spec = isDark ? 0x67e8f9 : 0x2c6e58;
+  return {
+    primaryMat: new THREE.MeshPhongMaterial({
+      color: isDark ? 0xc8f53c : 0x185c37,
+      specular: spec,
+      shininess: 68,
+    }),
+    accentMat: new THREE.MeshPhongMaterial({
+      color: isDark ? 0x56ccf2 : 0x035e8c,
+      specular: 0x9be7ff,
+      shininess: 76,
+    }),
+    bodyMat: new THREE.MeshPhongMaterial({
+      color: isDark ? 0x26313b : 0x3b4954,
+      specular: 0x526473,
+      shininess: 48,
+    }),
+    wireMat: new THREE.MeshBasicMaterial({
+      color: isDark ? 0xc8f53c : 0x185c37,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.28,
+    }),
+  };
+}
+
+function buildCardSculptureGroup(
+  projectId: string,
+  mats: SharedMaterials,
+  sharedPlinthGeo: THREE.BufferGeometry,
+  sharedRimGeo: THREE.BufferGeometry
+): THREE.Group {
+  const { primaryMat, accentMat, bodyMat, wireMat } = mats;
   const root = new THREE.Group();
 
-  const primaryMat = new THREE.MeshStandardMaterial({
-    color: isDark ? 0xc8f53c : 0x185c37,
-    roughness: 0.24,
-    metalness: 0.56,
-  });
-
-  const accentMat = new THREE.MeshStandardMaterial({
-    color: isDark ? 0x56ccf2 : 0x035e8c,
-    roughness: 0.22,
-    metalness: 0.62,
-  });
-
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: isDark ? 0x26313b : 0x3b4954,
-    roughness: 0.34,
-    metalness: 0.72,
-  });
-
-  const wireMat = new THREE.MeshBasicMaterial({
-    color: isDark ? 0xc8f53c : 0x185c37,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.28,
-  });
-
-  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.25, 0.08, 20), bodyMat);
+  const plinth = new THREE.Mesh(sharedPlinthGeo, bodyMat);
   plinth.position.y = -0.92;
   root.add(plinth);
 
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.02, 8, 32), primaryMat);
+  const rim = new THREE.Mesh(sharedRimGeo, primaryMat);
   rim.rotation.x = Math.PI / 2;
   rim.position.y = -0.87;
   root.add(rim);
@@ -62,14 +78,14 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
     case "hybrid-rag-thesis": {
       root.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.56, 1), primaryMat));
       root.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.82, 0), wireMat));
-      const r1 = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.032, 10, 34), accentMat);
+      const r1 = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.032, 8, 28), accentMat);
       r1.rotation.x = Math.PI * 0.34;
       root.add(r1);
-      const r2 = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.025, 10, 30), bodyMat);
+      const r2 = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.025, 8, 24), bodyMat);
       r2.rotation.y = Math.PI * 0.4;
       r2.rotation.x = -Math.PI * 0.25;
       root.add(r2);
-      const nodeGeo = new THREE.SphereGeometry(0.085, 10, 10);
+      const nodeGeo = new THREE.SphereGeometry(0.085, 8, 8);
       for (let i = 0; i < 6; i++) {
         const ang = (i / 6) * Math.PI * 2;
         const node = new THREE.Mesh(nodeGeo, i % 2 === 0 ? primaryMat : accentMat);
@@ -80,7 +96,7 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
     }
     case "beyond-rag": {
       root.add(new THREE.Mesh(new THREE.DodecahedronGeometry(0.52, 0), accentMat));
-      const halo = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.036, 10, 36), primaryMat);
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.036, 8, 30), primaryMat);
       halo.rotation.x = Math.PI * 0.42;
       halo.rotation.y = 0.28;
       root.add(halo);
@@ -97,7 +113,7 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
         sat.rotation.set(0.4, 0.6, 0.2);
         root.add(sat);
         const curve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(x, y, z));
-        root.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 3, 0.018, 6, false), accentMat));
+        root.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 2, 0.018, 6, false), accentMat));
       });
       break;
     }
@@ -125,18 +141,18 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
               new THREE.Vector3(0.02, 0.54, 0.22),
               new THREE.Vector3(0.38, -0.1, -0.14),
             ]),
-            14,
+            12,
             0.032,
-            8,
+            6,
             false
           ),
           accentMat
         )
       );
 
-      const frame = new THREE.Mesh(new THREE.TorusGeometry(0.96, 0.022, 8, 32), wireMat);
-      frame.rotation.y = Math.PI * 0.2;
-      root.add(frame);
+      const frameRing = new THREE.Mesh(new THREE.TorusGeometry(0.96, 0.022, 8, 28), wireMat);
+      frameRing.rotation.y = Math.PI * 0.2;
+      root.add(frameRing);
       break;
     }
     case "buildflow-erp": {
@@ -160,8 +176,8 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
       break;
     }
     case "arven-ecommerce": {
-      root.add(new THREE.Mesh(new THREE.TorusKnotGeometry(0.48, 0.14, 56, 10, 2, 3), primaryMat));
-      const collar = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.026, 8, 32), accentMat);
+      root.add(new THREE.Mesh(new THREE.TorusKnotGeometry(0.48, 0.14, 44, 8, 2, 3), primaryMat));
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.026, 8, 28), accentMat);
       collar.rotation.x = Math.PI * 0.48;
       root.add(collar);
       break;
@@ -169,12 +185,14 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
     case "digital-posyandu": {
       const strandPtsA: THREE.Vector3[] = [];
       const strandPtsB: THREE.Vector3[] = [];
-      for (let i = 0; i <= 12; i++) {
-        const t = (i / 12) * Math.PI * 2.2;
-        const y = -0.68 + (i / 12) * 1.38;
+      for (let i = 0; i <= 10; i++) {
+        const t = (i / 10) * Math.PI * 2.2;
+        const y = -0.68 + (i / 10) * 1.38;
         strandPtsA.push(new THREE.Vector3(Math.cos(t) * 0.44, y, Math.sin(t) * 0.44));
-        strandPtsB.push(new THREE.Vector3(Math.cos(t + Math.PI) * 0.44, y, Math.sin(t + Math.PI) * 0.44));
-        if (i % 3 === 0) {
+        strandPtsB.push(
+          new THREE.Vector3(Math.cos(t + Math.PI) * 0.44, y, Math.sin(t + Math.PI) * 0.44)
+        );
+        if (i % 2 === 0) {
           root.add(
             new THREE.Mesh(
               new THREE.TubeGeometry(new THREE.LineCurve3(strandPtsA[i], strandPtsB[i]), 2, 0.02, 6, false),
@@ -184,10 +202,10 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
         }
       }
       root.add(
-        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(strandPtsA), 24, 0.042, 8, false), primaryMat)
+        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(strandPtsA), 20, 0.042, 6, false), primaryMat)
       );
       root.add(
-        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(strandPtsB), 24, 0.042, 8, false), accentMat)
+        new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(strandPtsB), 20, 0.042, 6, false), accentMat)
       );
       break;
     }
@@ -213,9 +231,9 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
               new THREE.Vector3(-0.1, 0.12, 0.32),
               new THREE.Vector3(0.75, 0.56, 0.25),
             ]),
-            16,
+            14,
             0.028,
-            8,
+            6,
             false
           ),
           primaryMat
@@ -225,40 +243,27 @@ function buildCardSculpture(projectId: string, isDark: boolean) {
     }
   }
 
-  return {
-    root,
-    updateTheme(nextDark: boolean) {
-      const p = nextDark ? 0xc8f53c : 0x185c37;
-      const a = nextDark ? 0x56ccf2 : 0x035e8c;
-      const b = nextDark ? 0x26313b : 0x3b4954;
-      primaryMat.color.setHex(p);
-      accentMat.color.setHex(a);
-      bodyMat.color.setHex(b);
-      wireMat.color.setHex(p);
-    },
-    dispose() {
-      const geos = new Set<THREE.BufferGeometry>();
-      root.traverse((obj) => {
-        if (obj instanceof THREE.Mesh && !geos.has(obj.geometry)) {
-          geos.add(obj.geometry);
-          obj.geometry.dispose();
-        }
-      });
-      primaryMat.dispose();
-      accentMat.dispose();
-      bodyMat.dispose();
-      wireMat.dispose();
-    },
-  };
+  return root;
 }
 
+const ALL_PROJECT_IDS = [
+  "hybrid-rag-thesis",
+  "beyond-rag",
+  "mcp-craftrig",
+  "buildflow-erp",
+  "arven-ecommerce",
+  "digital-posyandu",
+  "destino-copytrade",
+] as const;
+
 /**
- * Direct-Swapchain Zero-Stall Shared WebGL Scissor Layer for Section 01:
- * - Renders directly to ONE persistent WebGL swapchain (ZERO `ctx2d.drawImage` GPU pipeline stalls!).
- * - ZERO `PMREMGenerator` / `RoomEnvironment` baking (uses crisp 3-point lighting + `compileAsync()`).
- * - ZERO per-frame `getBoundingClientRect()` layout reads! Caches each card slot's base layout
- *   relative to the canvas ONCE on mount/resize and adds `xMotionValue.get()` in pure O(1) math!
- * - Initializes ONCE during idle after Hero paint and strictly pauses/resumes rAF off-screen (never destroys WebGL mid-scroll).
+ * Single-Scene Zero-Desync Direct-Swapchain WebGL Scissor Layer for Section 01:
+ * - ONE shared THREE.Scene, ONE 4-light architectural rig, ONE set of 4 shared PBR materials
+ *   across all 7 sculptures (cuts shader compilations 7× -> ZERO mid-scroll shader stalls!).
+ * - Synced directly to Framer Motion's `frame.postRender` (AFTER Motion applies `x` to the DOM track)
+ *   so 3D viewports align 1:1 with cards on the exact same animation frame (zero 1-frame rubber-band lag!).
+ * - Full-rate lockstep rendering while scrolling or hovering; lightweight ~30fps idle spin when resting;
+ *   0% GPU/CPU when scrolled off-screen or hidden.
  */
 export function WorkCardsWebGLCanvas({
   slotsRef,
@@ -270,7 +275,6 @@ export function WorkCardsWebGLCanvas({
   const themeRef = useRef(theme);
   const syncThemeRef = useRef<(() => void) | null>(null);
   const remeasureRef = useRef<(() => void) | null>(null);
-  const projectIdsRef = useRef(projectIds);
 
   useEffect(() => {
     themeRef.current = theme;
@@ -278,7 +282,6 @@ export function WorkCardsWebGLCanvas({
   }, [theme]);
 
   useEffect(() => {
-    projectIdsRef.current = projectIds;
     remeasureRef.current?.();
   }, [projectIds]);
 
@@ -287,281 +290,333 @@ export function WorkCardsWebGLCanvas({
     if (!host) return;
 
     let cancelled = false;
-    let cleanupFn: (() => void) | null = null;
 
-    const init = () => {
-      if (cancelled || !host) return;
+    const canvas = document.createElement("canvas");
+    canvas.className = "pointer-events-none block h-full w-full";
+    canvas.setAttribute("aria-hidden", "true");
+    host.appendChild(canvas);
 
-      const canvas = document.createElement("canvas");
-      canvas.className = "pointer-events-none block h-full w-full";
-      canvas.setAttribute("aria-hidden", "true");
-      host.appendChild(canvas);
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isNarrow = window.innerWidth < 640;
+    const dpr = Math.min(window.devicePixelRatio || 1, isNarrow ? 1.0 : 1.25);
 
-      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: false,
+        alpha: true,
+        stencil: false,
+        powerPreference: "high-performance",
+      });
+    } catch {
+      if (canvas.parentNode === host) host.removeChild(canvas);
+      return;
+    }
 
-      let renderer: THREE.WebGLRenderer;
-      try {
-        renderer = new THREE.WebGLRenderer({
-          canvas,
-          antialias: dpr < 1.5,
-          alpha: true,
-          stencil: false,
-          powerPreference: "high-performance",
+    renderer.setPixelRatio(dpr);
+    renderer.setClearColor(0x000000, 0);
+
+    const isDarkInit = themeRef.current === "dark";
+    const scene = new THREE.Scene();
+    const lights = attachArchitecturalLights(scene, isDarkInit);
+    const sharedMats = createSharedCardMaterials(isDarkInit);
+    const sharedPlinthGeo = new THREE.CylinderGeometry(1.15, 1.25, 0.08, 18);
+    const sharedRimGeo = new THREE.TorusGeometry(1.18, 0.02, 8, 28);
+
+    const camera = new THREE.PerspectiveCamera(36, 2.2, 0.1, 30);
+    camera.position.set(0, 0.35, 3.85);
+    camera.lookAt(0, -0.05, 0);
+    let lastAspect = 2.2;
+
+    type SculptureEntry = {
+      root: THREE.Group;
+      rotY: number;
+      rotX: number;
+      scale: number;
+    };
+
+    const entries = new Map<string, SculptureEntry>();
+
+    type CachedSlotBox = {
+      id: string;
+      baseLeft: number;
+      bottom: number;
+      width: number;
+      height: number;
+    };
+
+    let cachedCanvasW = 1;
+    let cachedCanvasH = 200;
+    let cachedBoxes: CachedSlotBox[] = [];
+
+    const measureLayout = () => {
+      const hostRect = host.getBoundingClientRect();
+      cachedCanvasW = Math.max(1, Math.round(hostRect.width));
+      cachedCanvasH = Math.max(1, Math.round(hostRect.height));
+      renderer.setSize(cachedCanvasW, cachedCanvasH, false);
+
+      const currentX = xMotionValue.get();
+      const nextBoxes: CachedSlotBox[] = [];
+
+      slotsRef.current.forEach((slot) => {
+        const el = slot.getElement();
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        if (r.width < 10 || r.height < 10) return;
+        nextBoxes.push({
+          id: slot.id,
+          baseLeft: r.left - hostRect.left - currentX,
+          bottom: hostRect.bottom - r.bottom,
+          width: r.width,
+          height: r.height,
         });
-      } catch {
-        if (canvas.parentNode === host) host.removeChild(canvas);
+      });
+      cachedBoxes = nextBoxes;
+    };
+
+    let isInView = false;
+    let isPageVisible = !document.hidden;
+    let loopRunning = false;
+    let simTime = 0;
+    let lastDrawTs = performance.now();
+    let lastRenderedX = Number.NaN;
+
+    const drawFrame = (t: number) => {
+      if (cachedCanvasW < 10 || cachedCanvasH < 10) return;
+      if (cachedBoxes.length === 0) measureLayout();
+
+      const currentX = xMotionValue.get();
+      lastRenderedX = currentX;
+
+      renderer.setScissorTest(false);
+      renderer.setClearColor(0x000000, 0);
+      renderer.clear();
+      renderer.setScissorTest(true);
+
+      let anyHovered = false;
+
+      for (let i = 0; i < cachedBoxes.length; i++) {
+        const box = cachedBoxes[i];
+        const left = box.baseLeft + currentX;
+        if (left + box.width < -8 || left > cachedCanvasW + 8) continue;
+
+        const entry = entries.get(box.id);
+        const slot = slotsRef.current.get(box.id);
+        if (!entry || !slot) continue;
+
+        renderer.setViewport(left, box.bottom, box.width, box.height);
+        renderer.setScissor(left, box.bottom, box.width, box.height);
+
+        const aspect = box.width / box.height;
+        if (Math.abs(aspect - lastAspect) > 0.01) {
+          lastAspect = aspect;
+          camera.aspect = aspect;
+          camera.updateProjectionMatrix();
+        }
+
+        const ptr = slot.getPointer();
+        if (ptr.hovered) anyHovered = true;
+
+        const targetRotY = ptr.hovered ? ptr.x * 1.45 : prefersReduced ? 0.35 : t * 0.42;
+        const targetRotX = ptr.hovered
+          ? -ptr.y * 0.72
+          : prefersReduced
+          ? 0.08
+          : Math.sin(t * 0.65) * 0.12;
+        const targetScale = ptr.hovered ? 1.08 : 1.0;
+
+        entry.rotY += (targetRotY - entry.rotY) * (ptr.hovered ? 0.16 : 0.07);
+        entry.rotX += (targetRotX - entry.rotX) * 0.12;
+        entry.scale += (targetScale - entry.scale) * 0.14;
+
+        entry.root.rotation.y = entry.rotY;
+        entry.root.rotation.x = entry.rotX;
+        entry.root.position.y = prefersReduced ? 0 : Math.sin(t * 1.1) * 0.05;
+        entry.root.scale.setScalar(entry.scale);
+
+        entry.root.visible = true;
+        renderer.render(scene, camera);
+        entry.root.visible = false;
+      }
+
+      return anyHovered;
+    };
+
+    // Synced directly into Motion's postRender phase (0-frame lag with x transform!)
+    const onPostRender = (data: { timestamp: number }) => {
+      if (!isInView || !isPageVisible) {
+        stopLoop();
         return;
       }
 
-      renderer.setPixelRatio(dpr);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
-      renderer.setClearColor(0x000000, 0);
+      const currentX = xMotionValue.get();
+      const xMoved = Math.abs(currentX - lastRenderedX) > 0.05;
+      const elapsedMs = data.timestamp - lastDrawTs;
 
-      type Entry = {
-        scene: THREE.Scene;
-        camera: THREE.PerspectiveCamera;
-        lights: ReturnType<typeof attachArchitecturalLights>;
-        sculpture: ReturnType<typeof buildCardSculpture>;
-        rotY: number;
-        rotX: number;
-        lastAspect: number;
-      };
-
-      const entries = new Map<string, Entry>();
-      const allIds = [
-        "hybrid-rag-thesis",
-        "beyond-rag",
-        "mcp-craftrig",
-        "buildflow-erp",
-        "arven-ecommerce",
-        "digital-posyandu",
-        "destino-copytrade",
-      ];
-
-      const isDarkInit = themeRef.current === "dark";
-      for (const id of allIds) {
-        const scene = new THREE.Scene();
-        const lights = attachArchitecturalLights(scene, isDarkInit);
-        const camera = new THREE.PerspectiveCamera(36, 2.2, 0.1, 30);
-        camera.position.set(0, 0.35, 3.85);
-        camera.lookAt(0, -0.05, 0);
-        const sculpture = buildCardSculpture(id, isDarkInit);
-        scene.add(sculpture.root);
-        entries.set(id, {
-          scene,
-          camera,
-          lights,
-          sculpture,
-          rotY: 0,
-          rotX: 0,
-          lastAspect: 2.2,
+      // Full lockstep rate when track x moved; ~30fps when resting idle (or halted on reduced-motion)
+      let anySlotHovered = false;
+      if (!xMoved && elapsedMs < 33) {
+        slotsRef.current.forEach((s) => {
+          if (s.getPointer().hovered) anySlotHovered = true;
         });
+        if (!anySlotHovered) return;
       }
 
-      // Cached layout positions relative to host with x = 0 (ZERO per-frame getBoundingClientRect!)
-      type CachedSlotBox = {
-        id: string;
-        baseLeft: number;
-        bottom: number;
-        width: number;
-        height: number;
-      };
-      let cachedCanvasW = 1;
-      let cachedCanvasH = 200;
-      let cachedBoxes: CachedSlotBox[] = [];
+      if (prefersReduced && !xMoved && !anySlotHovered) return;
 
-      const measureLayout = () => {
-        const hostRect = host.getBoundingClientRect();
-        cachedCanvasW = Math.max(1, Math.round(hostRect.width));
-        cachedCanvasH = Math.max(1, Math.round(hostRect.height));
-        renderer.setSize(cachedCanvasW, cachedCanvasH, false);
+      const dt = Math.min(0.06, Math.max(0, elapsedMs / 1000));
+      lastDrawTs = data.timestamp;
+      if (!prefersReduced) {
+        simTime += dt;
+      }
+      drawFrame(simTime);
+    };
 
-        const currentX = xMotionValue.get();
-        const nextBoxes: CachedSlotBox[] = [];
+    const startLoop = () => {
+      if (!loopRunning && isInView && isPageVisible) {
+        loopRunning = true;
+        lastDrawTs = performance.now();
+        frame.postRender(onPostRender, true);
+      }
+    };
 
-        slotsRef.current.forEach((slot) => {
-          const el = slot.getElement();
-          if (!el) return;
-          const r = el.getBoundingClientRect();
-          if (r.width < 10 || r.height < 10) return;
-          nextBoxes.push({
-            id: slot.id,
-            // Subtract currentX so baseLeft is exact position at x === 0!
-            baseLeft: r.left - hostRect.left - currentX,
-            bottom: hostRect.bottom - r.bottom,
-            width: r.width,
-            height: r.height,
-          });
-        });
-        cachedBoxes = nextBoxes;
-      };
+    const stopLoop = () => {
+      if (loopRunning) {
+        loopRunning = false;
+        cancelFrame(onPostRender);
+      }
+    };
 
-      remeasureRef.current = () => {
-        requestAnimationFrame(() => {
-          measureLayout();
-          drawFrame(simTime);
-        });
-      };
+    // Also wake immediately whenever xMotionValue changes (even under reduced-motion)
+    const unsubX = xMotionValue.on("change", () => {
+      if (isInView && isPageVisible) {
+        if (!loopRunning) drawFrame(simTime);
+      }
+    });
 
-      const scratchScale = new THREE.Vector3(1, 1, 1);
-      let isInView = false;
-      let isPageVisible = !document.hidden;
-      let rafId = 0;
-      let simTime = 0;
-      let lastTs = performance.now();
-
-      const drawFrame = (t: number) => {
-        if (cachedCanvasW < 10 || cachedCanvasH < 10) return;
-        if (cachedBoxes.length === 0) measureLayout();
-
-        const currentX = xMotionValue.get();
-        renderer.setScissorTest(false);
-        renderer.setClearColor(0x000000, 0);
-        renderer.clear();
-        renderer.setScissorTest(true);
-
-        for (let i = 0; i < cachedBoxes.length; i++) {
-          const box = cachedBoxes[i];
-          const left = box.baseLeft + currentX;
-          if (left + box.width < -8 || left > cachedCanvasW + 8) continue;
-
-          const entry = entries.get(box.id);
-          const slot = slotsRef.current.get(box.id);
-          if (!entry || !slot) continue;
-
-          renderer.setViewport(left, box.bottom, box.width, box.height);
-          renderer.setScissor(left, box.bottom, box.width, box.height);
-
-          const aspect = box.width / box.height;
-          if (Math.abs(aspect - entry.lastAspect) > 0.01) {
-            entry.lastAspect = aspect;
-            entry.camera.aspect = aspect;
-            entry.camera.updateProjectionMatrix();
-          }
-
-          const ptr = slot.getPointer();
-          const targetRotY = ptr.hovered ? ptr.x * 1.45 : t * 0.42;
-          const targetRotX = ptr.hovered ? -ptr.y * 0.72 : Math.sin(t * 0.65) * 0.12;
-          const targetScale = ptr.hovered ? 1.08 : 1.0;
-
-          entry.rotY += (targetRotY - entry.rotY) * (ptr.hovered ? 0.14 : 0.05);
-          entry.rotX += (targetRotX - entry.rotX) * 0.1;
-
-          entry.sculpture.root.rotation.y = entry.rotY;
-          entry.sculpture.root.rotation.x = entry.rotX;
-          entry.sculpture.root.position.y = Math.sin(t * 1.1) * 0.06;
-          scratchScale.setScalar(targetScale);
-          entry.sculpture.root.scale.lerp(scratchScale, 0.12);
-
-          renderer.render(entry.scene, entry.camera);
-        }
-      };
-
-      const tick = (ts: number) => {
-        rafId = 0;
-        if (!isInView || !isPageVisible) return;
-        const dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));
-        lastTs = ts;
-        simTime += prefersReduced ? dt * 0.45 : dt;
-        drawFrame(simTime);
-        rafId = requestAnimationFrame(tick);
-      };
-
-      const ensureRunning = () => {
-        if (rafId === 0 && isInView && isPageVisible) {
-          lastTs = performance.now();
-          rafId = requestAnimationFrame(tick);
-        }
-      };
-
-      syncThemeRef.current = () => {
-        const nextDark = themeRef.current === "dark";
-        entries.forEach((entry) => {
-          entry.lights.updateTheme(nextDark);
-          entry.sculpture.updateTheme(nextDark);
-        });
-        if (isInView) drawFrame(simTime);
-      };
-
-      const ro = new ResizeObserver(() => {
+    remeasureRef.current = () => {
+      requestAnimationFrame(() => {
+        if (cancelled) return;
         measureLayout();
         if (isInView) drawFrame(simTime);
       });
-      ro.observe(host);
+    };
 
-      const io = new IntersectionObserver(
-        (obsEntries) => {
-          isInView = obsEntries.some((e) => e.isIntersecting);
-          if (isInView) {
-            if (cachedBoxes.length === 0) measureLayout();
-            drawFrame(simTime);
-            ensureRunning();
-          } else if (rafId) {
-            cancelAnimationFrame(rafId);
-            rafId = 0;
-          }
-        },
-        { rootMargin: "240px 0px" }
-      );
-      io.observe(host);
+    syncThemeRef.current = () => {
+      const nextDark = themeRef.current === "dark";
+      lights.updateTheme(nextDark);
+      const p = nextDark ? 0xc8f53c : 0x185c37;
+      const a = nextDark ? 0x56ccf2 : 0x035e8c;
+      const b = nextDark ? 0x26313b : 0x3b4954;
+      sharedMats.primaryMat.color.setHex(p);
+      sharedMats.accentMat.color.setHex(a);
+      sharedMats.bodyMat.color.setHex(b);
+      sharedMats.wireMat.color.setHex(p);
+      if (isInView) drawFrame(simTime);
+    };
 
-      const onVis = () => {
-        isPageVisible = !document.hidden;
-        if (isPageVisible) ensureRunning();
-        else if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = 0;
+    const ro = new ResizeObserver(() => {
+      measureLayout();
+      if (isInView) drawFrame(simTime);
+    });
+    ro.observe(host);
+
+    const io = new IntersectionObserver(
+      (obsEntries) => {
+        isInView = obsEntries.some((e) => e.isIntersecting);
+        if (isInView) {
+          if (cachedBoxes.length === 0) measureLayout();
+          drawFrame(simTime);
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { rootMargin: "220px 0px" }
+    );
+    io.observe(host);
+
+    const onVis = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) startLoop();
+      else stopLoop();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    measureLayout();
+
+    // Build sculpture geometries across yielded slices (scheduler.yield) so main thread never blocks > 50ms,
+    // then compile ALL 7 sculptures in ONE single async batch (shared materials = 1 GPU shader program!).
+    const buildAndCompile = async () => {
+      for (let i = 0; i < ALL_PROJECT_IDS.length; i++) {
+        if (cancelled) return;
+        const id = ALL_PROJECT_IDS[i];
+        const root = buildCardSculptureGroup(id, sharedMats, sharedPlinthGeo, sharedRimGeo);
+        root.visible = true;
+        scene.add(root);
+        entries.set(id, { root, rotY: 0, rotX: 0, scale: 1 });
+        if (i === 2 || i === 5) {
+          await yieldToMain();
+        }
+      }
+      if (cancelled) return;
+
+      const finishCompile = () => {
+        if (cancelled) return;
+        // One warm-up draw during idle uploads all 7 VBOs & initializes GPU swapchain
+        // BEFORE the user scrolls into Section 01 (eliminates first-draw mid-scroll stall!).
+        renderer.setScissorTest(false);
+        renderer.setViewport(0, 0, Math.max(1, cachedCanvasW), Math.max(1, cachedCanvasH));
+        renderer.render(scene, camera);
+        entries.forEach((e) => {
+          e.root.visible = false;
+        });
+        renderer.clear();
+        if (isInView) {
+          drawFrame(simTime);
+          startLoop();
         }
       };
-      document.addEventListener("visibilitychange", onVis);
 
-      measureLayout();
-
-      // Precompile shaders asynchronously off the scroll path via KHR_parallel_shader_compile!
-      const firstEntry = entries.values().next().value;
-      if (firstEntry && typeof renderer.compileAsync === "function") {
-        void renderer.compileAsync(firstEntry.scene, firstEntry.camera).then(() => {
-          if (!cancelled) drawFrame(simTime);
-        });
+      if (typeof renderer.compileAsync === "function") {
+        await renderer.compileAsync(scene, camera);
+        finishCompile();
       } else {
-        drawFrame(simTime);
+        renderer.compile(scene, camera);
+        finishCompile();
       }
-
-      cleanupFn = () => {
-        syncThemeRef.current = null;
-        remeasureRef.current = null;
-        if (rafId) cancelAnimationFrame(rafId);
-        io.disconnect();
-        ro.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        entries.forEach((entry) => entry.sculpture.dispose());
-        entries.clear();
-        renderer.dispose();
-        if (canvas.parentNode === host) host.removeChild(canvas);
-      };
     };
 
-    const win = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    let idleId = 0;
-    let timerId = 0;
-    if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(init, { timeout: 550 });
-    } else {
-      timerId = window.setTimeout(init, 250);
-    }
+    void buildAndCompile();
 
     return () => {
       cancelled = true;
-      if (idleId && typeof win.cancelIdleCallback === "function") {
-        win.cancelIdleCallback(idleId);
-      }
-      if (timerId) window.clearTimeout(timerId);
-      cleanupFn?.();
+      syncThemeRef.current = null;
+      remeasureRef.current = null;
+      stopLoop();
+      unsubX();
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+
+      const geos = new Set<THREE.BufferGeometry>([sharedPlinthGeo, sharedRimGeo]);
+      entries.forEach((entry) => {
+        entry.root.traverse((obj) => {
+          if (obj instanceof THREE.Mesh) {
+            geos.add(obj.geometry);
+          }
+        });
+      });
+      geos.forEach((g) => g.dispose());
+      entries.clear();
+
+      sharedMats.primaryMat.dispose();
+      sharedMats.accentMat.dispose();
+      sharedMats.bodyMat.dispose();
+      sharedMats.wireMat.dispose();
+      renderer.dispose();
+      if (canvas.parentNode === host) host.removeChild(canvas);
     };
   }, [slotsRef, xMotionValue]);
 

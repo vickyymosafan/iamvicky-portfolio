@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Award, ExternalLink, FileText, GraduationCap, Users } from "lucide-react";
 import {
@@ -11,8 +11,10 @@ import {
   SKILL_GROUPS,
 } from "@/data/portfolio";
 import { VO_BEATS } from "@/data/voBeats";
+import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 
-// Next.js 16 dynamic code-splitting: keeps Three.js Portal & GSAP Explainer out of initial Hero bundle!
+// Code-split + truly lazy-mount WorldPortalTransition & GSAP BangMotionStackExplainer
+// ONLY when scrolling within 700px of Section 04 (0 bytes & 0 DOM nodes at initial Hero load!)
 const WorldPortalTransition = dynamic(
   () =>
     import("@/components/motion/WorldPortalTransition").then(
@@ -21,10 +23,7 @@ const WorldPortalTransition = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div
-        id="stack"
-        className="flex h-screen w-full items-center justify-center bg-[#070a0d] font-mono text-xs uppercase tracking-[0.18em] text-[#c8f53c]"
-      >
+      <div className="flex h-[135vh] w-full items-center justify-center bg-[#070a0d] font-mono text-xs uppercase tracking-[0.18em] text-[#c8f53c]">
         Initializing Outer World Theater...
       </div>
     ),
@@ -45,32 +44,51 @@ const BangMotionStackExplainer = dynamic(
 );
 
 /**
- * Section 04 — Seamless Portal-to-Cinema Theater + Calm Static Credentials Zone:
- * - Top: WorldPortalTransition directly houses & expands smoothly into the 16:9 Bang-Motion Film
- *   (zero hard page breaks or seams!).
- * - Below: Static Reference Stack Breakdown + Voice Over Transcript + Education & Google AI Certifications
- *   + Leadership (STRICTLY zero scroll-reveal animations downwards + CSS content-visibility: auto!).
+ * Section 04 — Lazy-Mounted Portal-to-Cinema Theater + Calm Static Credentials Zone:
+ * - Exact-height 135vh outer host guarantees 0.000 CLS when lazy-mounting the Portal & GSAP film.
+ * - Anchors `#stack` directly on the static outer host so anchor scrolling always works immediately.
+ * - Below: Static Reference Stack Breakdown + Voice Over Transcript + Education & Certifications
+ *   with CSS `content-visibility: auto`.
  */
 export function StackAndCredentialsSection() {
-  // Warm up the code-split Bang-Motion GSAP explainer chunk during idle time after Hero LCP paints
-  // so emerging through the 03->04 portal renders instantaneously with 0ms loading stall.
+  const portalHostRef = useRef<HTMLDivElement>(null);
+  const [theaterMounted, setTheaterMounted] = useState(false);
+
+  // Warm up WorldPortalTransition + BangMotionStackExplainer cleanly during scroll-idle
+  // (NEVER mounting synchronously during an active wheel gesture!)
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void import("@/components/sections/BangMotionStackExplainer");
-    }, 1800);
-    return () => window.clearTimeout(timer);
-  }, []);
+    if (theaterMounted) return;
+    return scheduleWhenScrollIdle(() => {
+      setTheaterMounted(true);
+    }, 1000);
+  }, [theaterMounted]);
 
   return (
-    <section aria-label="Technical Stack, AI-Augmented Film, Education and Certifications" className="relative bg-background">
-      {/* Seamless 03 -> 04 Inner-to-Outer Portal Expanding Directly Into Bang-Motion Cinema */}
-      <WorldPortalTransition
-        renderTheater={(portalReady) => (
-          <BangMotionStackExplainer portalReady={portalReady} />
+    <section
+      aria-label="Technical Stack, AI-Augmented Film, Education and Certifications"
+      className="relative bg-background"
+    >
+      {/* Exact-height 135vh Portal Host — 0 CLS when lazy-mounted, #stack anchor always present */}
+      <div ref={portalHostRef} className="relative min-h-[135vh] w-full bg-[#070a0d]">
+        <div
+          id="stack"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-screen"
+          aria-hidden="true"
+        />
+        {theaterMounted ? (
+          <WorldPortalTransition
+            renderTheater={(portalReady) => (
+              <BangMotionStackExplainer portalReady={portalReady} />
+            )}
+          />
+        ) : (
+          <div className="sticky top-0 flex h-[100dvh] w-full items-center justify-center bg-[#070a0d] font-mono text-xs uppercase tracking-[0.18em] text-[#c8f53c]">
+            03 → 04 // Outer World Architecture Film
+          </div>
         )}
-      />
+      </div>
 
-      {/* Calm Static Editorial Zone Below Cinema (Zero Animations, content-visibility: auto for speed!) */}
+      {/* Calm Static Editorial Zone Below Cinema (Zero Animations, content-visibility: auto) */}
       <div className="mx-auto max-w-7xl space-y-16 px-5 pt-10 pb-20 sm:px-8 sm:pb-24">
         {/* Accessible American Female Voice-Over Script Reference */}
         <details className="border border-border bg-surface p-4 text-xs">
@@ -139,7 +157,7 @@ export function StackAndCredentialsSection() {
           </div>
         </div>
 
-        {/* Part C: Education & Google AI & Cloud Certifications (Auto-Scroll Target — ZERO Animations below) */}
+        {/* Part C: Education & Google AI & Cloud Certifications */}
         <div
           id="education-credentials"
           className="cv-auto-section scroll-mt-24 border-t border-border pt-14"
@@ -228,7 +246,7 @@ export function StackAndCredentialsSection() {
           </div>
         </div>
 
-        {/* Part D: Leadership, Speaking & Community Impact (Static Editorial Grid) */}
+        {/* Part D: Leadership, Speaking & Community Impact */}
         <div className="cv-auto-section space-y-6 border-t border-border pt-14">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">

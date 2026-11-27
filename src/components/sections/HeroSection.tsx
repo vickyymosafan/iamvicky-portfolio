@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import {
   ArrowDownRight,
   Cpu,
@@ -24,7 +24,6 @@ import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { useAudioGate } from "@/components/providers/AudioGateProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-// Next.js 16 dynamic code-splitting: keeps Three.js out of the critical initial Hero LCP bundle
 const HeroFieldCanvas = dynamic(
   () => import("@/components/three/HeroFieldCanvas").then((m) => m.HeroFieldCanvas),
   { ssr: false }
@@ -56,147 +55,122 @@ const PIPELINE_PULSE_STEPS = [
   { key: "QA", label: "13-VP Browser Gate" },
 ] as const;
 
+/**
+ * Isolated kinetic discipline headline — keeps the 3.1s rotator from re-rendering
+ * the rest of HeroSection (portrait, WebGL backdrop, metrics, marquee).
+ */
+const HeroKineticSlot = React.memo(function HeroKineticSlot({
+  paused,
+  inViewRef,
+  tagRef,
+  pulseContainerRef,
+}: {
+  paused: boolean;
+  inViewRef: React.RefObject<boolean>;
+  tagRef: React.RefObject<HTMLSpanElement | null>;
+  pulseContainerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const id = window.setInterval(() => {
+      if (document.hidden || !inViewRef.current) return;
+      setIdx((prev) => {
+        const next = (prev + 1) % KINETIC_DISCIPLINES.length;
+        if (tagRef.current) {
+          tagRef.current.textContent = `SYS // ${KINETIC_DISCIPLINES[next].tag}`;
+        }
+        if (pulseContainerRef.current) {
+          const children = pulseContainerRef.current.children;
+          for (let i = 0; i < children.length; i++) {
+            (children[i] as HTMLElement).dataset.active = i === next ? "true" : "false";
+          }
+        }
+        return next;
+      });
+    }, 3100);
+
+    return () => window.clearInterval(id);
+  }, [paused, inViewRef, tagRef, pulseContainerRef]);
+
+  const current = KINETIC_DISCIPLINES[idx];
+
+  return (
+    <span className="relative mt-1 block min-h-[1.12em] overflow-hidden">
+      <AnimatePresence mode="wait" initial={false}>
+        <m.span
+          key={current.phrase}
+          initial={{ y: "105%" }}
+          animate={{ y: "0%" }}
+          exit={{ y: "-105%" }}
+          transition={{ duration: 0.24, ease: ARCHITECTURAL_EASE }}
+          className="inline-flex flex-wrap items-baseline gap-x-2 text-primary"
+        >
+          <span>{current.phrase}</span>
+          <span
+            aria-hidden="true"
+            className={`inline-block h-[0.78em] w-[3px] translate-y-[0.06em] bg-primary ${
+              paused ? "opacity-40" : ""
+            }`}
+          />
+        </m.span>
+      </AnimatePresence>
+    </span>
+  );
+});
+
 export function HeroSection() {
   const { scrollTo } = useSmoothScroll();
-  const { replayWelcome, unlockAudio } = useAudioGate();
+  const { replayWelcome } = useAudioGate();
 
   const [motionPaused, setMotionPaused] = useState(false);
-  const [disciplineIdx, setDisciplineIdx] = useState(0);
-  const [pulseStepIdx, setPulseStepIdx] = useState(0);
 
   const sectionRef = useRef<HTMLElement>(null);
-  const tickerTrackRef = useRef<HTMLDivElement>(null);
-  const tickerFirstGroupRef = useRef<HTMLDivElement>(null);
-  const loopWidthRef = useRef(0);
-  const tickerOffsetRef = useRef(0);
-  const pausedRef = useRef(false);
   const heroInViewRef = useRef(true);
-  const resumeTickerRef = useRef<(() => void) | null>(null);
+  const tagRef = useRef<HTMLSpanElement>(null);
+  const pulseContainerRef = useRef<HTMLDivElement>(null);
+  const portraitCardRef = useRef<HTMLDivElement>(null);
+  const portraitRectRef = useRef<DOMRect | null>(null);
 
   useEffect(() => {
-    pausedRef.current = motionPaused;
-    if (!motionPaused) {
-      resumeTickerRef.current?.();
-    }
-  }, [motionPaused]);
-
-  // Kinetic headline rotator + pipeline pulse (paused automatically when Hero scrolls off-screen!)
-  useEffect(() => {
-    if (motionPaused) return;
-    const id = window.setInterval(() => {
-      if (document.hidden || !heroInViewRef.current) return;
-      setDisciplineIdx((prev) => (prev + 1) % KINETIC_DISCIPLINES.length);
-      setPulseStepIdx((prev) => (prev + 1) % PIPELINE_PULSE_STEPS.length);
-    }, 3100);
-    return () => window.clearInterval(id);
-  }, [motionPaused]);
-
-  // Zero-layout-thrashing rAF marquee loop: caches loopWidth via ResizeObserver & pauses off-screen!
-  useEffect(() => {
-    const firstGroup = tickerFirstGroupRef.current;
     const section = sectionRef.current;
-    if (!firstGroup || !section) return;
-
-    const measure = () => {
-      loopWidthRef.current = firstGroup.offsetWidth;
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(firstGroup);
-
-    let rafId = 0;
-    let lastTs = performance.now();
-    let isVisible = true;
-    let isPageVisible = !document.hidden;
-    const speedPxPerSec = 58;
-
-    const step = (ts: number) => {
-      rafId = 0;
-      if (!isVisible || !isPageVisible || pausedRef.current) return;
-
-      const dt = Math.min(0.05, (ts - lastTs) / 1000);
-      lastTs = ts;
-
-      const track = tickerTrackRef.current;
-      const loopWidth = loopWidthRef.current;
-      if (track && loopWidth > 0) {
-        tickerOffsetRef.current = (tickerOffsetRef.current + speedPxPerSec * dt) % loopWidth;
-        track.style.transform = `translate3d(${-tickerOffsetRef.current}px, 0, 0)`;
-      }
-      rafId = requestAnimationFrame(step);
-    };
-
-    const ensureRunning = () => {
-      if (rafId === 0 && isVisible && isPageVisible && !pausedRef.current) {
-        lastTs = performance.now();
-        rafId = requestAnimationFrame(step);
-      }
-    };
-    resumeTickerRef.current = ensureRunning;
-
-    const onVisChange = () => {
-      isPageVisible = !document.hidden;
-      if (isPageVisible) ensureRunning();
-      else if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
-    };
-    document.addEventListener("visibilitychange", onVisChange);
-
+    if (!section) return;
     const io = new IntersectionObserver(
       (entries) => {
-        isVisible = entries.some((e) => e.isIntersecting);
-        heroInViewRef.current = isVisible;
-        if (isVisible) ensureRunning();
-        else if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = 0;
-        }
+        heroInViewRef.current = entries.some((e) => e.isIntersecting);
       },
       { rootMargin: "100px 0px" }
     );
     io.observe(section);
-
-    ensureRunning();
-
-    return () => {
-      resumeTickerRef.current = null;
-      if (rafId) cancelAnimationFrame(rafId);
-      io.disconnect();
-      ro.disconnect();
-      document.removeEventListener("visibilitychange", onVisChange);
-    };
+    return () => io.disconnect();
   }, []);
 
-  // Pointer 3D tilt for the architectural studio portrait (cached rect on enter for zero reflows)
-  const tiltX = useMotionValue(0);
-  const tiltY = useMotionValue(0);
-  const smoothTiltX = useSpring(tiltX, { stiffness: 180, damping: 24 });
-  const smoothTiltY = useSpring(tiltY, { stiffness: 180, damping: 24 });
-  const portraitRectRef = useRef<DOMRect | null>(null);
-
+  // Zero-spring direct DOM tilt on hover only (clears transform completely at rest!)
   const handlePortraitEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (motionPaused) return;
     portraitRectRef.current = e.currentTarget.getBoundingClientRect();
   };
 
   const handlePortraitMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (motionPaused) return;
+    if (motionPaused || !portraitCardRef.current) return;
     const rect = portraitRectRef.current ?? e.currentTarget.getBoundingClientRect();
     portraitRectRef.current = rect;
     const px = (e.clientX - rect.left) / rect.width - 0.5;
     const py = (e.clientY - rect.top) / rect.height - 0.5;
-    tiltX.set(-py * 9);
-    tiltY.set(px * 9);
+    portraitCardRef.current.style.transform = `perspective(1100px) rotateX(${(-py * 8).toFixed(
+      2
+    )}deg) rotateY(${(px * 8).toFixed(2)}deg)`;
   };
 
   const handlePortraitLeave = () => {
     portraitRectRef.current = null;
-    tiltX.set(0);
-    tiltY.set(0);
+    if (portraitCardRef.current) {
+      portraitCardRef.current.style.transform = "";
+    }
   };
-
-  const currentDiscipline = KINETIC_DISCIPLINES[disciplineIdx];
 
   return (
     <section
@@ -208,8 +182,8 @@ export function HeroSection() {
       <HeroFieldCanvas paused={motionPaused} />
 
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        {/* Top Architectural Masthead Rule */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-y border-border py-3 font-mono text-[11px] uppercase tracking-[0.16em]">
+        {/* Top Architectural Masthead Rule (stable min-height prevents font-swap CLS) */}
+        <div className="mb-8 flex min-h-[62px] flex-wrap items-center justify-between gap-3 border-y border-border py-3 font-mono text-[11px] uppercase tracking-[0.16em]">
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-2 font-semibold text-foreground">
               <span className="h-2 w-2 rounded-full bg-sage" aria-hidden="true" />
@@ -223,16 +197,13 @@ export function HeroSection() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden font-semibold text-primary md:inline">
-              SYS // {currentDiscipline.tag}
+            <span ref={tagRef} className="hidden font-semibold text-primary md:inline">
+              SYS // {KINETIC_DISCIPLINES[0].tag}
             </span>
             <button
               type="button"
-              onClick={() => {
-                unlockAudio();
-                replayWelcome();
-              }}
-              className="inline-flex min-h-9 items-center gap-1.5 border border-border bg-surface/95 px-2.5 py-1 font-mono text-[11px] font-medium text-ink-secondary hover:border-primary hover:text-primary cursor-pointer"
+              onClick={replayWelcome}
+              className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 border border-border bg-surface/95 px-2.5 py-1 font-mono text-[11px] font-medium text-ink-secondary hover:border-primary hover:text-primary"
             >
               <RotateCcw className="h-3 w-3" aria-hidden="true" />
               <span>Replay Intro</span>
@@ -260,31 +231,16 @@ export function HeroSection() {
                 {PROFILE.fullName} — Architecting Production Web Systems
               </p>
 
-              <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.55rem] xl:text-[4.15rem] leading-[1.03]">
+              <h1 className="font-heading text-4xl font-bold leading-[1.03] tracking-tight text-foreground sm:text-5xl lg:text-[3.55rem] xl:text-[4.15rem]">
                 <span className="block">Full-Stack Systems</span>
                 <span className="block font-medium text-ink-secondary">forged through</span>
 
-                {/* Crisp Single-Line Kinetic Discipline Slot */}
-                <span className="relative mt-1 block overflow-hidden">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={currentDiscipline.phrase}
-                      initial={{ y: "105%" }}
-                      animate={{ y: "0%" }}
-                      exit={{ y: "-105%" }}
-                      transition={{ duration: 0.26, ease: ARCHITECTURAL_EASE }}
-                      className="inline-flex flex-wrap items-baseline gap-x-2 text-primary"
-                    >
-                      <span>{currentDiscipline.phrase}</span>
-                      <span
-                        aria-hidden="true"
-                        className={`inline-block h-[0.78em] w-[3px] translate-y-[0.06em] bg-primary ${
-                          motionPaused ? "opacity-40" : ""
-                        }`}
-                      />
-                    </motion.span>
-                  </AnimatePresence>
-                </span>
+                <HeroKineticSlot
+                  paused={motionPaused}
+                  inViewRef={heroInViewRef}
+                  tagRef={tagRef}
+                  pulseContainerRef={pulseContainerRef}
+                />
               </h1>
             </div>
 
@@ -300,11 +256,8 @@ export function HeroSection() {
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 type="button"
-                onClick={() => {
-                  unlockAudio();
-                  scrollTo("#work", -76);
-                }}
-                className="group inline-flex min-h-12 items-center gap-2.5 bg-primary px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground hover:bg-primary-hover active:scale-[0.98] cursor-pointer"
+                onClick={() => scrollTo("#work", -76)}
+                className="group inline-flex min-h-12 cursor-pointer items-center gap-2.5 bg-primary px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground hover:bg-primary-hover active:scale-[0.98]"
               >
                 <span>Explore 3D Work</span>
                 <ArrowDownRight
@@ -315,11 +268,8 @@ export function HeroSection() {
 
               <button
                 type="button"
-                onClick={() => {
-                  unlockAudio();
-                  scrollTo("#stack", 0);
-                }}
-                className="inline-flex min-h-12 items-center gap-2 border border-border-strong bg-surface/95 px-5 py-3 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-foreground hover:border-primary hover:text-primary active:scale-[0.98] cursor-pointer"
+                onClick={() => scrollTo("#stack", 0)}
+                className="inline-flex min-h-12 cursor-pointer items-center gap-2 border border-border-strong bg-surface/95 px-5 py-3 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-foreground hover:border-primary hover:text-primary active:scale-[0.98]"
               >
                 <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>Watch AI Stack Film</span>
@@ -363,16 +313,12 @@ export function HeroSection() {
               onPointerEnter={handlePortraitEnter}
               onPointerMove={handlePortraitMove}
               onPointerLeave={handlePortraitLeave}
-              style={{ perspective: 1100 }}
               className="relative"
             >
-              <motion.div
-                style={{
-                  rotateX: smoothTiltX,
-                  rotateY: smoothTiltY,
-                  transformStyle: "preserve-3d",
-                }}
-                className="relative border border-border-strong bg-surface/95 p-3 shadow-2xl"
+              <div
+                ref={portraitCardRef}
+                style={{ transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)" }}
+                className="relative border border-border-strong bg-surface/95 p-3 shadow-xl"
               >
                 <span
                   aria-hidden="true"
@@ -407,7 +353,7 @@ export function HeroSection() {
                     fill
                     priority
                     fetchPriority="high"
-                    quality={85}
+                    quality={82}
                     sizes="(max-width: 1024px) 92vw, 38vw"
                     className="object-cover object-top"
                   />
@@ -432,22 +378,19 @@ export function HeroSection() {
                       </span>
                     </div>
 
-                    <div className="mt-2.5 grid grid-cols-4 gap-1.5">
-                      {PIPELINE_PULSE_STEPS.map((step, i) => {
-                        const isActive = i === pulseStepIdx;
-                        return (
-                          <div
-                            key={step.key}
-                            className={`border px-1.5 py-1 text-center font-mono text-[11px] transition-colors ${
-                              isActive
-                                ? "border-[#c8f53c] bg-[#c8f53c]/15 font-bold text-[#c8f53c]"
-                                : "border-white/15 bg-white/[0.04] text-zinc-300"
-                            }`}
-                          >
-                            {step.key}
-                          </div>
-                        );
-                      })}
+                    <div
+                      ref={pulseContainerRef}
+                      className="mt-2.5 grid grid-cols-4 gap-1.5"
+                    >
+                      {PIPELINE_PULSE_STEPS.map((step, i) => (
+                        <div
+                          key={step.key}
+                          data-active={i === 0 ? "true" : "false"}
+                          className="border border-white/15 bg-white/[0.04] px-1.5 py-1 text-center font-mono text-[11px] text-zinc-300 transition-colors data-[active=true]:border-[#c8f53c] data-[active=true]:bg-[#c8f53c]/15 data-[active=true]:font-bold data-[active=true]:text-[#c8f53c]"
+                        >
+                          {step.key}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -493,28 +436,25 @@ export function HeroSection() {
                     <span className="hidden sm:inline">Email</span>
                   </a>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Zero-Thrash Live Capability Ticker with Explicit Pause / Play Toggle (WCAG 2.2.2) */}
+      {/* Zero-JS Pure GPU Compositor Capability Ticker with Explicit Pause / Play Toggle (WCAG 2.2.2) */}
       <div className="mt-12 border-y border-border bg-surface/95 sm:mt-16">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-5 py-3 sm:px-8">
           <button
             type="button"
-            onClick={() => {
-              unlockAudio();
-              setMotionPaused((prev) => !prev);
-            }}
+            onClick={() => setMotionPaused((prev) => !prev)}
             aria-label={
               motionPaused
                 ? "Play hero animation and capability ticker"
                 : "Pause hero animation and capability ticker"
             }
             data-testid="hero-motion-toggle"
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-border-strong bg-surface-elevated px-3.5 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-foreground hover:border-primary hover:text-primary cursor-pointer"
+            className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border border-border-strong bg-surface-elevated px-3.5 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-foreground hover:border-primary hover:text-primary"
           >
             <span
               aria-hidden="true"
@@ -540,16 +480,14 @@ export function HeroSection() {
             {motionPaused ? "MOTION PAUSED" : "LIVE STREAM"}
           </span>
 
-          <div className="relative min-w-0 flex-1 overflow-hidden">
+          <div className="marquee-clip relative min-w-0 flex-1">
             <div
-              ref={tickerTrackRef}
               data-paused={motionPaused ? "true" : "false"}
-              className="flex w-max items-center will-change-transform"
+              className="marquee-track items-center"
             >
               {[0, 1].map((dupIdx) => (
                 <div
                   key={dupIdx}
-                  ref={dupIdx === 0 ? tickerFirstGroupRef : undefined}
                   aria-hidden={dupIdx === 1}
                   className="flex shrink-0 items-center gap-6 pr-6"
                 >

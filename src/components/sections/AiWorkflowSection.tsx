@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -99,9 +99,8 @@ export function AiWorkflowSection() {
                   }`}
                 >
                   {isSelected ? (
-                    <motion.span
-                      layoutId="ai-workflow-active-bar"
-                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
+                    <span
+                      aria-hidden="true"
                       className="absolute inset-x-0 top-0 h-[3px] bg-primary"
                     />
                   ) : null}
@@ -140,12 +139,12 @@ export function AiWorkflowSection() {
           {/* Connected Two-Pane Deep-Dive Workbench */}
           <div className="border-t border-border">
             <AnimatePresence mode="wait">
-              <motion.div
+              <m.div
                 key={stage.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.22, ease: ARCHITECTURAL_EASE }}
+                transition={{ duration: 0.2, ease: ARCHITECTURAL_EASE }}
                 className="grid grid-cols-1 lg:grid-cols-12"
               >
                 {/* Left 6 Cols: Human-Readable Engineering Specification */}
@@ -425,7 +424,7 @@ export function AiWorkflowSection() {
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
           </div>
         </div>
