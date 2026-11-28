@@ -28,7 +28,11 @@ function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return "dark";
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "light" ? "light" : "dark";
+    if (stored === "light" || stored === "dark") return stored;
+    if (window.matchMedia?.("(prefers-color-scheme: light)").matches) {
+      return "light";
+    }
+    return "dark";
   } catch {
     return "dark";
   }
@@ -45,13 +49,16 @@ function getServerThemeSnapshot(): ThemeMode {
 function subscribeTheme(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   const onChange = () => callback();
+  const mq = window.matchMedia?.("(prefers-color-scheme: light)");
 
   window.addEventListener("storage", onChange);
   window.addEventListener(THEME_EVENT, onChange);
+  mq?.addEventListener("change", onChange);
 
   return () => {
     window.removeEventListener("storage", onChange);
     window.removeEventListener(THEME_EVENT, onChange);
+    mq?.removeEventListener("change", onChange);
   };
 }
 

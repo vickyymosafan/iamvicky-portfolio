@@ -19,11 +19,17 @@ import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 import {
+  KineticTextReveal,
   ScrollScaleStage,
   SectionReveal,
   StaggerGroup,
   StaggerItem,
 } from "@/components/motion/MotionPrimitives";
+import {
+  HoverSpotlightCard,
+  RippleButton,
+  RippleLink,
+} from "@/components/motion/InteractiveMotion";
 
 export function ContactFooter() {
   const [copied, setCopied] = useState(false);
@@ -48,158 +54,172 @@ export function ContactFooter() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         <ScrollScaleStage>
-        <div className="studio-card-featured relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12">
-          {/* Subtle Ambient Corner Highlight */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-45"
-            style={{
-              background:
-                "radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)",
-            }}
-          />
+          <HoverSpotlightCard className="studio-card-featured overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12">
+            {/* Subtle Ambient Corner Highlight */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-45"
+              style={{
+                background:
+                  "radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)",
+              }}
+            />
 
-          <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
-            <SectionReveal className="space-y-4 lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary-soft px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-                <span>06 / Let&apos;s Work Together</span>
-              </div>
+            <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+              <SectionReveal className="space-y-4 lg:col-span-7">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary-soft px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                  <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                  <span>06 / Let&apos;s Work Together</span>
+                </div>
 
-              <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                Let&apos;s build fast, dependable{" "}
-                <span className="text-primary">software together.</span>
-              </h2>
+                <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                  <KineticTextReveal text="Let's build fast, dependable" />{" "}
+                  <KineticTextReveal text="software together." delay={0.12} className="text-primary" />
+                </h2>
 
-              <p className="max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
-                B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00).
-                Open to Full-Stack, Frontend, or Backend Developer opportunities where clean
-                architecture and practical AI workflows go hand in hand.
-              </p>
+                <p className="max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
+                  B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00).
+                  Open to Full-Stack, Frontend, or Backend Developer opportunities where clean
+                  architecture and practical AI workflows go hand in hand.
+                </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <a
-                  href={`mailto:${PROFILE.email}`}
-                  className="cta-glow inline-flex min-h-12 max-w-full items-center gap-2 rounded-full bg-primary px-4 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:px-6 sm:text-sm"
-                >
-                  <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="truncate">{PROFILE.email}</span>
-                  <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-                </a>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <RippleLink
+                    href={`mailto:${PROFILE.email}`}
+                    className="cta-glow group inline-flex min-h-12 max-w-full items-center gap-2 rounded-full bg-primary px-4 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:px-6 sm:text-sm"
+                  >
+                    <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{PROFILE.email}</span>
+                    <ArrowUpRight
+                      className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      aria-hidden="true"
+                    />
+                  </RippleLink>
 
-                <button
-                  type="button"
-                  onClick={handleCopyEmail}
-                  className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface-elevated px-5 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" aria-hidden="true" />
-                      <span>Copy Email</span>
-                    </>
-                  )}
-                </button>
+                  <RippleButton
+                    onClick={handleCopyEmail}
+                    className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface-elevated px-5 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-primary" aria-hidden="true" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" aria-hidden="true" />
+                        <span>Copy Email</span>
+                      </>
+                    )}
+                  </RippleButton>
 
-                <a
-                  href={PROFILE.cvPdfPath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-background px-5 py-3 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-foreground"
-                >
-                  <FileDown className="h-4 w-4" aria-hidden="true" />
-                  <span>Download CV</span>
-                </a>
-              </div>
-
-              <span className="sr-only" aria-live="polite">
-                {copied ? "Email address copied to clipboard." : ""}
-              </span>
-            </SectionReveal>
-
-            {/* Right Direct Channels */}
-            <StaggerGroup className="space-y-3 lg:col-span-5">
-              <StaggerItem>
-                <a
-                  href={PROFILE.phoneHref}
-                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
-                >
-                  <span className="flex items-center gap-2.5 font-mono text-xs">
-                    <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <span>{PROFILE.phone}</span>
-                  </span>
-                  <span className="font-mono text-[11px] text-muted">Situbondo, ID</span>
-                </a>
-              </StaggerItem>
-
-              <div className="grid grid-cols-2 gap-3">
-                <StaggerItem>
-                  <a
-                    href={PROFILE.socials.github}
+                  <RippleLink
+                    href={PROFILE.cvPdfPath}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-background px-5 py-3 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-foreground"
                   >
-                    <span className="flex items-center gap-2">
-                      <Github className="h-4 w-4" aria-hidden="true" />
-                      <span>GitHub</span>
+                    <FileDown className="h-4 w-4" aria-hidden="true" />
+                    <span>Download CV</span>
+                  </RippleLink>
+                </div>
+
+                <span className="sr-only" aria-live="polite">
+                  {copied ? "Email address copied to clipboard." : ""}
+                </span>
+              </SectionReveal>
+
+              {/* Right Direct Channels */}
+              <StaggerGroup className="space-y-3 lg:col-span-5">
+                <StaggerItem>
+                  <RippleLink
+                    href={PROFILE.phoneHref}
+                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
+                  >
+                    <span className="flex items-center gap-2.5 font-mono text-xs">
+                      <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span>{PROFILE.phone}</span>
                     </span>
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
+                    <span className="font-mono text-[11px] text-muted">Situbondo, ID</span>
+                  </RippleLink>
                 </StaggerItem>
 
-                <StaggerItem>
-                  <a
-                    href={PROFILE.socials.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Linkedin className="h-4 w-4" aria-hidden="true" />
-                      <span>LinkedIn</span>
-                    </span>
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
-                </StaggerItem>
+                <div className="grid grid-cols-2 gap-3">
+                  <StaggerItem>
+                    <RippleLink
+                      href={PROFILE.socials.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Github className="h-4 w-4" aria-hidden="true" />
+                        <span>GitHub</span>
+                      </span>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </RippleLink>
+                  </StaggerItem>
 
-                <StaggerItem>
-                  <a
-                    href={PROFILE.socials.craftrig}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span>Craftrig MCP</span>
-                    </span>
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
-                </StaggerItem>
+                  <StaggerItem>
+                    <RippleLink
+                      href={PROFILE.socials.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Linkedin className="h-4 w-4" aria-hidden="true" />
+                        <span>LinkedIn</span>
+                      </span>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </RippleLink>
+                  </StaggerItem>
 
-                <StaggerItem>
-                  <a
-                    href={PROFILE.socials.portfolio3d}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-accent" aria-hidden="true" />
-                      <span>3D Portfolio</span>
-                    </span>
-                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </a>
-                </StaggerItem>
-              </div>
-            </StaggerGroup>
-          </div>
-        </div>
+                  <StaggerItem>
+                    <RippleLink
+                      href={PROFILE.socials.craftrig}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
+                        <span>Craftrig MCP</span>
+                      </span>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </RippleLink>
+                  </StaggerItem>
+
+                  <StaggerItem>
+                    <RippleLink
+                      href={PROFILE.socials.portfolio3d}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-accent" aria-hidden="true" />
+                        <span>3D Portfolio</span>
+                      </span>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </RippleLink>
+                  </StaggerItem>
+                </div>
+              </StaggerGroup>
+            </div>
+          </HoverSpotlightCard>
         </ScrollScaleStage>
 
         {/* Bottom Copyright & Back to Top */}
@@ -211,14 +231,16 @@ export function ContactFooter() {
               React 19, Tailwind CSS 4 &amp; Framer Motion.
             </p>
           </div>
-          <button
-            type="button"
+          <RippleButton
             onClick={() => scrollTo(0, 0)}
-            className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface px-4 py-2 text-foreground hover:border-primary hover:text-primary"
+            className="group inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface px-4 py-2 text-foreground hover:border-primary hover:text-primary"
           >
             <span>Back to top</span>
-            <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
+            <ArrowUp
+              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5"
+              aria-hidden="true"
+            />
+          </RippleButton>
         </div>
       </div>
     </footer>

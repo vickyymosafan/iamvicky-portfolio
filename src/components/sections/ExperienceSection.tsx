@@ -17,6 +17,7 @@ import {
 import { EXPERIENCES, PROFILE } from "@/data/portfolio";
 import {
   ARCHITECTURAL_EASE,
+  KineticTextReveal,
   ScrollDepthParallax,
   ScrollProgressLine,
   SectionReveal,
@@ -24,6 +25,11 @@ import {
   StaggerGroup,
   StaggerItem,
 } from "@/components/motion/MotionPrimitives";
+import {
+  HoverSpotlightCard,
+  RippleButton,
+  RippleLink,
+} from "@/components/motion/InteractiveMotion";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const STAT_ICONS = [BarChart3, Rocket, Sparkles] as const;
@@ -53,8 +59,8 @@ export function ExperienceSection() {
               </div>
 
               <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
-                Hands-on delivery across{" "}
-                <span className="text-primary">web, health &amp; fintech.</span>
+                <KineticTextReveal text="Hands-on delivery across" />{" "}
+                <KineticTextReveal text="web, health & fintech." delay={0.12} className="text-primary" />
               </h2>
 
               <p className="text-sm leading-relaxed text-ink-secondary sm:text-base">
@@ -167,12 +173,12 @@ export function ExperienceSection() {
                       </span>
                     </button>
 
-                    <div
+                    <HoverSpotlightCard
                       className={`overflow-hidden rounded-2xl p-5 sm:p-6 ${
                         isExpanded ? "studio-card-featured" : "studio-card"
                       }`}
                     >
-                      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                      <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-start">
                         {/* Custom Studio 3D Experience Icon */}
                         <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-xl border border-border bg-[#0e1117]">
                           <Image
@@ -225,8 +231,7 @@ export function ExperienceSection() {
                               ))}
                             </div>
 
-                            <button
-                              type="button"
+                            <RippleButton
                               onClick={() => setExpandedId(isExpanded ? "" : exp.id)}
                               aria-expanded={isExpanded}
                               className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface-elevated px-4 py-1.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
@@ -240,7 +245,7 @@ export function ExperienceSection() {
                               ) : (
                                 <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                               )}
-                            </button>
+                            </RippleButton>
                           </div>
                         </div>
                       </div>
@@ -254,7 +259,7 @@ export function ExperienceSection() {
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.25, ease: ARCHITECTURAL_EASE }}
-                            className="overflow-hidden"
+                            className="relative z-10 overflow-hidden"
                           >
                             <div className="mt-5 space-y-4 border-t border-border pt-4">
                               <ul className="space-y-2">
@@ -275,7 +280,7 @@ export function ExperienceSection() {
                               {exp.links.length > 0 ? (
                                 <div className="flex flex-wrap gap-2 pt-1">
                                   {exp.links.map((link) => (
-                                    <a
+                                    <RippleLink
                                       key={link.href}
                                       href={link.href}
                                       target="_blank"
@@ -288,7 +293,7 @@ export function ExperienceSection() {
                                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                                       )}
                                       <span>{link.label}</span>
-                                    </a>
+                                    </RippleLink>
                                   ))}
                                 </div>
                               ) : null}
@@ -296,7 +301,7 @@ export function ExperienceSection() {
                           </m.div>
                         ) : null}
                       </AnimatePresence>
-                    </div>
+                    </HoverSpotlightCard>
                   </m.article>
                 );
               })}

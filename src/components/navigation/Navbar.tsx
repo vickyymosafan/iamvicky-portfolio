@@ -7,6 +7,7 @@ import { PROFILE } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { ARCHITECTURAL_EASE, SlidingPill } from "@/components/motion/MotionPrimitives";
+import { RippleButton, RippleLink } from "@/components/motion/InteractiveMotion";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface NavbarProps {
@@ -174,8 +175,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
         {/* Action Cluster */}
         <div className="flex items-center gap-2">
           {/* Quick Search / Command Palette */}
-          <button
-            type="button"
+          <RippleButton
             onClick={onOpenCommandPalette}
             aria-label="Search Ctrl K"
             title="Search portfolio (Ctrl+K)"
@@ -186,11 +186,10 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             <kbd className="hidden rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[11px] text-muted sm:inline">
               Ctrl K
             </kbd>
-          </button>
+          </RippleButton>
 
           {/* Theme Switcher */}
-          <button
-            type="button"
+          <RippleButton
             onClick={toggleTheme}
             aria-label={
               theme === "dark"
@@ -204,21 +203,23 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             ) : (
               <Moon className="h-4 w-4" aria-hidden="true" />
             )}
-          </button>
+          </RippleButton>
 
           {/* Primary Pill CTA */}
-          <a
+          <RippleLink
             href="#contact"
             onClick={(e) => handleNavClick(e, "contact")}
-            className="cta-glow hidden min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover md:inline-flex"
+            className="cta-glow group hidden min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover md:inline-flex"
           >
             <span>Let&apos;s Talk</span>
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </a>
+            <ArrowRight
+              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </RippleLink>
 
           {/* Mobile Menu Toggle */}
-          <button
-            type="button"
+          <RippleButton
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-nav-drawer"
@@ -230,7 +231,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
             ) : (
               <Menu className="h-5 w-5" aria-hidden="true" />
             )}
-          </button>
+          </RippleButton>
         </div>
       </div>
 

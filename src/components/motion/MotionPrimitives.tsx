@@ -273,3 +273,113 @@ export function DividerReveal({ className }: DividerRevealProps) {
     />
   );
 }
+
+interface KineticTextRevealProps {
+  text: string;
+  className?: string;
+  delay?: number;
+  stagger?: number;
+  trigger?: "mount" | "view";
+}
+
+/**
+ * Masked split-word kinetic typography reveal.
+ * Keeps resting opacity at 1 and renders statically under prefers-reduced-motion.
+ */
+export function KineticTextReveal({
+  text,
+  className,
+  delay = 0,
+  stagger = 0.048,
+  trigger = "view",
+}: KineticTextRevealProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const words = text.split(" ");
+
+  if (shouldReduceMotion) {
+    return <span className={className}>{text}</span>;
+  }
+
+  return (
+    <span className={className}>
+      {words.map((word, idx) => (
+        <React.Fragment key={`${word}-${idx}`}>
+          <span className="inline-block overflow-hidden align-bottom pb-[0.08em] -mb-[0.08em]">
+            <m.span
+              className="inline-block"
+              initial={{ y: "105%" }}
+              animate={trigger === "mount" ? { y: "0%" } : undefined}
+              whileInView={trigger === "view" ? { y: "0%" } : undefined}
+              viewport={trigger === "view" ? VIEWPORT_ONCE : undefined}
+              transition={{
+                duration: 0.56,
+                delay: delay + idx * stagger,
+                ease: ARCHITECTURAL_EASE,
+              }}
+            >
+              {word}
+            </m.span>
+          </span>
+          {idx < words.length - 1 ? " " : null}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
+
+interface KineticScrollBandProps {
+  items: readonly string[];
+  direction?: "left" | "right";
+  className?: string;
+}
+
+/**
+ * Decorative scroll-linked kinetic typographic ribbon.
+ * Translates smoothly on horizontal scroll axis via useScroll + useTransform + useSpring.
+ */
+export function KineticScrollBand({
+  items,
+  direction = "left",
+  className,
+}: KineticScrollBandProps) {
+  const bandRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: bandRef,
+    offset: ["start end", "end start"],
+  });
+
+  const rawX = useTransform(
+    scrollYProgress,
+    [0, 1],
+    shouldReduceMotion
+      ? [0, 0]
+      : direction === "left"
+      ? [44, -76]
+      : [-76, 44]
+  );
+  const smoothX = useSpring(rawX, SPRING_PARALLAX);
+
+  return (
+    <div
+      ref={bandRef}
+      data-kinetic-band
+      aria-hidden="true"
+      className={`pointer-events-none select-none overflow-x-clip border-y border-border/60 py-3 ${className ?? ""}`}
+    >
+      <m.div
+        style={{ x: shouldReduceMotion ? 0 : smoothX }}
+        className="flex w-max items-center gap-6 whitespace-nowrap font-heading text-xs font-bold uppercase tracking-[0.26em] text-muted sm:text-sm"
+      >
+        {[...items, ...items].map((item, idx) => (
+          <React.Fragment key={`${item}-${idx}`}>
+            <span className={idx % 2 === 0 ? "text-muted" : "text-primary"}>
+              {item}
+            </span>
+            <span className="h-1 w-1 rounded-full bg-primary" />
+          </React.Fragment>
+        ))}
+      </m.div>
+    </div>
+  );
+}

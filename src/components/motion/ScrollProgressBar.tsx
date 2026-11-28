@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Native CSS scroll-driven progress bar (animation-timeline: scroll(root block)),
- * falling back to a passive scroll listener ONLY in browsers lacking CSS scroll-timeline support.
+ * Scroll-linked page reading progress indicator.
+ * Uses native CSS Scroll-Driven Animations (`animation-timeline: scroll(root block)`)
+ * in supporting browsers, and falls back to a passive scroll listener otherwise.
  */
 export function ScrollProgressBar() {
   const barRef = useRef<HTMLDivElement>(null);
@@ -37,11 +38,11 @@ export function ScrollProgressBar() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-60 h-[2.5px] bg-transparent"
+      className="pointer-events-none fixed inset-x-0 top-0 z-60 h-[3px] bg-transparent"
     >
       <div
         ref={barRef}
-        className="scroll-progress-bar h-full w-full bg-primary"
+        className="scroll-progress-bar h-full w-full"
       />
     </div>
   );

@@ -70,7 +70,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="dark" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("vicky-portfolio-theme");var m=t==="light"?"light":"dark";document.documentElement.dataset.theme=m;var el=document.querySelector('meta[name="color-scheme"]');if(el)el.setAttribute("content",m);}catch(e){document.documentElement.dataset.theme="dark";}`,
+            __html: `try{var t=localStorage.getItem("vicky-portfolio-theme");var m=t==="light"||t==="dark"?t:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.theme=m;var el=document.querySelector('meta[name="color-scheme"]');if(el)el.setAttribute("content",m);}catch(e){document.documentElement.dataset.theme="dark";}`,
           }}
         />
       </head>

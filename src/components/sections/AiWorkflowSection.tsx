@@ -18,11 +18,18 @@ import { AI_WORKFLOW_STAGES, PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import {
   ARCHITECTURAL_EASE,
+  KineticTextReveal,
   ScrollDepthParallax,
   SectionReveal,
   SlidingPill,
   SPRING_PILL,
 } from "@/components/motion/MotionPrimitives";
+import {
+  HoverSpotlightCard,
+  OneShotTypewriter,
+  RippleButton,
+  RippleLink,
+} from "@/components/motion/InteractiveMotion";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const INSPECTOR_TABS = ["Code", "Console", "Flow", "Outcome"] as const;
@@ -84,8 +91,8 @@ export function AiWorkflowSection() {
             </div>
 
             <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
-              Structured PRDs.{" "}
-              <span className="text-primary">Repeatable AI delivery.</span>
+              <KineticTextReveal text="Structured PRDs." />{" "}
+              <KineticTextReveal text="Repeatable AI delivery." delay={0.12} className="text-primary" />
             </h2>
 
             <p className="max-w-xl text-base leading-relaxed text-ink-secondary">
@@ -107,7 +114,7 @@ export function AiWorkflowSection() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <a
+              <RippleLink
                 href="https://github.com/vickyymosafan/mcp-craftrig"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -115,9 +122,9 @@ export function AiWorkflowSection() {
               >
                 <Github className="h-4 w-4" aria-hidden="true" />
                 <span>View Craftrig Repo</span>
-              </a>
+              </RippleLink>
 
-              <a
+              <RippleLink
                 href="#film"
                 onClick={(e) => {
                   e.preventDefault();
@@ -127,7 +134,7 @@ export function AiWorkflowSection() {
               >
                 <Play className="h-3.5 w-3.5 fill-current text-primary" aria-hidden="true" />
                 <span>Watch Walkthrough</span>
-              </a>
+              </RippleLink>
             </div>
           </m.div>
 
@@ -243,7 +250,7 @@ export function AiWorkflowSection() {
                   <div>{"}"}</div>
                   <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] text-[#38bdf8]">
                     <Terminal className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{stage.statusLine}</span>
+                    <OneShotTypewriter text={stage.statusLine} className="truncate" />
                   </div>
                 </div>
               </div>
@@ -252,12 +259,12 @@ export function AiWorkflowSection() {
         </div>
 
         {/* ================================================================
-            INTERACTIVE 2-COLUMN STAGE WORKBENCH (Modeled after redesign-section-2.png)
+            INTERACTIVE 2-COLUMN STAGE WORKBENCH
            ================================================================ */}
         <SectionReveal className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* Left Narrative Card */}
-          <div className="studio-card flex flex-col justify-between gap-6 rounded-2xl p-6 sm:p-7 lg:col-span-5">
-            <div className="space-y-4">
+          <HoverSpotlightCard className="studio-card flex flex-col justify-between gap-6 rounded-2xl p-6 sm:p-7 lg:col-span-5">
+            <div className="relative z-10 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.14em] text-primary">
                   <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
@@ -265,22 +272,20 @@ export function AiWorkflowSection() {
                 </span>
 
                 <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
+                  <RippleButton
                     onClick={() => setActiveIndex(prevIndex)}
                     aria-label="Previous workflow stage"
                     className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-strong bg-surface-elevated text-foreground hover:border-primary hover:text-primary"
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </RippleButton>
+                  <RippleButton
                     onClick={() => setActiveIndex(nextIndex)}
                     aria-label="Next workflow stage"
                     className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-strong bg-surface-elevated text-foreground hover:border-primary hover:text-primary"
                   >
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                  </RippleButton>
                 </div>
               </div>
 
@@ -307,7 +312,7 @@ export function AiWorkflowSection() {
             </div>
 
             {/* Clean Input -> Verified Box */}
-            <div className="space-y-2 rounded-xl border border-border bg-surface-elevated/60 p-4 font-mono text-xs">
+            <div className="relative z-10 space-y-2 rounded-xl border border-border bg-surface-elevated/60 p-4 font-mono text-xs">
               <div className="flex items-start gap-2.5">
                 <span className="shrink-0 font-bold text-primary">1. INPUT</span>
                 <span className="text-ink-secondary">{stage.readableFlow.input}</span>
@@ -317,12 +322,12 @@ export function AiWorkflowSection() {
                 <span className="text-foreground">{stage.readableFlow.verified}</span>
               </div>
             </div>
-          </div>
+          </HoverSpotlightCard>
 
           {/* Right Tabbed Artifact Viewer */}
-          <div className="studio-card flex flex-col justify-between overflow-hidden rounded-2xl lg:col-span-7">
+          <HoverSpotlightCard className="studio-card flex flex-col justify-between overflow-hidden rounded-2xl lg:col-span-7">
             {/* Top Tabs + Copy Button */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-elevated/55 px-4 py-3 sm:px-5">
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-elevated/55 px-4 py-3 sm:px-5">
               <div
                 className="flex flex-wrap items-center gap-1"
                 role="tablist"
@@ -331,13 +336,12 @@ export function AiWorkflowSection() {
                 {INSPECTOR_TABS.map((tab) => {
                   const active = activeTab === tab;
                   return (
-                    <button
+                    <RippleButton
                       key={tab}
-                      type="button"
                       role="tab"
                       aria-selected={active}
                       onClick={() => setActiveTab(tab)}
-                      className={`relative min-h-9 cursor-pointer rounded-full px-3.5 py-1 font-mono text-xs font-semibold ${
+                      className={`min-h-9 cursor-pointer rounded-full px-3.5 py-1 font-mono text-xs font-semibold ${
                         active
                           ? "bg-primary text-primary-foreground"
                           : "text-muted hover:text-foreground"
@@ -350,13 +354,12 @@ export function AiWorkflowSection() {
                         />
                       ) : null}
                       <span className="relative z-10">{tab}</span>
-                    </button>
+                    </RippleButton>
                   );
                 })}
               </div>
 
-              <button
-                type="button"
+              <RippleButton
                 onClick={handleCopyCode}
                 className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-border-strong bg-surface px-3.5 py-1 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
               >
@@ -371,11 +374,11 @@ export function AiWorkflowSection() {
                     <span>Copy</span>
                   </>
                 )}
-              </button>
+              </RippleButton>
             </div>
 
             {/* Active Tab Body */}
-            <div className="flex-1 bg-[#0b0e15] p-5 font-mono text-xs leading-relaxed text-[#f5f6f8] sm:p-6">
+            <div className="relative z-10 flex-1 bg-[#0b0e15] p-5 font-mono text-xs leading-relaxed text-[#f5f6f8] sm:p-6">
               <AnimatePresence mode="wait">
                 <m.div
                   key={`${stage.id}-${activeTab}`}
@@ -411,7 +414,7 @@ export function AiWorkflowSection() {
               ) : activeTab === "Console" ? (
                 <div className="space-y-2.5">
                   <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[#f5a623]">
-                    $ {stage.command}
+                    $ <OneShotTypewriter text={stage.command} />
                   </div>
                   {stage.consoleLines.map((cl, i) => (
                     <div key={`${stage.id}-cl-${i}`} className="flex flex-wrap gap-2">
@@ -477,29 +480,28 @@ export function AiWorkflowSection() {
             </div>
 
             {/* Bottom File Footer + Next Step CTA */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-elevated/55 px-4 py-3 font-mono text-xs sm:px-5">
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-elevated/55 px-4 py-3 font-mono text-xs sm:px-5">
               <span className="inline-flex items-center gap-2 text-muted">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 <span>{stage.terminalTitle}</span>
               </span>
 
-              <button
-                type="button"
+              <RippleButton
                 onClick={() => setActiveIndex(nextIndex)}
-                className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 font-semibold text-primary hover:underline"
+                className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full px-2.5 font-semibold text-primary hover:underline"
               >
                 <span>
                   Next: {AI_WORKFLOW_STAGES[nextIndex].step} / 05 (
                   {AI_WORKFLOW_STAGES[nextIndex].shortTitle})
                 </span>
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+              </RippleButton>
             </div>
-          </div>
+          </HoverSpotlightCard>
         </SectionReveal>
 
         {/* ================================================================
-            BOTTOM 5-STEP CONNECTED TIMELINE RAIL (redesign-section-2.png)
+            BOTTOM 5-STEP CONNECTED TIMELINE RAIL
            ================================================================ */}
         <div className="relative pt-2">
           <div
@@ -517,12 +519,11 @@ export function AiWorkflowSection() {
             {AI_WORKFLOW_STAGES.map((item, idx) => {
               const active = idx === activeIndex;
               return (
-                <button
+                <RippleButton
                   key={item.id}
-                  type="button"
                   onClick={() => setActiveIndex(idx)}
                   aria-current={active ? "step" : undefined}
-                  className={`group relative flex cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-xl border p-3 text-left ${
+                  className={`group flex cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-xl border p-3 text-left ${
                     active
                       ? "border-primary/60"
                       : "border-border bg-surface/80 hover:border-border-strong"
@@ -531,7 +532,7 @@ export function AiWorkflowSection() {
                   {active ? (
                     <SlidingPill
                       layoutId="workflow-stage-bg"
-                      className="absolute inset-0 rounded-xl bg-primary-soft/60"
+                      className="pointer-events-none absolute inset-0 rounded-xl bg-primary-soft/60"
                     />
                   ) : null}
                   <span
@@ -552,7 +553,7 @@ export function AiWorkflowSection() {
                       {item.shortTitle}
                     </div>
                   </div>
-                </button>
+                </RippleButton>
               );
             })}
           </div>

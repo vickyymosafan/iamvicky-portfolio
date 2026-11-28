@@ -9,24 +9,59 @@ import {
   Briefcase,
   Code2,
   Cpu,
+  Database,
   Download,
   FolderKanban,
+  Layers,
+  Rocket,
+  Server,
+  ShieldCheck,
   Sparkles,
+  Terminal,
+  Zap,
 } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import {
   ARCHITECTURAL_EASE,
   DividerReveal,
+  KineticTextReveal,
   ScrollDepthParallax,
   SectionReveal,
   SPRING_TACTILE,
   StaggerGroup,
   StaggerItem,
 } from "@/components/motion/MotionPrimitives";
+import {
+  HoverSpotlightCard,
+  InfiniteMarquee,
+  type MarqueeItem,
+  RippleLink,
+  TypewriterText,
+} from "@/components/motion/InteractiveMotion";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const METRIC_ICONS = [Briefcase, FolderKanban, Award] as const;
+
+const HERO_TYPEWRITER_PHRASES = [
+  "12-Module BuildFlow Construction ERP",
+  "NexaPip MT5 Expert Advisor Marketplace",
+  "Craftrig Multi-Agent Governance MCP",
+  "91.67% Recall Hybrid RAG Search Engine",
+] as const;
+
+const HERO_MARQUEE_ITEMS: readonly MarqueeItem[] = [
+  { label: "Next.js 16", meta: "App Router", icon: Layers },
+  { label: "NestJS & Express", meta: "Modular APIs", icon: Server },
+  { label: "TypeScript", meta: "Strict End-to-End", icon: Code2 },
+  { label: "PostgreSQL & Prisma", meta: "Relational ERD", icon: Database },
+  { label: "Craftrig MCP", meta: "50/50 Tests · DAG Locks", icon: Cpu },
+  { label: "Hybrid RAG", meta: "91.67% Recall · 26× Cache", icon: Sparkles },
+  { label: "BuildFlow ERP", meta: "12 Vertical Slices", icon: Rocket },
+  { label: "NexaPip Marketplace", meta: "SHA-256 .ex5 Vault", icon: ShieldCheck },
+  { label: "Playwright QA", meta: "13-VP Dual-Theme", icon: Terminal },
+  { label: "Redis & BullMQ", meta: "Outbox Queues", icon: Zap },
+];
 
 export function HeroSection() {
   const { scrollTo } = useSmoothScroll();
@@ -36,7 +71,7 @@ export function HeroSection() {
       {/* Reference-Matched Hero Atmospheric Backdrop (Orbital Arc, Studio Spotlight, Sparkles) */}
       <SectionBackdrop variant="hero" />
 
-      {/* Delicate Vertical Scroll Down Rail on Ultra-Wide Screens (Matches redesign-hero-section.png) */}
+      {/* Delicate Vertical Scroll Down Rail on Ultra-Wide Screens */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute top-1/2 right-6 z-20 hidden -translate-y-1/2 flex-col items-center gap-3 2xl:flex"
@@ -54,47 +89,47 @@ export function HeroSection() {
         {/* Main Hero Split Composition */}
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Left Narrative Column */}
-          <div className="space-y-7 lg:col-span-7">
-            {/* Availability Status Pill */}
+          <div className="space-y-6 lg:col-span-7">
+            {/* Availability Status Pill + Zero-CLS Typewriter Specialty Bar */}
             <m.div
               initial={{ y: 8 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.4, ease: ARCHITECTURAL_EASE }}
-              className="flex flex-wrap items-center gap-3"
+              className="flex flex-col items-start gap-2.5"
             >
               <span className="inline-flex items-center gap-2.5 rounded-full border border-border-strong bg-surface/90 px-4 py-1.5 font-mono text-xs font-medium text-foreground">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 <span>{PROFILE.availability}</span>
               </span>
+
+              <TypewriterText
+                prefix="FOCUS //"
+                phrases={HERO_TYPEWRITER_PHRASES}
+                className="w-full max-w-md sm:w-auto sm:min-w-[360px]"
+              />
             </m.div>
 
-            {/* Primary Storytelling Headline */}
+            {/* Primary Kinetic Typography Headline */}
             <div className="space-y-5">
               <h1 className="font-heading text-4xl font-bold leading-[1.03] tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-[66px]">
-                <m.span
-                  initial={{ y: 18 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.48, delay: 0.02, ease: ARCHITECTURAL_EASE }}
+                <KineticTextReveal
+                  text={PROFILE.heroHeadlineTop}
+                  trigger="mount"
+                  delay={0.02}
                   className="block"
-                >
-                  {PROFILE.heroHeadlineTop}
-                </m.span>
-                <m.span
-                  initial={{ y: 18 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.08, ease: ARCHITECTURAL_EASE }}
+                />
+                <KineticTextReveal
+                  text={PROFILE.heroHeadlineMid}
+                  trigger="mount"
+                  delay={0.12}
                   className="block"
-                >
-                  {PROFILE.heroHeadlineMid}
-                </m.span>
-                <m.span
-                  initial={{ y: 18 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.54, delay: 0.14, ease: ARCHITECTURAL_EASE }}
-                  className="mt-1 inline-flex items-baseline gap-2 italic text-primary"
-                >
-                  <span>{PROFILE.heroHeadlineAccent}</span>
-                </m.span>
+                />
+                <KineticTextReveal
+                  text={PROFILE.heroHeadlineAccent}
+                  trigger="mount"
+                  delay={0.22}
+                  className="mt-1 inline-block italic text-primary"
+                />
               </h1>
 
               <m.p
@@ -107,40 +142,44 @@ export function HeroSection() {
               </m.p>
             </div>
 
-            {/* Primary & Secondary Pill CTAs */}
+            {/* Primary & Secondary Pill CTAs with Pointer-Origin Ripple + Tactile Spring Hover */}
             <m.div
               initial={{ y: 12 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.48, delay: 0.22, ease: ARCHITECTURAL_EASE }}
               className="flex flex-wrap items-center gap-3.5 pt-1"
             >
-              <m.a
-                href="#projects"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                transition={SPRING_TACTILE}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollTo("#projects", -78);
-                }}
-                className="cta-glow inline-flex min-h-12 items-center gap-2.5 rounded-full bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
-              >
-                <span>View My Projects</span>
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </m.a>
+              <m.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} transition={SPRING_TACTILE}>
+                <RippleLink
+                  href="#projects"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollTo("#projects", -78);
+                  }}
+                  className="cta-glow group inline-flex min-h-12 items-center gap-2.5 rounded-full bg-primary px-6 py-3 font-mono text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
+                >
+                  <span>View My Projects</span>
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </RippleLink>
+              </m.div>
 
-              <m.a
-                href={PROFILE.cvPdfPath}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                transition={SPRING_TACTILE}
-                className="inline-flex min-h-12 items-center gap-2.5 rounded-full border border-border-strong bg-surface/90 px-6 py-3 font-mono text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
-              >
-                <span>Download Resume</span>
-                <Download className="h-4 w-4" aria-hidden="true" />
-              </m.a>
+              <m.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} transition={SPRING_TACTILE}>
+                <RippleLink
+                  href={PROFILE.cvPdfPath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex min-h-12 items-center gap-2.5 rounded-full border border-border-strong bg-surface/90 px-6 py-3 font-mono text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
+                >
+                  <span>Download Resume</span>
+                  <Download
+                    className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5"
+                    aria-hidden="true"
+                  />
+                </RippleLink>
+              </m.div>
             </m.div>
 
             {/* 3-Column Verified Proof Metrics Strip */}
@@ -178,7 +217,7 @@ export function HeroSection() {
             </StaggerGroup>
           </div>
 
-          {/* Right Portrait Studio Card with Scroll-Linked Depth Parallax */}
+          {/* Right Portrait Studio Card with Scroll-Linked Depth Parallax & Pointer Spotlight */}
           <ScrollDepthParallax
             distance={20}
             className="relative mx-auto w-full max-w-[430px] lg:col-span-5 lg:max-w-none"
@@ -189,131 +228,134 @@ export function HeroSection() {
               transition={{ duration: 0.58, delay: 0.08, ease: ARCHITECTURAL_EASE }}
               className="relative"
             >
-            {/* Decorative Luminous Orbital Ring Behind Portrait */}
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 480 480"
-              className="animate-orbit-slow pointer-events-none absolute -inset-6 h-[calc(100%+3rem)] w-[calc(100%+3rem)] opacity-75"
-              fill="none"
-            >
-              <ellipse
-                cx="240"
-                cy="248"
-                rx="218"
-                ry="88"
-                transform="rotate(-22 240 248)"
-                stroke="var(--primary)"
-                strokeOpacity="0.42"
-                strokeWidth="1.25"
-              />
-              <ellipse
-                cx="240"
-                cy="252"
-                rx="192"
-                ry="68"
-                transform="rotate(14 240 252)"
-                stroke="var(--accent)"
-                strokeOpacity="0.28"
-                strokeWidth="1"
-              />
-            </svg>
+              {/* Decorative Luminous Orbital Ring Behind Portrait */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 480 480"
+                className="animate-orbit-slow pointer-events-none absolute -inset-6 h-[calc(100%+3rem)] w-[calc(100%+3rem)] opacity-75"
+                fill="none"
+              >
+                <ellipse
+                  cx="240"
+                  cy="248"
+                  rx="218"
+                  ry="88"
+                  transform="rotate(-22 240 248)"
+                  stroke="var(--primary)"
+                  strokeOpacity="0.42"
+                  strokeWidth="1.25"
+                />
+                <ellipse
+                  cx="240"
+                  cy="252"
+                  rx="192"
+                  ry="68"
+                  transform="rotate(14 240 252)"
+                  stroke="var(--accent)"
+                  strokeOpacity="0.28"
+                  strokeWidth="1"
+                />
+              </svg>
 
-            {/* Tilted Luminous Studio Spotlight Backing Panel (Matches redesign-hero-section.png) */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-2 -rotate-3 rounded-[34px] border border-primary/35 opacity-85"
-              style={{
-                background:
-                  "radial-gradient(circle at 46% 38%, var(--primary-glow) 0%, var(--primary-soft) 44%, transparent 76%)",
-              }}
-            />
-
-            {/* Framed Obsidian Glass Portrait Card */}
-            <div className="studio-card-featured relative overflow-hidden rounded-[28px]">
-              {/* Warm Amber-Gold Studio Backlight Halo Behind Vicky's Portrait */}
+              {/* Tilted Luminous Studio Spotlight Backing Panel */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none absolute -inset-2 -rotate-3 rounded-[34px] border border-primary/35 opacity-85"
                 style={{
                   background:
-                    "radial-gradient(circle at 50% 34%, var(--primary-glow) 0%, var(--primary-soft) 40%, transparent 74%)",
+                    "radial-gradient(circle at 46% 38%, var(--primary-glow) 0%, var(--primary-soft) 44%, transparent 76%)",
                 }}
               />
 
-              <div className="relative aspect-[4/4.45] w-full overflow-hidden">
-                <Image
-                  src="/profile.png"
-                  alt="Portrait of M. Vicky Mosafan, Full-Stack Web Developer"
-                  fill
-                  priority
-                  quality={82}
-                  sizes="(max-width: 1024px) 90vw, 460px"
-                  className="object-cover object-top transition-transform duration-500 hover:scale-[1.02]"
-                />
+              {/* Framed Obsidian Glass Portrait Card with Hover Spotlight */}
+              <HoverSpotlightCard className="studio-card-featured overflow-hidden rounded-[28px]">
+                {/* Warm Amber-Gold Studio Backlight Halo Behind Portrait */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080a0f]/80 via-[#080a0f]/25 to-transparent"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 34%, var(--primary-glow) 0%, var(--primary-soft) 40%, transparent 74%)",
+                  }}
                 />
-              </div>
 
-              {/* Bottom Identity Strip Inside Portrait Card */}
-              <div className="relative z-10 flex items-center justify-between gap-3 border-t border-border bg-surface/95 px-5 py-3.5">
-                <div className="min-w-0">
-                  <p className="font-heading text-sm font-bold text-foreground">
-                    {PROFILE.fullName}
-                  </p>
-                  <p className="truncate font-mono text-[11px] text-muted">
-                    {PROFILE.location}
-                  </p>
+                <div className="relative aspect-[4/4.45] w-full overflow-hidden">
+                  <Image
+                    src="/profile.png"
+                    alt="Portrait of M. Vicky Mosafan, Full-Stack Web Developer"
+                    fill
+                    priority
+                    quality={82}
+                    sizes="(max-width: 1024px) 90vw, 460px"
+                    className="object-cover object-top transition-transform duration-500 hover:scale-[1.025]"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080a0f]/80 via-[#080a0f]/25 to-transparent"
+                  />
                 </div>
-                <span className="shrink-0 rounded-full border border-primary/35 bg-primary-soft px-3 py-1 font-mono text-[11px] font-semibold text-primary">
-                  GPA 3.94
-                </span>
+
+                {/* Bottom Identity Strip Inside Portrait Card */}
+                <div className="relative z-10 flex items-center justify-between gap-3 border-t border-border bg-surface/95 px-5 py-3.5">
+                  <div className="min-w-0">
+                    <p className="font-heading text-sm font-bold text-foreground">
+                      {PROFILE.fullName}
+                    </p>
+                    <p className="truncate font-mono text-[11px] text-muted">
+                      {PROFILE.location}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-primary/35 bg-primary-soft px-3 py-1 font-mono text-[11px] font-semibold text-primary">
+                    GPA 3.94
+                  </span>
+                </div>
+              </HoverSpotlightCard>
+
+              {/* Floating Studio Badge: Top-Left */}
+              <div className="animate-studio-float absolute -top-3 left-3 z-20 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/95 px-3.5 py-1.5 font-mono text-xs font-medium text-foreground shadow-xl sm:-left-4">
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                <span>Software Engineer</span>
               </div>
-            </div>
 
-            {/* Floating Studio Badge: Top-Left */}
-            <div className="animate-studio-float absolute -top-3 left-3 z-20 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/95 px-3.5 py-1.5 font-mono text-xs font-medium text-foreground shadow-xl sm:-left-4">
-              <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-              <span>Software Engineer</span>
-            </div>
+              {/* Floating Code Badge: Top-Right */}
+              <div
+                aria-hidden="true"
+                className="absolute top-6 -right-2 z-20 hidden h-11 w-12 items-center justify-center rounded-xl border border-primary/35 bg-surface/95 text-primary shadow-xl sm:flex"
+              >
+                <Code2 className="h-5 w-5" />
+              </div>
 
-            {/* Floating Code Badge: Top-Right */}
-            <div
-              aria-hidden="true"
-              className="absolute top-6 -right-2 z-20 hidden h-11 w-12 items-center justify-center rounded-xl border border-primary/35 bg-surface/95 text-primary shadow-xl sm:flex"
-            >
-              <Code2 className="h-5 w-5" />
-            </div>
-
-            {/* Floating Highlight Card: Mid-Right */}
-            <a
-              href="#workflow"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollTo("#workflow", -80);
-              }}
-              className="absolute top-1/2 -right-3 z-20 hidden max-w-[210px] -translate-y-1/2 items-center gap-2.5 rounded-2xl border border-border-strong bg-surface/95 px-3.5 py-2.5 shadow-2xl hover:border-primary xl:flex"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Cpu className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate font-heading text-xs font-bold text-foreground">
-                  Craftrig MCP
+              {/* Floating Highlight Card: Mid-Right */}
+              <RippleLink
+                href="#workflow"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollTo("#workflow", -80);
+                }}
+                className="group absolute top-1/2 -right-3 z-20 hidden max-w-[210px] -translate-y-1/2 items-center gap-2.5 rounded-2xl border border-border-strong bg-surface/95 px-3.5 py-2.5 shadow-2xl hover:border-primary xl:flex"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <Cpu className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <span className="block truncate font-mono text-[11px] text-muted">
-                  Task DAG · 50/50 tests
-                  <ArrowRight className="ml-1 inline h-3 w-3" aria-hidden="true" />
+                <span className="min-w-0">
+                  <span className="block truncate font-heading text-xs font-bold text-foreground">
+                    Craftrig MCP
+                  </span>
+                  <span className="block truncate font-mono text-[11px] text-muted">
+                    Task DAG · 50/50 tests
+                    <ArrowRight
+                      className="ml-1 inline h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </span>
                 </span>
-              </span>
-            </a>
+              </RippleLink>
 
-            {/* Floating Proof Pill: Bottom-Left above portrait footer (zero overlap with GPA 3.94) */}
-            <div className="absolute bottom-[78px] left-3 z-20 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/95 px-3.5 py-1.5 font-mono text-[11px] font-medium text-foreground shadow-xl sm:-left-4">
-              <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              <span>BuildFlow ERP · NexaPip</span>
-            </div>
+              {/* Floating Proof Pill: Bottom-Left above portrait footer */}
+              <div className="absolute bottom-[78px] left-3 z-20 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/95 px-3.5 py-1.5 font-mono text-[11px] font-medium text-foreground shadow-xl sm:-left-4">
+                <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                <span>BuildFlow ERP · NexaPip</span>
+              </div>
             </m.div>
           </ScrollDepthParallax>
         </div>
@@ -328,31 +370,34 @@ export function HeroSection() {
                 <span>{PROFILE.aboutEyebrow}</span>
               </p>
               <h2 className="font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
-                {PROFILE.aboutHeadline}
+                <KineticTextReveal text={PROFILE.aboutHeadline} />
               </h2>
               <p className="font-mono text-xs text-muted">
                 B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00)
               </p>
               <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                <a
+                <RippleLink
                   href="#workflow"
                   onClick={(e) => {
                     e.preventDefault();
                     scrollTo("#workflow", -80);
                   }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+                  className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
                 >
                   <span>Inspect Craftrig Workflow</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                </a>
-                <a
+                  <ArrowRight
+                    className="h-3.5 w-3.5 text-primary transition-transform duration-200 group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </RippleLink>
+                <RippleLink
                   href={PROFILE.socials.craftrig}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-surface-elevated/70 px-4 py-2.5 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-primary"
                 >
                   <span>Craftrig MCP Repo</span>
-                </a>
+                </RippleLink>
               </div>
             </SectionReveal>
 
@@ -368,6 +413,15 @@ export function HeroSection() {
             </StaggerGroup>
           </div>
         </div>
+
+        {/* Seamless Pause-Safe Infinite Engineering & Tech Ticker */}
+        <SectionReveal className="mt-12 sm:mt-14">
+          <InfiniteMarquee
+            items={HERO_MARQUEE_ITEMS}
+            label="Core Engineering Stack and Shipped Proof Ticker"
+            durationSeconds={38}
+          />
+        </SectionReveal>
       </div>
     </section>
   );

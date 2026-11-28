@@ -296,15 +296,49 @@ body {
 }
 
 /* ==========================================================================
+   Modern Web Guidance: Top-Level @property Registrations for Smooth Masks
+   ========================================================================== */
+@property --spot-inner {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --spot-outer {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* ==========================================================================
    Modern Web Guidance: Native CSS Scroll-Driven Animations (view() + scroll())
    ========================================================================== */
 .scroll-progress-bar {
   transform-origin: 0 50%;
   transform: scaleX(0);
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--primary-hover) 68%,
+    var(--accent) 100%
+  );
+  box-shadow: 0 0 14px var(--primary-glow);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+  @supports (animation-timeline: scroll()) {
     @keyframes root-scroll-grow {
       from {
         transform: scaleX(0);
@@ -336,6 +370,243 @@ body {
       animation-timeline: view(block);
       animation-range: entry 0% cover 24%;
     }
+  }
+}
+
+/* ==========================================================================
+   Interactive Pointer-Tracking Studio Spotlight (interactive-content-reveal)
+   ========================================================================== */
+.studio-spotlight-card {
+  position: relative;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --spot-inner: 0px;
+  --spot-outer: 0px;
+}
+
+.studio-spotlight-card:hover {
+  --spot-inner: 90px;
+  --spot-outer: 240px;
+}
+
+.studio-spotlight-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    320px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--primary) 16%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 7%, transparent) 46%,
+    transparent 74%
+  );
+  mask-image: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    black var(--spot-inner, 0px),
+    transparent var(--spot-outer, 0px)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    black var(--spot-inner, 0px),
+    transparent var(--spot-outer, 0px)
+  );
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  transition:
+    --spot-inner 220ms ease-out,
+    --spot-outer 260ms ease-out,
+    opacity 200ms ease-out;
+}
+
+.studio-spotlight-card:hover > .studio-spotlight-layer {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-spotlight-layer {
+    transition: none !important;
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   GPU-Composited Pointer-Origin Ripple Micro-Interaction
+   ========================================================================== */
+.ripple-wave {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, currentColor 34%, transparent) 0%,
+    color-mix(in srgb, currentColor 14%, transparent) 58%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ripple-expand {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0.48;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0;
+    }
+  }
+
+  .ripple-wave {
+    animation: ripple-expand 540ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+}
+
+/* ==========================================================================
+   Infinite Marquee / Ticker (GPU-Composited, WCAG 2.2.2 Pause-Safe)
+   ========================================================================== */
+.marquee-viewport {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes marquee-scroll {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .marquee-track {
+    animation: marquee-scroll var(--marquee-duration, 34s) linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-track[data-direction="right"] {
+    animation-direction: reverse;
+  }
+
+  .marquee-viewport:hover .marquee-track,
+  .marquee-viewport:focus-within .marquee-track,
+  .marquee-viewport[data-paused="true"] .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-viewport {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .marquee-track {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .marquee-duplicate {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Native Horizontal Snap Carousel & Scrollability Affordance Hints
+   ========================================================================== */
+.horizontal-snap-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  touch-action: manipulation;
+  scroll-padding-inline: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 50%, transparent) transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .horizontal-snap-track {
+    scroll-behavior: smooth;
+  }
+
+  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+    @keyframes reveal-fade-start {
+      to {
+        --fade-start: var(--fade-size);
+      }
+    }
+
+    @keyframes hide-fade-end {
+      from {
+        --fade-end: var(--fade-size);
+      }
+    }
+
+    .horizontal-snap-track {
+      --fade-size: 2.25rem;
+      mask:
+        linear-gradient(black, black) no-clip subtract,
+        linear-gradient(to right, black, transparent) 0 0 / var(--fade-start) 100% no-repeat no-clip,
+        linear-gradient(to right, transparent, black) 100% 0 / var(--fade-end) 100% no-repeat no-clip;
+      animation: reveal-fade-start linear both, hide-fade-end linear both;
+      animation-timeline: scroll(self inline);
+      animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+    }
+  }
+}
+
+/* ==========================================================================
+   Typewriter Caret (<= 0.9Hz gentle pulse, strictly below WCAG 2.3.1 limit)
+   ========================================================================== */
+.typewriter-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  vertical-align: -0.15em;
+  background-color: var(--primary);
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes caret-pulse {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    55%,
+    100% {
+      opacity: 0.15;
+    }
+  }
+
+  .typewriter-caret {
+    animation: caret-pulse 1.15s ease-in-out infinite;
   }
 }
 
