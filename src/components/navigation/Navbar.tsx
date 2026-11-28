@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, m } from "framer-motion";
-import { ArrowRight, Command, FileDown, Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Command, FileDown, Menu, Moon, Sun, X } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
@@ -255,7 +255,7 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
                       }`}
                     >
                       <span>{item.label}</span>
-                      <span className="text-xs opacity-70">↗</span>
+                      <ArrowUpRight className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
                     </a>
                   </li>
                 );

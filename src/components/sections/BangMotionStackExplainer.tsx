@@ -1176,7 +1176,7 @@ export function BangMotionStackExplainer() {
                     Agentic Multi-Hop Self-Critic Grounding Loop
                   </div>
                   <div style={{ fontSize: 14 }} className="font-mono text-white">
-                    Cloudflare Workers · Gemini → Groq → Cohere → OpenRouter
+                    Cloudflare Workers · Gemini, Groq, Cohere, OpenRouter
                   </div>
                 </div>
               </div>

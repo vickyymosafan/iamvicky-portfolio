@@ -2,7 +2,9 @@
 
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
+  ArrowDown,
   ArrowRight,
+  ArrowUp,
   Check,
   Copy,
   Cpu,
@@ -428,7 +430,7 @@ export function CommandPalette({
         <div className="flex items-center justify-between border-t border-border bg-surface-elevated/60 px-4 py-2.5 font-mono text-[11px] text-muted">
           <span className="inline-flex items-center gap-2">
             <BrandLogo size={18} className="shrink-0" />
-            <span>↑↓ Navigate · Enter Open</span>
+            <span className="inline-flex items-center gap-1"><ArrowUp className="h-3 w-3" aria-hidden="true" /><ArrowDown className="h-3 w-3" aria-hidden="true" /><span>Navigate · Enter Open</span></span>
           </span>
           <span>Esc Close</span>
         </div>

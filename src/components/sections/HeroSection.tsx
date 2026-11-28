@@ -267,7 +267,8 @@ export function HeroSection() {
                   Craftrig MCP
                 </span>
                 <span className="block truncate font-mono text-[11px] text-muted">
-                  Task DAG · 50/50 tests →
+                  Task DAG · 50/50 tests
+                  <ArrowRight className="ml-1 inline h-3 w-3" aria-hidden="true" />
                 </span>
               </span>
             </a>

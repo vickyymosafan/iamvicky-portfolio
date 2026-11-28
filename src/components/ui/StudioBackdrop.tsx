@@ -6,7 +6,7 @@ import React from "react";
  *   inside a GPU-isolated fixed compositor layer (`contain: strict`, `translate3d(0,0,0)`).
  * - Mirrors all 7 redesign reference mockups: blazing top-left & bottom-right obsidian glass spheres
  *   with crescent rim highlights, floating translucent edge orbs, sweeping diagonal silk wave,
- *   fine architectural grid, coordinate crosshairs (+), and 4-point star sparkles (✦).
+ *   fine architectural grid, coordinate crosshairs (+), and 4-point star sparkles (star glyph paths).
  * - Strictly zero green / zero pink: Electric Amber-Gold + Glacier Blue (Dark) & Burnished Amber + Cobalt (Light).
  */
 export function StudioBackdrop() {
@@ -169,7 +169,7 @@ export function StudioBackdrop() {
           />
         </g>
 
-        {/* Technical Coordinate Crosshairs (+) & 4-Point Star Sparkles (✦) in open margins */}
+        {/* Technical Coordinate Crosshairs (+) & 4-Point Star Sparkles (star glyph paths) in open margins */}
         <g stroke="var(--orb-rim)" strokeWidth="1" opacity="0.32">
           <path d="M 42 208 H 54 M 48 202 V 214" />
           <path d="M 1384 148 H 1396 M 1390 142 V 154" />

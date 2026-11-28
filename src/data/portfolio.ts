@@ -220,7 +220,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     ],
     architecture: [
       { id: "ui", label: "Next.js 16 PWA", sublabel: "Voice + History", layer: "client" },
-      { id: "ret", label: "pgvector + BM25", sublabel: "Top-50 → wRRF", layer: "data" },
+      { id: "ret", label: "pgvector + BM25", sublabel: "Top-50 to wRRF", layer: "data" },
       { id: "llm", label: "Cohere Aya 32B", sublabel: "Top-5 Context", layer: "ai" },
       { id: "cache", label: "Redis Cache", sublabel: "694ms Fast Path", layer: "orchestration" },
     ],
@@ -242,7 +242,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       "Engineered an edge API on Cloudflare Workers + Hono with Neon PostgreSQL, multi-provider LLM fallback (Gemini, Groq, Cohere, OpenRouter), admin PDF/DOCX ingestion, and a citation-aware Next.js chat interface.",
     engineeringDecisions: [
       "Built query rewriting, multi-hop decomposition, reranking, and a self-critic loop that flags and repairs ungrounded claims.",
-      "Wired automatic 4-provider failover (Gemini → Groq → Cohere → OpenRouter) with edge rate limiting and response caching.",
+      "Wired automatic 4-provider failover (Gemini, Groq, Cohere, then OpenRouter) with edge rate limiting and response caching.",
       "Delivered virtualized chat history, inline citations, Markdown/LaTeX math rendering, and PDF/DOCX upload workflows.",
     ],
     metrics: [
@@ -293,7 +293,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     metrics: [
       { label: "MCP Core", value: "22+ Tools", detail: "Task DAG, locks & QA" },
       { label: "Test Suite", value: "50/50", detail: "Strict TypeScript" },
-      { label: "QA Matrix", value: "13 VPs", detail: "320px → 1920px" },
+      { label: "QA Matrix", value: "13 VPs", detail: "320px to 1920px" },
     ],
     tech: ["TypeScript", "MCP SDK v2", "Playwright", "SQLite WAL", "Topological DAG", "Node 22"],
     links: [
@@ -542,9 +542,9 @@ export const ADDITIONAL_PROJECTS: AdditionalProject[] = [
     name: "MQL5 Algorithmic Trading Suite",
     fileCode: "MQL5-SUITE.mq5",
     category: "Trading & Data",
-    tags: ["Trading & Data", "11 Products · 5.0★"],
+    tags: ["Trading & Data", "11 Products · 5.0 Rating"],
     image: "/images/redesign/proj-destino-copytrade.jpg",
-    focus: "11 published MetaTrader 5 products (2 Expert Advisors, 9 custom indicators) earning a 5.0★ global trader rating.",
+    focus: "11 published MetaTrader 5 products (2 Expert Advisors, 9 custom indicators) earning a 5.0 global trader rating.",
     href: "https://www.mql5.com/en/users/vickymosafan",
   },
   {
@@ -682,14 +682,14 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     readableFlow: {
       input: "User query enters Next.js PWA and hits typed retrieval API.",
       process: "Fuses Supabase pgvector semantic Top-50 + BM25 lexical rerank via wRRF.",
-      verified: "Recall improves 75% → 91.67%, MRR 0.71 → 1.00, Redis cuts 18.3s → 694ms.",
+      verified: "Recall improves 75% to 91.67%, MRR 0.71 to 1.00, Redis cuts 18.3s to 694ms.",
     },
     consoleLines: [
       { kind: "comment", value: "# Hybrid Retrieval Pipeline: Dense Semantic + Sparse Lexical Fusion" },
       { kind: "code", value: "const semanticTop50 = await pgvector.search(geminiEmbed, { limit: 50 });" },
       { kind: "code", value: "const fusedTop5 = weightedRRF(semanticTop50, bm25.rerank(query));" },
-      { kind: "metric", label: "ACCURACY", value: "Recall 91.67% (↑ from 75.0%) · MRR 1.00 (↑ from 0.71)" },
-      { kind: "pass", label: "REDIS CACHE", value: "Median E2E latency cut 18,300ms → 694ms (26× speedup)" },
+      { kind: "metric", label: "ACCURACY", value: "Recall 91.67% (up from 75.0%) · MRR 1.00 (up from 0.71)" },
+      { kind: "pass", label: "REDIS CACHE", value: "Median E2E latency cut 18,300ms to 694ms (26× speedup)" },
     ],
     artifactLines: [
       "export async function retrieveAcademicContext(query: string) {",
@@ -762,8 +762,8 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     },
     consoleLines: [
       { kind: "comment", value: "# Production Resilience Verification Checklist" },
-      { kind: "pass", label: "LLM CHAIN", value: "Gemini → Groq → Cohere → OpenRouter automatic edge fallback" },
-      { kind: "pass", label: "CACHE PATH", value: "Redis response cache active (18.3s → 694ms on academic RAG)" },
+      { kind: "pass", label: "LLM CHAIN", value: "Gemini, Groq, Cohere, then OpenRouter automatic edge fallback" },
+      { kind: "pass", label: "CACHE PATH", value: "Redis response cache active (18.3s to 694ms on academic RAG)" },
       { kind: "pass", label: "OFFLINE PWA", value: "Dexie IndexedDB local sync active for field Posyandu & Site Ops" },
       { kind: "metric", label: "DEPLOY", value: "Vercel Edge + Cloudflare Workers live · Core Web Vitals green" },
     ],
@@ -806,7 +806,7 @@ export const EXPERIENCES: ExperienceItem[] = [
     locationOrMode: "Independent Seller · Quantitative Tooling",
     image: "/images/redesign/proj-mcp-craftrig.jpg",
     summary:
-      "Developed, shipped, and maintained 11 commercial MetaTrader 5 trading products for global retail traders, sustaining a 5.0★ rating.",
+      "Developed, shipped, and maintained 11 commercial MetaTrader 5 trading products for global retail traders, sustaining a 5.0 rating.",
     highlights: [
       "Published 11 products on the official MQL5 Market (2 automated Expert Advisors and 9 custom technical indicators).",
       "Earned a 5.0 / 5.0 customer rating through fast support, bug fixes, feature iterations, and clean releases.",
