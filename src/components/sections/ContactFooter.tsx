@@ -6,12 +6,13 @@ import {
   ArrowUpRight,
   Check,
   Copy,
+  Cpu,
   FileDown,
   Github,
+  Globe,
   Linkedin,
   Mail,
   Phone,
-  TrendingUp,
 } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
@@ -64,9 +65,9 @@ export function ContactFooter() {
               </h2>
 
               <p className="max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
-                Open to Full-Stack, Frontend, or Backend Developer roles — as well as
-                focused product engineering collaborations. Reach out directly via email,
-                phone, or LinkedIn.
+                B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00).
+                Open to Full-Stack, Frontend, or Backend Developer opportunities where clean
+                architecture and practical AI workflows go hand in hand.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -154,25 +155,28 @@ export function ContactFooter() {
                 </a>
 
                 <a
-                  href={PROFILE.socials.mql5}
+                  href={PROFILE.socials.craftrig}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
                   <span className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" aria-hidden="true" />
-                    <span>MQL5 (5.0★)</span>
+                    <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <span>Craftrig MCP</span>
                   </span>
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
 
                 <a
-                  href={PROFILE.socials.googleSkills}
+                  href={PROFILE.socials.portfolio3d}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
                 >
-                  <span>Google Skills</span>
+                  <span className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-accent" aria-hidden="true" />
+                    <span>3D Portfolio</span>
+                  </span>
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
               </div>

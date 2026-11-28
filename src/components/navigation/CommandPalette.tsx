@@ -5,8 +5,10 @@ import {
   ArrowRight,
   Check,
   Copy,
+  Cpu,
   FileDown,
   Github,
+  Globe,
   Layers,
   Linkedin,
   Moon,
@@ -140,8 +142,8 @@ export function CommandPalette({
         id: "sec-work",
         group: "Sections",
         label: "Jump to Featured Engineering Work",
-        hint: "7 Flagship Projects",
-        keywords: "work projects portfolio rag mcp erp",
+        hint: `${FEATURED_PROJECTS.length} Flagship Projects`,
+        keywords: "work projects portfolio rag mcp erp nexapip buildflow",
         icon: ArrowRight,
         run: () => goTo("#projects"),
       },
@@ -260,6 +262,30 @@ export function CommandPalette({
         icon: Github,
         run: () => {
           window.open(PROFILE.socials.github, "_blank", "noopener,noreferrer");
+          onClose();
+        },
+      },
+      {
+        id: "act-craftrig",
+        group: "Quick Actions",
+        label: "Open Craftrig MCP Repository",
+        hint: "Open Source",
+        keywords: "craftrig mcp server typescript agent orchestration",
+        icon: Cpu,
+        run: () => {
+          window.open(PROFILE.socials.craftrig, "_blank", "noopener,noreferrer");
+          onClose();
+        },
+      },
+      {
+        id: "act-portfolio-3d",
+        group: "Quick Actions",
+        label: "Open 3D Portfolio (iamvicky.vercel.app)",
+        hint: "3D Showcase",
+        keywords: "3d portfolio iamvicky showcase external",
+        icon: Globe,
+        run: () => {
+          window.open(PROFILE.socials.portfolio3d, "_blank", "noopener,noreferrer");
           onClose();
         },
       },

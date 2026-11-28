@@ -28,24 +28,28 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://iamvicky.vercel.app"),
-  title: "M. Vicky Mosafan — Full-Stack Developer & AI-Augmented Engineer",
+  metadataBase: new URL("https://vickylabs.vercel.app"),
+  title: "M. Vicky Mosafan | Full-Stack Web Developer & AI-Augmented Engineer",
   description:
-    "Portfolio of M. Vicky Mosafan — Full-Stack Web Developer (Next.js, NestJS, Prisma, PostgreSQL) & AI-Augmented Software Engineer building Hybrid/Agentic RAG engines, TypeScript MCP servers, and production web systems.",
+    "Full-Stack Web Developer (Next.js, NestJS/Express, TypeScript, Prisma, PostgreSQL) pairing classic software fundamentals with AI-augmented workflows via Craftrig MCP across BuildFlow ERP, NexaPip Marketplace, and Hybrid RAG systems.",
   keywords: [
     "M. Vicky Mosafan",
     "Full-Stack Web Developer",
     "AI-Augmented Software Engineering",
+    "Craftrig MCP",
     "MCP Server Developer",
     "Next.js",
     "NestJS",
+    "PostgreSQL",
+    "Prisma",
+    "BuildFlow ERP",
+    "NexaPip Marketplace",
     "Hybrid RAG",
-    "Agentic Engineering",
   ],
   openGraph: {
-    title: "M. Vicky Mosafan — Full-Stack & AI-Augmented Software Engineer",
+    title: "M. Vicky Mosafan | Full-Stack Web Developer & AI-Augmented Engineer",
     description:
-      "Production web systems, Hybrid & Agentic RAG pipelines (91.67% Recall), and custom TypeScript MCP servers.",
+      "Classic software fundamentals paired with Craftrig MCP: BuildFlow ERP (12 modules), NexaPip Marketplace, Hybrid RAG (91.67% Recall), and Playwright-verified full-stack web apps.",
     type: "website",
   },
 };

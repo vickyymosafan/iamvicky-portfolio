@@ -124,8 +124,9 @@ export function StackAndCredentialsSection() {
               </h2>
 
               <p className="text-sm leading-relaxed text-ink-secondary sm:text-base">
-                From clear specification to verified deployment — watch the 6-chapter
-                interactive walkthrough with synchronized voice-over.
+                From structured PRDs and Craftrig MCP governance to automated Playwright
+                audits and edge deployment, watch the 6-chapter interactive walkthrough
+                with synchronized voice-over.
               </p>
             </div>
 
@@ -184,8 +185,8 @@ export function StackAndCredentialsSection() {
                 <div className="flex items-start gap-2.5">
                   <Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                   <p className="text-xs leading-relaxed text-ink-secondary">
-                    Building fast, maintainable, and user-centered software systems with
-                    verifiable engineering standards.
+                    Classic software fundamentals paired with AI-augmented workflows, backed
+                    by automated tests and Playwright QA.
                   </p>
                 </div>
 
@@ -436,7 +437,7 @@ export function StackAndCredentialsSection() {
           </div>
 
           {/* Career Highlights Glass Telemetry Bar (Matches bottom bar of redesign-section-4.1.png) */}
-          <div className="studio-card-featured relative overflow-hidden rounded-2xl px-6 py-4">
+          <div className="studio-card-featured relative overflow-hidden rounded-2xl px-4 py-4 sm:px-6">
             <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-2.5">
                 <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -445,24 +446,30 @@ export function StackAndCredentialsSection() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 sm:gap-8">
-                <div className="flex items-center gap-2.5">
-                  <span className="font-heading text-xl font-bold text-primary tabular-nums">
+              <div className="grid grid-cols-3 gap-3 sm:gap-8">
+                <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2.5">
+                  <span className="font-heading text-lg font-bold text-primary tabular-nums sm:text-xl">
                     10+
                   </span>
-                  <span className="font-mono text-[11px] text-muted">Shipped Systems</span>
+                  <span className="font-mono text-[11px] leading-tight text-muted">
+                    Shipped Systems
+                  </span>
                 </div>
-                <div className="flex items-center gap-2.5 border-l border-border pl-4 sm:pl-8">
-                  <span className="font-heading text-xl font-bold text-foreground tabular-nums">
+                <div className="flex min-w-0 flex-col items-start gap-0.5 border-l border-border pl-3 sm:flex-row sm:items-center sm:gap-2.5 sm:pl-8">
+                  <span className="font-heading text-lg font-bold text-foreground tabular-nums sm:text-xl">
                     91.67%
                   </span>
-                  <span className="font-mono text-[11px] text-muted">RAG Recall</span>
-                </div>
-                <div className="flex items-center gap-2.5 border-l border-border pl-4 sm:pl-8">
-                  <span className="font-heading text-xl font-bold text-accent tabular-nums">
-                    45+
+                  <span className="font-mono text-[11px] leading-tight text-muted">
+                    RAG Recall
                   </span>
-                  <span className="font-mono text-[11px] text-muted">MCP Tools</span>
+                </div>
+                <div className="flex min-w-0 flex-col items-start gap-0.5 border-l border-border pl-3 sm:flex-row sm:items-center sm:gap-2.5 sm:pl-8">
+                  <span className="font-heading text-lg font-bold text-accent tabular-nums sm:text-xl">
+                    50/50
+                  </span>
+                  <span className="font-mono text-[11px] leading-tight text-muted">
+                    Craftrig Tests
+                  </span>
                 </div>
               </div>
 

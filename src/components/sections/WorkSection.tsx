@@ -108,15 +108,15 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
               </div>
 
               <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl lg:text-[54px]">
-                Production Web Systems,{" "}
+                Production Web Apps,{" "}
                 <span className="text-primary">AI Search</span> &amp;{" "}
-                <span className="text-accent">Developer Tools.</span>
+                <span className="text-accent">MCP Tooling.</span>
               </h2>
 
               <p className="max-w-xl text-base leading-relaxed text-ink-secondary sm:text-lg">
-                Every system here solved a concrete operational bottleneck — slow document
-                lookup, manual field healthcare tracking, or fragmented construction budgets.
-                Inspect any case study for the full architecture and measured results.
+                From architecting 12-module BuildFlow ERP and building NexaPip Marketplace
+                to hybrid RAG engines and Craftrig MCP, every system starts with clear
+                boundaries and ships with measured proof.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -177,7 +177,7 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                   <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                   <div className="leading-tight">
                     <p className="font-heading text-xs font-bold text-foreground">
-                      7 Flagship Case Studies
+                      {FEATURED_PROJECTS.length} Flagship Case Studies
                     </p>
                     <p className="font-mono text-[11px] text-muted">
                       Benchmarked · Shipped End-to-End

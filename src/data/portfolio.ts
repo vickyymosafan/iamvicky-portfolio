@@ -111,45 +111,53 @@ interface LeadershipItem {
 export const PROFILE = {
   fullName: "M. Vicky Mosafan",
   displayName: "Vicky Mosafan",
-  roleTitle: "Full-Stack Web Developer & AI Systems Engineer",
+  roleTitle: "Full-Stack Web Developer & AI-Augmented Engineer",
   shortRole: "Full-Stack Developer",
   location: "Situbondo, East Java, Indonesia",
-  availability: "Open to Full-Stack, Frontend & Backend Opportunities",
+  availability: "Open to Full-Stack, Frontend & Backend Roles",
   email: "mvickymosafan@gmail.com",
   phone: "+62 851-7955-6798",
   phoneHref: "tel:+6285179556798",
   cvPdfPath: "/CV-M-Vicky-Mosafan.pdf",
-  heroHeadlineTop: "Full-Stack Systems",
-  heroHeadlineMid: "Built for Speed &",
-  heroHeadlineAccent: "Real-World Scale.",
+  heroHeadlineTop: "Full-Stack Craft.",
+  heroHeadlineMid: "AI-Augmented Speed.",
+  heroHeadlineAccent: "Reliable Production.",
   summary:
-    "I'm Vicky Mosafan — a Full-Stack Developer turning messy operational workflows into fast, dependable web apps and AI-powered tools. Focused on clean architecture, measurable performance, and clarity for the people who use them.",
+    "Writing code faster with AI is easy. Keeping it clean, secure, and reliable in production is the real engineering challenge. I am Vicky Mosafan, a Full-Stack Web Developer pairing Next.js, NestJS/Express, TypeScript, Prisma, and PostgreSQL with disciplined AI workflows.",
   aboutEyebrow: "ABOUT ME",
-  aboutHeadline: "Turning Complex Operations into Dependable Software",
+  aboutHeadline: "Classic Software Fundamentals, Paired with Craftrig MCP",
   aboutStory:
-    "My journey began building practical tools for campus labs and local businesses in East Java — from offline-ready community healthcare apps to trading systems and 12-module construction ERPs. Today I combine disciplined TypeScript engineering with structured AI workflows so teams ship production software faster without cutting corners.",
+    "I am a Full-Stack Web Developer (Next.js, NestJS/Express, TypeScript, Prisma, PostgreSQL) who pairs classic software fundamentals with AI-augmented workflows. Every project starts with structured PRDs, database ERDs, and clear module boundaries, never blind prompting.",
+  aboutParagraphs: [
+    "I am a Full-Stack Web Developer (Next.js, NestJS/Express, TypeScript, Prisma, PostgreSQL) who pairs classic software fundamentals with AI-augmented workflows. Every project starts with structured PRDs, database ERDs, and clear module boundaries, never blind prompting.",
+    "To make that workflow truly dependable day to day, I built Craftrig, an open-source TypeScript MCP server that I rely on across my own projects. It keeps AI agents like Claude Code and Google Antigravity aligned through dependency-ordered task plans, file write locks, and automated Playwright browser and accessibility audits, turning AI assistance into repeatable engineering output.",
+    "That same discipline carries directly into projects like BuildFlow ERP and NexaPip Marketplace, from architecting a 12-module construction ERP (BOQ costing, 3-way procurement, and double-entry finance) to building a full-stack MT5 Expert Advisor marketplace.",
+  ],
   aboutShortBio:
-    "Full-Stack Web Developer (B.S. Information Systems, GPA 3.94/4.00) focused on Next.js, NestJS, PostgreSQL, RAG search pipelines, and multi-agent developer tooling.",
-  motto: "Build. Ship. Improve.",
+    "B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00). Full-Stack Web Developer pairing Next.js, NestJS/Express, TypeScript, Prisma, and PostgreSQL with Craftrig MCP for structured plans, file locks, and Playwright QA.",
+  motto: "Structure first. Verify everything. Ship cleanly.",
   socials: {
     github: "https://github.com/vickyymosafan",
     linkedin: "https://www.linkedin.com/in/vickymosafan/",
+    craftrig: "https://github.com/vickyymosafan/mcp-craftrig",
+    generalPortfolio: "https://vickylabs.vercel.app",
+    portfolio3d: "https://iamvicky.vercel.app",
     mql5: "https://www.mql5.com/en/users/vickymosafan",
     googleSkills:
       "https://www.skills.google/public_profiles/9bc91f79-a2fd-4b45-88ba-bd3f6da6acb3",
-    portfolio: "https://iamvicky.vercel.app/",
+    portfolio: "https://vickylabs.vercel.app",
     himaforsi: "https://www.instagram.com/himaforsi_umjember/",
   },
   heroProofMetrics: [
     {
       value: "2+",
       label: "Years Hands-On",
-      sub: "Web, AI & Fintech",
+      sub: "Full-Stack & AI",
     },
     {
-      value: "10+",
-      label: "Shipped Systems",
-      sub: "Live & Open-Source",
+      value: "8",
+      label: "Flagship Systems",
+      sub: "ERP, Marketplace & MCP",
     },
     {
       value: "3.94",
@@ -158,8 +166,8 @@ export const PROFILE = {
     },
   ],
   journeyHighlights: [
-    { value: "11+", label: "MQL5 Releases" },
-    { value: "10+", label: "Shipped Systems" },
+    { value: "12", label: "ERP Modules" },
+    { value: "50/50", label: "Craftrig Tests" },
     { value: "91.67%", label: "RAG Recall" },
   ],
   coreStackPills: [
@@ -167,11 +175,11 @@ export const PROFILE = {
     "React",
     "TypeScript",
     "NestJS",
-    "Node.js",
+    "Express",
     "PostgreSQL",
     "Prisma",
     "Redis",
-    "Tailwind CSS",
+    "Playwright",
   ],
 } as const;
 
@@ -272,7 +280,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     image: "/images/redesign/proj-mcp-craftrig.jpg",
     featuredTag: "MCP SDK v2 · 50/50 Tests · 13-VP QA",
     summary:
-      "Open-source TypeScript MCP server that keeps AI coding agents disciplined with dependency task graphs, file write locks, and real Playwright browser audits.",
+      "Open-source TypeScript MCP server I rely on across my own projects to keep Claude Code and Google Antigravity aligned with dependency-ordered task plans, file write locks, and Playwright browser and accessibility audits.",
     problem:
       "Autonomous coding agents often drift off-spec, overwrite each other's files, or claim UI checks passed without ever inspecting a live browser.",
     solution:
@@ -283,7 +291,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       "Built automated 13-viewport responsive, dual-theme contrast, and interaction audits directly inside the MCP workflow.",
     ],
     metrics: [
-      { label: "MCP Suite", value: "45+ Tools", detail: "Orchestration + QA" },
+      { label: "MCP Core", value: "22+ Tools", detail: "Task DAG, locks & QA" },
       { label: "Test Suite", value: "50/50", detail: "Strict TypeScript" },
       { label: "QA Matrix", value: "13 VPs", detail: "320px → 1920px" },
     ],
@@ -480,14 +488,14 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     id: "nexapip-marketplace",
     index: "08",
-    title: "NexaPip EA Marketplace",
-    subtitle: "vickyymosafan/nexapip-marketplace · MT5 Lifetime-License Store",
+    title: "NexaPip Marketplace",
+    subtitle: "vickyymosafan/nexapip-marketplace · MT5 Expert Advisor Store",
     category: "Full-Stack",
     year: "2026",
     image: "/images/redesign/proj-nexapip-marketplace.jpg",
     featuredTag: "Lifetime IDR · SHA-256 .ex5 Vault",
     summary:
-      "Indonesian marketplace for MetaTrader 5 Expert Advisors sold as a one-time lifetime purchase in Rupiah, with a secure .ex5 vault, buyer library, and seller studio.",
+      "Full-stack Indonesian MetaTrader 5 Expert Advisor marketplace built with Next.js 16, Prisma 7, and PostgreSQL, pairing one-time lifetime IDR checkout via Mayar with a SHA-256 verified .ex5 vault.",
     problem:
       "Indonesian traders buy EAs through scattered chats and rental schemes, with no trusted way to pay in Rupiah, verify the binary, or re-download purchases later.",
     solution:
@@ -585,7 +593,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     shortTitle: "PRD & Blueprint",
     tagline: "Zero guesswork before a single line of code is written",
     description:
-      "Every project begins with a structured blueprint: domain boundaries, database schema, OpenAPI contracts, security roles, and clear acceptance criteria — proven across BuildFlow ERP's 12 modules.",
+      "Every project starts with structured PRDs, database ERDs, OpenAPI contracts, security roles, and clear module boundaries, never blind prompting. Proven across BuildFlow ERP's 12 domain modules.",
     tools: ["Structured PRDs", "OpenAPI 3.1", "Database ERD", "RBAC Matrix"],
     command: "craftrig blueprint compile --project buildflow-erp --strict",
     terminalTitle: "architecture.yaml",
@@ -624,7 +632,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     shortTitle: "MCP Tooling",
     tagline: "Tool-enforced discipline instead of chaotic chat prompting",
     description:
-      "AI tools like Claude Code and Google Antigravity work inside my open-source TypeScript MCP server (vickyymosafan/mcp-craftrig), enforcing dependency-ordered task graphs and exclusive file write locks.",
+      "To make AI-augmented workflows truly dependable day to day, I built Craftrig (vickyymosafan/mcp-craftrig), an open-source TypeScript MCP server that keeps Claude Code and Google Antigravity aligned through dependency-ordered task plans and exclusive file write locks.",
     tools: ["mcp-craftrig", "Claude Code", "Google Antigravity", "21 Agent Skills"],
     command: "claude mcp add craftrig -- node dist/src/index.js",
     terminalTitle: "execution-plan.dag.json",
@@ -664,7 +672,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     shortTitle: "Full-Stack Build",
     tagline: "Typed end-to-end from UI components to PostgreSQL & vector search",
     description:
-      "Clean vertical modules keep features easy to read and extend — whether tuning weighted RRF retrieval on pgvector, building offline IndexedDB sync, or structuring NestJS and Next.js services.",
+      "Clean vertical modules keep features easy to read and extend, whether tuning weighted RRF retrieval on pgvector, building NexaPip Marketplace's SHA-256 .ex5 vault, or structuring NestJS and Next.js services.",
     tools: ["Next.js 16 / React 19", "NestJS / Express / Hono", "PostgreSQL + Prisma", "pgvector + Redis"],
     command: "pnpm --filter @rag/engine benchmark --cache redis",
     terminalTitle: "weighted-rrf.pipeline.ts",
@@ -701,7 +709,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     shortTitle: "Automated QA",
     tagline: "Verified in real headless Chrome across 13 screen sizes",
     description:
-      "Nothing ships on assumptions. Playwright automatically inspects 13 viewports (320px to 1920px) in both Dark & Light themes for layout overflow, WCAG contrast, keyboard accessibility, and runtime errors — alongside Jest API suites.",
+      "Nothing ships on assumptions. Playwright automatically inspects 13 viewports (320px to 1920px) in both Dark and Light themes for layout overflow, WCAG contrast, keyboard accessibility, and runtime errors, alongside Jest API suites.",
     tools: ["Playwright 13-VP", "axe-core Contrast", "Jest & Supertest", "TypeScript Strict"],
     command: "craftrig localhost audit --themes dark,light --viewports 13",
     terminalTitle: "visual-a11y.receipt.json",
@@ -718,7 +726,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
       { kind: "keyval", label: "viewports", value: "320 · 360 · 375 · 390 · 414 · 430 · 768 · 844 · 1024 · 1280 · 1366 · 1440 · 1920" },
       { kind: "keyval", label: "a11y_audit", value: "@axe-core/playwright + WCAG AA/AAA contrast verification" },
       { kind: "metric", label: "DEFECTS", value: "0 horizontal overflow · 0 console/page errors · 0 broken assets" },
-      { kind: "pass", label: "QUALITY GATE", value: "ALL CHECKPOINTS PASSED — evidence archived cleanly" },
+      { kind: "pass", label: "QUALITY GATE", value: "ALL CHECKPOINTS PASSED, evidence archived cleanly" },
     ],
     artifactLines: [
       "{",
@@ -740,7 +748,7 @@ export const AI_WORKFLOW_STAGES: AiWorkflowStage[] = [
     shortTitle: "Production Ship",
     tagline: "Fast edge delivery engineered for real-world networks",
     description:
-      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, and Railway with practical safeguards — multi-LLM fallbacks, Redis fast paths, offline IndexedDB queues, and fallback datasets.",
+      "Deployed via GitHub Actions to Vercel, Cloudflare Workers, and Railway with practical safeguards: multi-LLM fallbacks, Redis fast paths, offline IndexedDB queues, and fallback datasets.",
     tools: ["GitHub Actions", "Vercel Edge", "Cloudflare Workers", "Railway CI/CD"],
     command: "gh workflow run deploy-production.yml --ref main",
     terminalTitle: "resilience-manifest.md",
@@ -843,7 +851,7 @@ export const EXPERIENCES: ExperienceItem[] = [
     locationOrMode: "Internship · Architecture & Agency Web",
     image: "/images/redesign/icon-architecture-building.jpg",
     summary:
-      "Built SIM Architect — a 3-role architecture project management system — plus the firm's custom PHP MVC company website with automated Railway deployment.",
+      "Built SIM Architect, a 3-role architecture project management system, plus the firm's custom PHP MVC company website with automated Railway deployment.",
     highlights: [
       "Delivered 3-role workflow (Admin, Project Staff, Client): task tracking, RAB estimate verification, design vault, and client revision quotas.",
       "Designed a 10-table MySQL database with secure password hashing, session regeneration, and login audit logs.",

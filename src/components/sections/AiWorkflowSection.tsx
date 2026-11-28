@@ -74,18 +74,19 @@ export function AiWorkflowSection() {
           >
             <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-              <span>02 / How I Build</span>
+              <span>02 / Craftrig MCP &amp; Workflow</span>
             </div>
 
             <h2 className="font-heading text-3xl font-bold leading-[1.06] tracking-tight text-foreground sm:text-5xl">
-              Structured workflow.{" "}
-              <span className="text-primary">Predictable delivery.</span>
+              Structured PRDs.{" "}
+              <span className="text-primary">Repeatable AI delivery.</span>
             </h2>
 
             <p className="max-w-xl text-base leading-relaxed text-ink-secondary">
-              Fast software only stays dependable when built inside clear boundaries. Step
-              through the 5-stage engineering pipeline I use across BuildFlow ERP, Hybrid
-              RAG, and Craftrig MCP.
+              Every project starts with structured PRDs, database ERDs, and clear module
+              boundaries, never blind prompting. Craftrig, my open-source TypeScript MCP
+              server, keeps Claude Code and Google Antigravity aligned through task plans,
+              file write locks, and automated Playwright browser audits.
             </p>
 
             <div className="flex flex-wrap gap-2">
@@ -188,7 +189,7 @@ export function AiWorkflowSection() {
                   <span className="h-2.5 w-2.5 rounded-full bg-[#38bdf8]" />
                 </div>
                 <span className="font-mono text-[11px] text-[#93a0b2]">
-                  vicky-studio — {stage.terminalTitle}
+                  craftrig-studio / {stage.terminalTitle}
                 </span>
                 <span className="rounded-full border border-[#f5a623]/40 bg-[#f5a623]/12 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#f5a623]">
                   Architecture

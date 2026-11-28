@@ -55,29 +55,29 @@ export function ExperienceSection() {
               </h2>
 
               <p className="text-sm leading-relaxed text-ink-secondary sm:text-base">
-                From mobile Kotlin internships and architecture firm platforms to offline
-                elderly healthcare PWAs, 11 MQL5 trading releases, and fintech portals — every
-                role taught me how to ship reliable software under real-world constraints.
+                From Kotlin internships and custom PHP architecture platforms to offline
+                elderly healthcare PWAs, 11 MQL5 trading releases, and fintech portals,
+                every role sharpened how I ship dependable software under real constraints.
               </p>
 
               {/* Compact 3-Stat Journey Proof Pill Box */}
-              <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border-strong bg-surface/90 p-4">
+              <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border-strong bg-surface/90 p-3.5 sm:p-4">
                 {PROFILE.journeyHighlights.map((item, idx) => {
                   const Icon = STAT_ICONS[idx] ?? Sparkles;
                   return (
                     <div
                       key={item.label}
-                      className={`flex flex-col items-start gap-1 ${
-                        idx > 0 ? "border-l border-border pl-3" : ""
+                      className={`flex min-w-0 flex-col items-start gap-1 ${
+                        idx > 0 ? "border-l border-border pl-2.5 sm:pl-3" : ""
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
-                        <Icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                        <span className="font-heading text-lg font-bold text-foreground tabular-nums sm:text-xl">
+                        <Icon className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                        <span className="font-heading text-base font-bold text-foreground tabular-nums sm:text-xl">
                           {item.value}
                         </span>
                       </div>
-                      <span className="font-mono text-[11px] text-muted">
+                      <span className="font-mono text-[11px] leading-tight text-muted">
                         {item.label}
                       </span>
                     </div>

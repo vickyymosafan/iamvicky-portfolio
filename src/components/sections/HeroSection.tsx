@@ -264,10 +264,10 @@ export function HeroSection() {
               </span>
               <span className="min-w-0">
                 <span className="block truncate font-heading text-xs font-bold text-foreground">
-                  AI &amp; MCP Systems
+                  Craftrig MCP
                 </span>
                 <span className="block truncate font-mono text-[11px] text-muted">
-                  45+ tools · 91.67% RAG →
+                  Task DAG · 50/50 tests →
                 </span>
               </span>
             </a>
@@ -275,12 +275,12 @@ export function HeroSection() {
             {/* Floating Proof Pill: Bottom-Left above portrait footer (zero overlap with GPA 3.94) */}
             <div className="absolute bottom-[78px] left-3 z-20 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/95 px-3.5 py-1.5 font-mono text-[11px] font-medium text-foreground shadow-xl sm:-left-4">
               <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              <span>11 MQL5 Releases · 5.0★</span>
+              <span>BuildFlow ERP · NexaPip</span>
             </div>
           </m.div>
         </div>
 
-        {/* Bottom-of-Hero Storytelling "About Me" Teaser Strip (from redesign-hero-section.png) */}
+        {/* Bottom-of-Hero Storytelling "About Me" Section */}
         <m.div
           id="about"
           initial={{ y: 14 }}
@@ -289,8 +289,8 @@ export function HeroSection() {
           transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
           className="mt-16 scroll-mt-24 border-t border-border pt-10 sm:mt-20 sm:pt-12"
         >
-          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
-            <div className="space-y-2 lg:col-span-4">
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+            <div className="space-y-4 lg:col-span-5">
               <p className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
                 <span>{PROFILE.aboutEyebrow}</span>
@@ -298,24 +298,36 @@ export function HeroSection() {
               <h2 className="font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
                 {PROFILE.aboutHeadline}
               </h2>
+              <p className="font-mono text-xs text-muted">
+                B.S. in Information Systems, Universitas Muhammadiyah Jember (GPA 3.94/4.00)
+              </p>
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <a
+                  href="#workflow"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollTo("#workflow", -80);
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+                >
+                  <span>Inspect Craftrig Workflow</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                </a>
+                <a
+                  href={PROFILE.socials.craftrig}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-surface-elevated/70 px-4 py-2.5 font-mono text-xs font-semibold text-ink-secondary hover:border-primary hover:text-primary"
+                >
+                  <span>Craftrig MCP Repo</span>
+                </a>
+              </div>
             </div>
 
-            <p className="text-sm leading-relaxed text-ink-secondary sm:text-base lg:col-span-5">
-              {PROFILE.aboutStory}
-            </p>
-
-            <div className="flex lg:col-span-3 lg:justify-end">
-              <a
-                href="#experience"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollTo("#experience", -80);
-                }}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
-              >
-                <span>Explore My Journey</span>
-                <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              </a>
+            <div className="space-y-3.5 text-sm leading-relaxed text-ink-secondary sm:text-base lg:col-span-7">
+              {PROFILE.aboutParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
           </div>
         </m.div>

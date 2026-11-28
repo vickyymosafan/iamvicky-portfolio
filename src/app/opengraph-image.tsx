@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "M. Vicky Mosafan — Full-Stack Developer & AI-Augmented Software Engineer";
+export const alt = "M. Vicky Mosafan | Full-Stack Web Developer & AI-Augmented Engineer";
 
 export const size = {
   width: 1200,
@@ -68,7 +68,7 @@ export default function OpenGraphImage() {
                 VICKY MOSAFAN // PORTFOLIO
               </span>
               <span style={{ fontSize: 20, color: "#93a0b2", marginTop: 4 }}>
-                Full-Stack Developer &amp; AI Systems Engineer
+                Full-Stack Web Developer &amp; AI-Augmented Engineer
               </span>
             </div>
           </div>
@@ -95,8 +95,8 @@ export default function OpenGraphImage() {
             M. Vicky Mosafan
           </div>
           <div style={{ fontSize: 32, color: "#cbd3de", lineHeight: 1.35, maxWidth: 960 }}>
-            Full-Stack Developer building fast, scalable web applications, AI retrieval engines,
-            and reliable backend platforms.
+            Classic full-stack fundamentals paired with AI-augmented workflows across Craftrig
+            MCP, BuildFlow ERP, and NexaPip Marketplace.
           </div>
         </div>
 
@@ -113,11 +113,11 @@ export default function OpenGraphImage() {
           }}
         >
           <div style={{ display: "flex", gap: 36 }}>
-            <span style={{ color: "#f5a623", fontWeight: 700 }}>91.67% RAG Recall</span>
-            <span style={{ color: "#38bdf8", fontWeight: 700 }}>45+ MCP Tools</span>
-            <span style={{ color: "#fb923c", fontWeight: 700 }}>12-Module BuildFlow ERP</span>
+            <span style={{ color: "#f5a623", fontWeight: 700 }}>Craftrig MCP (50/50 Tests)</span>
+            <span style={{ color: "#38bdf8", fontWeight: 700 }}>12-Module BuildFlow ERP</span>
+            <span style={{ color: "#fb923c", fontWeight: 700 }}>NexaPip Marketplace</span>
           </div>
-          <span>github.com/vickyymosafan</span>
+          <span>vickylabs.vercel.app</span>
         </div>
       </div>
     ),
