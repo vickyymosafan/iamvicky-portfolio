@@ -15,7 +15,15 @@ import {
 } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import {
+  ARCHITECTURAL_EASE,
+  DividerReveal,
+  ScrollDepthParallax,
+  SectionReveal,
+  SPRING_TACTILE,
+  StaggerGroup,
+  StaggerItem,
+} from "@/components/motion/MotionPrimitives";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const METRIC_ICONS = [Briefcase, FolderKanban, Award] as const;
@@ -61,34 +69,56 @@ export function HeroSection() {
             </m.div>
 
             {/* Primary Storytelling Headline */}
-            <m.div
-              initial={{ y: 12 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.5, delay: 0.04, ease: ARCHITECTURAL_EASE }}
-              className="space-y-5"
-            >
+            <div className="space-y-5">
               <h1 className="font-heading text-4xl font-bold leading-[1.03] tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-[66px]">
-                <span className="block">{PROFILE.heroHeadlineTop}</span>
-                <span className="block">{PROFILE.heroHeadlineMid}</span>
-                <span className="mt-1 inline-flex items-baseline gap-2 italic text-primary">
+                <m.span
+                  initial={{ y: 18 }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.48, delay: 0.02, ease: ARCHITECTURAL_EASE }}
+                  className="block"
+                >
+                  {PROFILE.heroHeadlineTop}
+                </m.span>
+                <m.span
+                  initial={{ y: 18 }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.08, ease: ARCHITECTURAL_EASE }}
+                  className="block"
+                >
+                  {PROFILE.heroHeadlineMid}
+                </m.span>
+                <m.span
+                  initial={{ y: 18 }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.54, delay: 0.14, ease: ARCHITECTURAL_EASE }}
+                  className="mt-1 inline-flex items-baseline gap-2 italic text-primary"
+                >
                   <span>{PROFILE.heroHeadlineAccent}</span>
-                </span>
+                </m.span>
               </h1>
 
-              <p className="max-w-xl text-base leading-relaxed text-ink-secondary sm:text-lg">
+              <m.p
+                initial={{ y: 14 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.5, delay: 0.18, ease: ARCHITECTURAL_EASE }}
+                className="max-w-xl text-base leading-relaxed text-ink-secondary sm:text-lg"
+              >
                 {PROFILE.summary}
-              </p>
-            </m.div>
+              </m.p>
+            </div>
 
             {/* Primary & Secondary Pill CTAs */}
             <m.div
-              initial={{ y: 10 }}
+              initial={{ y: 12 }}
               animate={{ y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08, ease: ARCHITECTURAL_EASE }}
+              transition={{ duration: 0.48, delay: 0.22, ease: ARCHITECTURAL_EASE }}
               className="flex flex-wrap items-center gap-3.5 pt-1"
             >
-              <a
+              <m.a
                 href="#projects"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={SPRING_TACTILE}
                 onClick={(e) => {
                   e.preventDefault();
                   scrollTo("#projects", -78);
@@ -97,30 +127,32 @@ export function HeroSection() {
               >
                 <span>View My Projects</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </a>
+              </m.a>
 
-              <a
+              <m.a
                 href={PROFILE.cvPdfPath}
                 target="_blank"
                 rel="noopener noreferrer"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={SPRING_TACTILE}
                 className="inline-flex min-h-12 items-center gap-2.5 rounded-full border border-border-strong bg-surface/90 px-6 py-3 font-mono text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
               >
                 <span>Download Resume</span>
                 <Download className="h-4 w-4" aria-hidden="true" />
-              </a>
+              </m.a>
             </m.div>
 
             {/* 3-Column Verified Proof Metrics Strip */}
-            <m.div
-              initial={{ y: 10 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.45, delay: 0.12, ease: ARCHITECTURAL_EASE }}
+            <StaggerGroup
+              staggerDelay={0.07}
+              delayChildren={0.2}
               className="grid max-w-xl grid-cols-3 gap-4 pt-3 sm:gap-6"
             >
               {PROFILE.heroProofMetrics.map((metric, idx) => {
                 const Icon = METRIC_ICONS[idx] ?? Briefcase;
                 return (
-                  <div
+                  <StaggerItem
                     key={metric.label}
                     className={`flex items-start gap-2.5 sm:gap-3 ${
                       idx > 0 ? "border-l border-border pl-4 sm:pl-6" : ""
@@ -140,19 +172,23 @@ export function HeroSection() {
                         {metric.label}
                       </div>
                     </div>
-                  </div>
+                  </StaggerItem>
                 );
               })}
-            </m.div>
+            </StaggerGroup>
           </div>
 
-          {/* Right Portrait Studio Card (Modeled after redesign-hero-section.png) */}
-          <m.div
-            initial={{ y: 14, scale: 0.99 }}
-            animate={{ y: 0, scale: 1 }}
-            transition={{ duration: 0.55, delay: 0.06, ease: ARCHITECTURAL_EASE }}
+          {/* Right Portrait Studio Card with Scroll-Linked Depth Parallax */}
+          <ScrollDepthParallax
+            distance={20}
             className="relative mx-auto w-full max-w-[430px] lg:col-span-5 lg:max-w-none"
           >
+            <m.div
+              initial={{ y: 16, scale: 0.985 }}
+              animate={{ y: 0, scale: 1 }}
+              transition={{ duration: 0.58, delay: 0.08, ease: ARCHITECTURAL_EASE }}
+              className="relative"
+            >
             {/* Decorative Luminous Orbital Ring Behind Portrait */}
             <svg
               aria-hidden="true"
@@ -278,20 +314,15 @@ export function HeroSection() {
               <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
               <span>BuildFlow ERP · NexaPip</span>
             </div>
-          </m.div>
+            </m.div>
+          </ScrollDepthParallax>
         </div>
 
         {/* Bottom-of-Hero Storytelling "About Me" Section */}
-        <m.div
-          id="about"
-          initial={{ y: 14 }}
-          whileInView={{ y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
-          className="mt-16 scroll-mt-24 border-t border-border pt-10 sm:mt-20 sm:pt-12"
-        >
+        <div id="about" className="mt-16 scroll-mt-24 pt-10 sm:mt-20 sm:pt-12">
+          <DividerReveal className="mb-10 h-px w-full bg-gradient-to-r from-primary/65 via-border-strong to-transparent sm:mb-12" />
           <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
-            <div className="space-y-4 lg:col-span-5">
+            <SectionReveal className="space-y-4 lg:col-span-5">
               <p className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
                 <span>{PROFILE.aboutEyebrow}</span>
@@ -323,15 +354,20 @@ export function HeroSection() {
                   <span>Craftrig MCP Repo</span>
                 </a>
               </div>
-            </div>
+            </SectionReveal>
 
-            <div className="space-y-3.5 text-sm leading-relaxed text-ink-secondary sm:text-base lg:col-span-7">
+            <StaggerGroup
+              staggerDelay={0.08}
+              className="space-y-3.5 text-sm leading-relaxed text-ink-secondary sm:text-base lg:col-span-7"
+            >
               {PROFILE.aboutParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+                <StaggerItem key={paragraph}>
+                  <p>{paragraph}</p>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerGroup>
           </div>
-        </m.div>
+        </div>
       </div>
     </section>
   );

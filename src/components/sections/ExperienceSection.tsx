@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, m } from "framer-motion";
 import {
@@ -15,13 +15,22 @@ import {
   Sparkles,
 } from "lucide-react";
 import { EXPERIENCES, PROFILE } from "@/data/portfolio";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import {
+  ARCHITECTURAL_EASE,
+  ScrollDepthParallax,
+  ScrollProgressLine,
+  SectionReveal,
+  SPRING_TACTILE,
+  StaggerGroup,
+  StaggerItem,
+} from "@/components/motion/MotionPrimitives";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const STAT_ICONS = [BarChart3, Rocket, Sparkles] as const;
 
 export function ExperienceSection() {
   const [expandedId, setExpandedId] = useState<string>(EXPERIENCES[0]?.id ?? "");
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   return (
     <section
@@ -37,13 +46,7 @@ export function ExperienceSection() {
               LEFT STICKY STORYTELLING COLUMN (Modeled after redesign-section-3.png)
              ================================================================ */}
           <div className="space-y-7 lg:sticky lg:top-28 lg:col-span-5">
-            <m.div
-              initial={{ y: 12 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
-              className="space-y-5"
-            >
+            <SectionReveal className="space-y-5">
               <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 <span>03 / Experience Timeline</span>
@@ -61,11 +64,11 @@ export function ExperienceSection() {
               </p>
 
               {/* Compact 3-Stat Journey Proof Pill Box */}
-              <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border-strong bg-surface/90 p-3.5 sm:p-4">
+              <StaggerGroup className="grid grid-cols-3 gap-2 rounded-2xl border border-border-strong bg-surface/90 p-3.5 sm:p-4">
                 {PROFILE.journeyHighlights.map((item, idx) => {
                   const Icon = STAT_ICONS[idx] ?? Sparkles;
                   return (
-                    <div
+                    <StaggerItem
                       key={item.label}
                       className={`flex min-w-0 flex-col items-start gap-1 ${
                         idx > 0 ? "border-l border-border pl-2.5 sm:pl-3" : ""
@@ -80,20 +83,14 @@ export function ExperienceSection() {
                       <span className="font-mono text-[11px] leading-tight text-muted">
                         {item.label}
                       </span>
-                    </div>
+                    </StaggerItem>
                   );
                 })}
-              </div>
-            </m.div>
+              </StaggerGroup>
+            </SectionReveal>
 
-            {/* Borderless Seamlessly-Blended Workstation Visual (Matches bottom-left of redesign-section-3.png) */}
-            <m.div
-              initial={{ y: 12 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.48, delay: 0.06, ease: ARCHITECTURAL_EASE }}
-              className="relative hidden lg:block"
-            >
+            {/* Borderless Seamlessly-Blended Workstation Visual with Scroll Parallax */}
+            <ScrollDepthParallax distance={18} className="relative hidden lg:block">
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -inset-4 rounded-full opacity-70"
@@ -111,18 +108,24 @@ export function ExperienceSection() {
                   className="animate-studio-float scale-[1.06] object-cover"
                 />
               </div>
-            </m.div>
+            </ScrollDepthParallax>
           </div>
 
           {/* ================================================================
               RIGHT VERTICAL TIMELINE RAIL & CARDS (Modeled after redesign-section-3.png)
              ================================================================ */}
-          <div className="relative lg:col-span-7">
-            {/* Vertical Glowing Timeline Spine */}
+          <div ref={timelineRef} className="relative lg:col-span-7">
+            {/* Scroll-Driven Glowing Vertical Timeline Spine */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute top-6 bottom-6 left-4 hidden w-px bg-gradient-to-b from-primary via-border-strong to-transparent sm:block"
-            />
+              className="pointer-events-none absolute top-6 bottom-6 left-4 hidden w-[2px] overflow-hidden rounded-full bg-border sm:block"
+            >
+              <ScrollProgressLine
+                targetRef={timelineRef}
+                orientation="vertical"
+                className="h-full w-full bg-gradient-to-b from-primary via-primary to-accent shadow-[0_0_12px_var(--primary-glow)]"
+              />
+            </div>
 
             <div className="space-y-5">
               {EXPERIENCES.map((exp, idx) => {
@@ -130,10 +133,16 @@ export function ExperienceSection() {
                 return (
                   <m.article
                     key={exp.id}
-                    initial={{ y: 12 }}
-                    whileInView={{ y: 0 }}
+                    initial={{ y: 18, scale: 0.99 }}
+                    whileInView={{ y: 0, scale: 1 }}
                     viewport={{ once: true, amount: 0.08 }}
-                    transition={{ duration: 0.38, delay: idx * 0.04, ease: ARCHITECTURAL_EASE }}
+                    whileHover={{ y: -2 }}
+                    transition={{
+                      duration: 0.42,
+                      delay: idx * 0.04,
+                      ease: ARCHITECTURAL_EASE,
+                      y: SPRING_TACTILE,
+                    }}
                     className="relative sm:pl-12"
                   >
                     {/* Glowing Timeline Milestone Node (28x28 WCAG 2.5.8 hit target) */}

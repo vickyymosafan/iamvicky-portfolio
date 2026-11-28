@@ -21,7 +21,15 @@ import {
   PROFILE,
 } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import {
+  ARCHITECTURAL_EASE,
+  ScrollDepthParallax,
+  SectionReveal,
+  SlidingPill,
+  SPRING_TACTILE,
+  StaggerGroup,
+  StaggerItem,
+} from "@/components/motion/MotionPrimitives";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 interface WorkSectionProps {
@@ -71,7 +79,7 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
   const totalPadded = String(filteredProjects.length).padStart(2, "0");
 
   return (
-    <section id="projects" className="relative scroll-mt-20 py-20 sm:py-28">
+    <section id="projects" className="relative scroll-mt-20 overflow-x-clip py-20 sm:py-28">
       {/* Reference-Matched Sweeping Silk Ribbon & Floating Micro-Sphere Backdrop */}
       <SectionBackdrop variant="work" />
 
@@ -146,12 +154,9 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
               </div>
             </m.div>
 
-            {/* Right Borderless Seamlessly-Blended Studio 3D Monolith (Matches redesign-section-1.png) */}
-            <m.div
-              initial={{ y: 14, scale: 0.98 }}
-              whileInView={{ y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.5, delay: 0.06, ease: ARCHITECTURAL_EASE }}
+            {/* Right Borderless Seamlessly-Blended Studio 3D Monolith with Scroll Parallax */}
+            <ScrollDepthParallax
+              distance={26}
               className="relative mx-auto w-full max-w-[500px] lg:col-span-5 lg:max-w-none"
             >
               {/* Soft Luminous Backlight Halo Directly Behind VM Monolith */}
@@ -185,7 +190,7 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                   </div>
                 </div>
               </div>
-            </m.div>
+            </ScrollDepthParallax>
           </div>
 
           {/* Filter & Counter Toolbar */}
@@ -214,13 +219,19 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                       role="tab"
                       aria-selected={isSelected}
                       onClick={() => setActiveCategory(category)}
-                      className={`min-h-9 cursor-pointer rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
+                      className={`relative min-h-9 cursor-pointer rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
                         isSelected
                           ? "bg-primary font-semibold text-primary-foreground"
                           : "text-muted hover:text-foreground"
                       }`}
                     >
-                      {category}
+                      {isSelected ? (
+                        <SlidingPill
+                          layoutId="work-category-pill"
+                          className="pointer-events-none absolute inset-0 rounded-full bg-primary shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                        />
+                      ) : null}
+                      <span className="relative z-10">{category}</span>
                     </button>
                   );
                 })}
@@ -251,10 +262,17 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                   <m.article
                     key={project.id}
                     layout="position"
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    transition={{ duration: 0.32, delay: idx * 0.04, ease: ARCHITECTURAL_EASE }}
+                    initial={{ y: 18, scale: 0.985 }}
+                    whileInView={{ y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.08 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    whileHover={{ y: -4 }}
+                    transition={{
+                      duration: 0.36,
+                      delay: Math.min(idx, 5) * 0.04,
+                      ease: ARCHITECTURAL_EASE,
+                      layout: SPRING_TACTILE,
+                    }}
                     onMouseEnter={() => setSelectedFeaturedId(project.id)}
                     className={`group flex flex-col overflow-hidden rounded-2xl ${
                       isHighlighted ? "studio-card-featured" : "studio-card"
@@ -358,13 +376,7 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
 
           {/* Archive Hero Row */}
           <div className="relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
-            <m.div
-              initial={{ y: 12 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.45, ease: ARCHITECTURAL_EASE }}
-              className="space-y-4 lg:col-span-7"
-            >
+            <SectionReveal className="space-y-4 lg:col-span-7">
               <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 <span>Archive Vault {"//"} Additional Releases</span>
@@ -380,13 +392,10 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                 algorithmic trading tools on MQL5 Market, and practical developer utilities.
                 Filter or search directly below.
               </p>
-            </m.div>
+            </SectionReveal>
 
-            <m.div
-              initial={{ y: 12 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.48, delay: 0.05, ease: ARCHITECTURAL_EASE }}
+            <ScrollDepthParallax
+              distance={22}
               className="relative mx-auto w-full max-w-[480px] lg:col-span-5 lg:max-w-none"
             >
               <div
@@ -406,7 +415,7 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                   className="animate-studio-float scale-[1.06] object-cover"
                 />
               </div>
-            </m.div>
+            </ScrollDepthParallax>
           </div>
 
           {/* Archive Filter Tabs + Live Search Input */}
@@ -425,13 +434,19 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                     role="tab"
                     aria-selected={active}
                     onClick={() => setArchiveCategory(cat)}
-                    className={`min-h-9 cursor-pointer rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
+                    className={`relative min-h-9 cursor-pointer rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
                       active
                         ? "bg-primary font-semibold text-primary-foreground"
                         : "text-muted hover:text-foreground"
                     }`}
                   >
-                    {cat}
+                    {active ? (
+                      <SlidingPill
+                        layoutId="archive-category-pill"
+                        className="pointer-events-none absolute inset-0 rounded-full bg-primary shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                      />
+                    ) : null}
+                    <span className="relative z-10">{cat}</span>
                   </button>
                 );
               })}
@@ -469,17 +484,20 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
               No archived systems match &ldquo;{archiveQuery}&rdquo;.
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <StaggerGroup className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredArchive.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`group relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl p-5 hover:-translate-y-0.5 ${
-                    item.featured ? "studio-card-featured" : "studio-card"
-                  }`}
-                >
+                <StaggerItem key={item.name} className="h-full">
+                  <m.a
+                    layout="position"
+                    whileHover={{ y: -3 }}
+                    transition={SPRING_TACTILE}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-2xl p-5 ${
+                      item.featured ? "studio-card-featured" : "studio-card"
+                    }`}
+                  >
                   {item.featured ? (
                     <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 font-mono text-[11px] font-bold text-primary-foreground">
                       <Star className="h-3 w-3 fill-current" aria-hidden="true" />
@@ -529,9 +547,10 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
                       <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </div>
-                </a>
+                  </m.a>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerGroup>
           )}
         </div>
       </div>

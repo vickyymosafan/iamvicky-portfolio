@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight, Command, FileDown, Menu, Moon, Sun, X } from 
 import { PROFILE } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import { ARCHITECTURAL_EASE, SlidingPill } from "@/components/motion/MotionPrimitives";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface NavbarProps {
@@ -147,19 +147,25 @@ export function Navbar({ onOpenCommandPalette }: NavbarProps) {
                 href={`#${item.id}`}
                 onClick={(e) => handleNavClick(e, item.id)}
                 aria-current={isActive ? "location" : undefined}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
+                className={`relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs font-medium ${
                   isActive
                     ? "bg-primary font-semibold text-primary-foreground"
                     : "text-muted hover:text-foreground"
                 }`}
               >
                 {isActive ? (
+                  <SlidingPill
+                    layoutId="nav-active-pill"
+                    className="pointer-events-none absolute inset-0 rounded-full bg-primary shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                  />
+                ) : null}
+                {isActive ? (
                   <span
-                    className="h-1.5 w-1.5 rounded-full bg-primary-foreground"
+                    className="relative z-10 h-1.5 w-1.5 rounded-full bg-primary-foreground"
                     aria-hidden="true"
                   />
                 ) : null}
-                <span>{item.label}</span>
+                <span className="relative z-10">{item.label}</span>
               </a>
             );
           })}

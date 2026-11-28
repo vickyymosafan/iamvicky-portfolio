@@ -32,7 +32,17 @@ import {
 import { VO_BEATS } from "@/data/voBeats";
 import { scheduleWhenScrollIdle } from "@/lib/scrollIdle";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import {
+  ARCHITECTURAL_EASE,
+  ScrollDepthParallax,
+  ScrollScaleStage,
+  SectionReveal,
+  SlidingPill,
+  SPRING_TACTILE,
+  StaggerGroup,
+  StaggerItem,
+  VIEWPORT_ONCE,
+} from "@/components/motion/MotionPrimitives";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const BangMotionStackExplainer = dynamic(
@@ -89,7 +99,7 @@ export function StackAndCredentialsSection() {
   return (
     <section
       aria-label="Engineering Process Film, Technical Stack, Education and Certifications"
-      className="relative border-t border-border"
+      className="relative overflow-x-clip border-t border-border"
     >
       {/* ====================================================================
           SECTION 04 — INTERACTIVE PROCESS WALKTHROUGH FILM (redesign-section-4.png)
@@ -111,7 +121,7 @@ export function StackAndCredentialsSection() {
 
         <div className="relative z-10 mx-auto max-w-7xl space-y-8 px-5 sm:px-8">
           {/* Header Row */}
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <SectionReveal className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
               <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
@@ -138,12 +148,13 @@ export function StackAndCredentialsSection() {
               <span>Skip to Stack &amp; Credentials</span>
               <ArrowDown className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
             </button>
-          </div>
+          </SectionReveal>
 
           {/* 12-Col Film Theater + Core Tech Snapshot Sidebar (Exact layout of redesign-section-4.png) */}
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-            {/* Interactive Film Player with Luminous Cinema Viewfinder Corner Brackets */}
-            <div className="relative rounded-3xl border border-primary/65 bg-[#080a0f] p-3 shadow-[0_0_42px_-12px_var(--primary-glow)] sm:p-4 lg:col-span-9">
+            {/* Interactive Film Player with Scroll-Scale Stage & Luminous Viewfinder Corner Brackets */}
+            <ScrollScaleStage className="lg:col-span-9">
+              <div className="relative rounded-3xl border border-primary/65 bg-[#080a0f] p-3 shadow-[0_0_42px_-12px_var(--primary-glow)] sm:p-4">
               {/* Viewfinder Corner Reticle Brackets (Matches redesign-section-4.png) */}
               <span aria-hidden="true" className="pointer-events-none absolute top-2 left-2 h-4 w-4 rounded-tl-xl border-t-2 border-l-2 border-primary/80" />
               <span aria-hidden="true" className="pointer-events-none absolute top-2 right-2 h-4 w-4 rounded-tr-xl border-t-2 border-r-2 border-primary/80" />
@@ -157,10 +168,11 @@ export function StackAndCredentialsSection() {
                   Preparing 6-Chapter Walkthrough...
                 </div>
               )}
-            </div>
+              </div>
+            </ScrollScaleStage>
 
             {/* Right Sidebar: Core Tech Snapshot */}
-            <aside className="studio-card flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
+            <aside className="studio-card scroll-lift-view flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Layers className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -169,16 +181,15 @@ export function StackAndCredentialsSection() {
                   </h3>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <StaggerGroup staggerDelay={0.035} className="flex flex-wrap gap-2">
                   {PROFILE.coreStackPills.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-border bg-surface-elevated px-3 py-1 font-mono text-xs font-medium text-foreground"
-                    >
-                      {item}
-                    </span>
+                    <StaggerItem key={item} y={8}>
+                      <span className="inline-block rounded-full border border-border bg-surface-elevated px-3 py-1 font-mono text-xs font-medium text-foreground">
+                        {item}
+                      </span>
+                    </StaggerItem>
                   ))}
-                </div>
+                </StaggerGroup>
               </div>
 
               <div className="space-y-4 border-t border-border pt-5">
@@ -273,8 +284,11 @@ export function StackAndCredentialsSection() {
               </a>
             </m.div>
 
-            {/* Borderless Seamlessly-Blended Workstation Visual (Matches top-right of redesign-section-4.1.png) */}
-            <div className="relative mx-auto w-full max-w-[480px] lg:col-span-5 lg:max-w-none">
+            {/* Borderless Seamlessly-Blended Workstation Visual with Scroll Parallax */}
+            <ScrollDepthParallax
+              distance={20}
+              className="relative mx-auto w-full max-w-[480px] lg:col-span-5 lg:max-w-none"
+            >
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -inset-5 rounded-full opacity-75"
@@ -292,7 +306,7 @@ export function StackAndCredentialsSection() {
                   className="animate-studio-float scale-[1.06] object-cover"
                 />
               </div>
-            </div>
+            </ScrollDepthParallax>
           </div>
 
           {/* Main Bento Split: Filterable Tech Stack (9 cols) + About Me Bio Card (3 cols) */}
@@ -323,13 +337,19 @@ export function StackAndCredentialsSection() {
                         role="tab"
                         aria-selected={active}
                         onClick={() => setSkillFilter(cat)}
-                        className={`min-h-9 cursor-pointer rounded-full px-3 py-1 font-mono text-xs font-medium ${
+                        className={`relative min-h-9 cursor-pointer rounded-full px-3 py-1 font-mono text-xs font-medium ${
                           active
                             ? "bg-primary font-semibold text-primary-foreground"
                             : "border border-border bg-surface-elevated text-muted hover:text-foreground"
                         }`}
                       >
-                        {cat}
+                        {active ? (
+                          <SlidingPill
+                            layoutId="stack-filter-pill"
+                            className="pointer-events-none absolute inset-0 rounded-full bg-primary shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                          />
+                        ) : null}
+                        <span className="relative z-10">{cat}</span>
                       </button>
                     );
                   })}
@@ -337,11 +357,22 @@ export function StackAndCredentialsSection() {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {visibleSkillGroups.map((group) => {
+                {visibleSkillGroups.map((group, idx) => {
                   const Icon = SKILL_ICONS[group.id] ?? Code2;
                   return (
-                    <div
+                    <m.div
                       key={group.id}
+                      layout="position"
+                      initial={{ y: 14, scale: 0.985 }}
+                      whileInView={{ y: 0, scale: 1 }}
+                      viewport={VIEWPORT_ONCE}
+                      whileHover={{ y: -3 }}
+                      transition={{
+                        duration: 0.36,
+                        delay: idx * 0.035,
+                        ease: ARCHITECTURAL_EASE,
+                        layout: SPRING_TACTILE,
+                      }}
                       className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-surface-elevated/45 p-5 hover:border-primary/45"
                     >
                       <div className="space-y-3">
@@ -374,14 +405,14 @@ export function StackAndCredentialsSection() {
                           </span>
                         ))}
                       </div>
-                    </div>
+                    </m.div>
                   );
                 })}
               </div>
             </div>
 
             {/* Right About Me Bio Card (Matches right sidebar of redesign-section-4.1.png) */}
-            <aside className="studio-card-featured flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
+            <aside className="studio-card-featured scroll-lift-view flex flex-col justify-between gap-6 rounded-3xl p-6 lg:col-span-3">
               <div className="space-y-4">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
@@ -437,7 +468,7 @@ export function StackAndCredentialsSection() {
           </div>
 
           {/* Career Highlights Glass Telemetry Bar (Matches bottom bar of redesign-section-4.1.png) */}
-          <div className="studio-card-featured relative overflow-hidden rounded-2xl px-4 py-4 sm:px-6">
+          <SectionReveal className="studio-card-featured relative overflow-hidden rounded-2xl px-4 py-4 sm:px-6">
             <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-2.5">
                 <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -473,7 +504,7 @@ export function StackAndCredentialsSection() {
                 </div>
               </div>
 
-              {/* Luminous Telemetry Node Wave SVG (Matches bottom-right of redesign-section-4.1.png) */}
+              {/* Animated Luminous Telemetry Node Wave SVG (Matches bottom-right of redesign-section-4.1.png) */}
               <svg
                 aria-hidden="true"
                 viewBox="0 0 220 36"
@@ -487,17 +518,21 @@ export function StackAndCredentialsSection() {
                     <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.8" />
                   </linearGradient>
                 </defs>
-                <path
+                <m.path
                   d="M 4 28 C 44 26, 56 12, 92 14 C 128 16, 146 28, 178 24 C 196 22, 206 12, 216 6"
                   stroke="url(#ch-wave-grad)"
                   strokeWidth="1.8"
                   strokeLinecap="round"
+                  initial={{ pathLength: 0.15 }}
+                  whileInView={{ pathLength: 1 }}
+                  viewport={VIEWPORT_ONCE}
+                  transition={{ duration: 1.05, ease: ARCHITECTURAL_EASE }}
                 />
                 <circle cx="92" cy="14" r="4.5" fill="var(--bg)" stroke="var(--primary)" strokeWidth="2" />
                 <circle cx="178" cy="24" r="4.5" fill="var(--bg)" stroke="var(--accent)" strokeWidth="2" />
               </svg>
             </div>
-          </div>
+          </SectionReveal>
 
           {/* ================================================================
               EDUCATION & GOOGLE AI / CLOUD CERTIFICATIONS
@@ -516,26 +551,25 @@ export function StackAndCredentialsSection() {
                   </h3>
                 </div>
 
-                <div className="space-y-4">
+                <StaggerGroup className="space-y-4">
                   {EDUCATION.map((edu) => (
-                    <div
-                      key={edu.institution}
-                      className="studio-card space-y-2 rounded-2xl p-5"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-mono text-xs text-muted">{edu.period}</span>
-                        <span className="rounded-full bg-primary-soft px-3 py-0.5 font-mono text-xs font-semibold text-primary">
-                          {edu.highlight}
-                        </span>
+                    <StaggerItem key={edu.institution}>
+                      <div className="studio-card space-y-2 rounded-2xl p-5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-mono text-xs text-muted">{edu.period}</span>
+                          <span className="rounded-full bg-primary-soft px-3 py-0.5 font-mono text-xs font-semibold text-primary">
+                            {edu.highlight}
+                          </span>
+                        </div>
+                        <h4 className="font-heading text-base font-bold text-foreground sm:text-lg">
+                          {edu.institution}
+                        </h4>
+                        <p className="text-sm font-medium text-ink-secondary">{edu.degree}</p>
+                        <p className="text-xs leading-relaxed text-muted">{edu.detail}</p>
                       </div>
-                      <h4 className="font-heading text-base font-bold text-foreground sm:text-lg">
-                        {edu.institution}
-                      </h4>
-                      <p className="text-sm font-medium text-ink-secondary">{edu.degree}</p>
-                      <p className="text-xs leading-relaxed text-muted">{edu.detail}</p>
-                    </div>
+                    </StaggerItem>
                   ))}
-                </div>
+                </StaggerGroup>
               </div>
 
               {/* Certifications Column */}
@@ -559,26 +593,29 @@ export function StackAndCredentialsSection() {
                   </a>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <StaggerGroup staggerDelay={0.04} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {CERTIFICATIONS.map((cert, i) => (
-                    <div
-                      key={cert}
-                      className="studio-card flex flex-col justify-between rounded-2xl p-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-bold text-primary">
-                          0{i + 1}
-                        </span>
-                        <span className="rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase text-accent">
-                          Google Cloud Skills
-                        </span>
-                      </div>
-                      <p className="mt-3 font-heading text-sm font-bold leading-snug text-foreground">
-                        {cert}
-                      </p>
-                    </div>
+                    <StaggerItem key={cert} className="h-full">
+                      <m.div
+                        whileHover={{ y: -2 }}
+                        transition={SPRING_TACTILE}
+                        className="studio-card flex h-full flex-col justify-between rounded-2xl p-4"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-xs font-bold text-primary">
+                            0{i + 1}
+                          </span>
+                          <span className="rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase text-accent">
+                            Google Cloud Skills
+                          </span>
+                        </div>
+                        <p className="mt-3 font-heading text-sm font-bold leading-snug text-foreground">
+                          {cert}
+                        </p>
+                      </m.div>
+                    </StaggerItem>
                   ))}
-                </div>
+                </StaggerGroup>
 
                 <div className="studio-card rounded-2xl p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-muted">
@@ -594,7 +631,7 @@ export function StackAndCredentialsSection() {
               LEADERSHIP, SPEAKING & COMMUNITY IMPACT
              ================================================================ */}
           <div className="space-y-6 border-t border-border pt-14">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <SectionReveal className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <Users className="h-5 w-5 text-primary" aria-hidden="true" />
                 <h3 className="font-heading text-2xl font-bold tracking-tight text-foreground">
@@ -604,41 +641,44 @@ export function StackAndCredentialsSection() {
               <span className="font-mono text-xs text-muted">
                 HIMAFORSI UMJ · Information Systems Diklat · RTIK Jember
               </span>
-            </div>
+            </SectionReveal>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StaggerGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {LEADERSHIP.map((item) => (
-                <div
-                  key={item.role}
-                  className="studio-card flex h-full flex-col justify-between rounded-2xl p-5"
-                >
-                  <div className="space-y-2">
-                    <span className="font-mono text-[11px] font-semibold text-primary">
-                      {item.period}
-                    </span>
-                    <h4 className="font-heading text-base font-bold leading-snug text-foreground">
-                      {item.role}
-                    </h4>
-                    <p className="font-mono text-xs text-muted">{item.organization}</p>
-                    <p className="pt-1 text-xs leading-relaxed text-ink-secondary">
-                      {item.summary}
-                    </p>
-                  </div>
+                <StaggerItem key={item.role} className="h-full">
+                  <m.div
+                    whileHover={{ y: -3 }}
+                    transition={SPRING_TACTILE}
+                    className="studio-card flex h-full flex-col justify-between rounded-2xl p-5"
+                  >
+                    <div className="space-y-2">
+                      <span className="font-mono text-[11px] font-semibold text-primary">
+                        {item.period}
+                      </span>
+                      <h4 className="font-heading text-base font-bold leading-snug text-foreground">
+                        {item.role}
+                      </h4>
+                      <p className="font-mono text-xs text-muted">{item.organization}</p>
+                      <p className="pt-1 text-xs leading-relaxed text-ink-secondary">
+                        {item.summary}
+                      </p>
+                    </div>
 
-                  {item.link ? (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-flex min-h-10 items-center gap-1.5 font-mono text-xs font-semibold text-primary hover:underline"
-                    >
-                      <span>View @himaforsi_umjember</span>
-                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                    </a>
-                  ) : null}
-                </div>
+                    {item.link ? (
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex min-h-10 items-center gap-1.5 font-mono text-xs font-semibold text-primary hover:underline"
+                      >
+                        <span>View @himaforsi_umjember</span>
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                      </a>
+                    ) : null}
+                  </m.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerGroup>
           </div>
         </div>
       </div>

@@ -16,7 +16,13 @@ import {
 } from "lucide-react";
 import { AI_WORKFLOW_STAGES, PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
-import { ARCHITECTURAL_EASE } from "@/components/motion/MotionPrimitives";
+import {
+  ARCHITECTURAL_EASE,
+  ScrollDepthParallax,
+  SectionReveal,
+  SlidingPill,
+  SPRING_PILL,
+} from "@/components/motion/MotionPrimitives";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
 
 const INSPECTOR_TABS = ["Code", "Console", "Flow", "Outcome"] as const;
@@ -55,7 +61,7 @@ export function AiWorkflowSection() {
   return (
     <section
       id="workflow"
-      className="cv-auto-section relative scroll-mt-20 border-t border-border py-20 sm:py-28"
+      className="cv-auto-section relative scroll-mt-20 overflow-x-clip border-t border-border py-20 sm:py-28"
     >
       {/* Reference-Matched Diagonal Orbital Ribbon & Glow Backdrop */}
       <SectionBackdrop variant="workflow" />
@@ -125,14 +131,8 @@ export function AiWorkflowSection() {
             </div>
           </m.div>
 
-          {/* Right Live 3D-Tilted Obsidian IDE Visual + Floating Glass Cubes (Matches redesign-section-2.png) */}
-          <m.div
-            initial={{ y: 14 }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.48, delay: 0.06, ease: ARCHITECTURAL_EASE }}
-            className="relative lg:col-span-6"
-          >
+          {/* Right Live 3D-Tilted Obsidian IDE Visual with Scroll Parallax */}
+          <ScrollDepthParallax distance={20} className="relative lg:col-span-6">
             {/* Glowing Orbital Ring + Floating Translucent Glass Cubes Behind/Around IDE */}
             <svg
               aria-hidden="true"
@@ -248,13 +248,13 @@ export function AiWorkflowSection() {
                 </div>
               </div>
             </div>
-          </m.div>
+          </ScrollDepthParallax>
         </div>
 
         {/* ================================================================
             INTERACTIVE 2-COLUMN STAGE WORKBENCH (Modeled after redesign-section-2.png)
            ================================================================ */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <SectionReveal className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* Left Narrative Card */}
           <div className="studio-card flex flex-col justify-between gap-6 rounded-2xl p-6 sm:p-7 lg:col-span-5">
             <div className="space-y-4">
@@ -337,13 +337,19 @@ export function AiWorkflowSection() {
                       role="tab"
                       aria-selected={active}
                       onClick={() => setActiveTab(tab)}
-                      className={`min-h-9 cursor-pointer rounded-full px-3.5 py-1 font-mono text-xs font-semibold ${
+                      className={`relative min-h-9 cursor-pointer rounded-full px-3.5 py-1 font-mono text-xs font-semibold ${
                         active
                           ? "bg-primary text-primary-foreground"
                           : "text-muted hover:text-foreground"
                       }`}
                     >
-                      {tab}
+                      {active ? (
+                        <SlidingPill
+                          layoutId="workflow-inspector-tab"
+                          className="pointer-events-none absolute inset-0 rounded-full bg-primary shadow-[0_0_20px_-4px_var(--primary-glow)]"
+                        />
+                      ) : null}
+                      <span className="relative z-10">{tab}</span>
                     </button>
                   );
                 })}
@@ -370,6 +376,15 @@ export function AiWorkflowSection() {
 
             {/* Active Tab Body */}
             <div className="flex-1 bg-[#0b0e15] p-5 font-mono text-xs leading-relaxed text-[#f5f6f8] sm:p-6">
+              <AnimatePresence mode="wait">
+                <m.div
+                  key={`${stage.id}-${activeTab}`}
+                  initial={{ y: 6, opacity: 0.4 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -6, opacity: 0.4 }}
+                  transition={{ duration: 0.18, ease: ARCHITECTURAL_EASE }}
+                  className="h-full"
+                >
               {activeTab === "Code" ? (
                 <div className="overflow-x-auto">
                   <ol className="space-y-1.5">
@@ -457,6 +472,8 @@ export function AiWorkflowSection() {
                   </p>
                 </div>
               )}
+                </m.div>
+              </AnimatePresence>
             </div>
 
             {/* Bottom File Footer + Next Step CTA */}
@@ -479,7 +496,7 @@ export function AiWorkflowSection() {
               </button>
             </div>
           </div>
-        </div>
+        </SectionReveal>
 
         {/* ================================================================
             BOTTOM 5-STEP CONNECTED TIMELINE RAIL (redesign-section-2.png)
@@ -487,8 +504,15 @@ export function AiWorkflowSection() {
         <div className="relative pt-2">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-[22px] right-8 left-8 hidden h-px bg-border lg:block"
-          />
+            className="pointer-events-none absolute top-[22px] right-8 left-8 hidden h-px overflow-hidden bg-border lg:block"
+          >
+            <m.div
+              className="h-full w-full bg-gradient-to-r from-primary via-primary to-accent"
+              style={{ transformOrigin: "left center" }}
+              animate={{ scaleX: (activeIndex + 1) / AI_WORKFLOW_STAGES.length }}
+              transition={SPRING_PILL}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {AI_WORKFLOW_STAGES.map((item, idx) => {
               const active = idx === activeIndex;
@@ -498,14 +522,20 @@ export function AiWorkflowSection() {
                   type="button"
                   onClick={() => setActiveIndex(idx)}
                   aria-current={active ? "step" : undefined}
-                  className={`group relative flex cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left ${
+                  className={`group relative flex cursor-pointer flex-col items-start gap-2 overflow-hidden rounded-xl border p-3 text-left ${
                     active
-                      ? "border-primary/60 bg-primary-soft/60"
+                      ? "border-primary/60"
                       : "border-border bg-surface/80 hover:border-border-strong"
                   }`}
                 >
+                  {active ? (
+                    <SlidingPill
+                      layoutId="workflow-stage-bg"
+                      className="absolute inset-0 rounded-xl bg-primary-soft/60"
+                    />
+                  ) : null}
                   <span
-                    className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+                    className={`relative z-10 inline-flex h-4 w-4 items-center justify-center rounded-full border ${
                       active
                         ? "border-primary bg-primary"
                         : "border-border-strong bg-background group-hover:border-primary"
@@ -514,7 +544,7 @@ export function AiWorkflowSection() {
                   >
                     {active ? <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" /> : null}
                   </span>
-                  <div>
+                  <div className="relative z-10">
                     <div className="font-mono text-[11px] font-bold text-primary">
                       {item.step} / 05
                     </div>

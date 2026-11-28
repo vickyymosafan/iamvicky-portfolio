@@ -18,6 +18,12 @@ import { PROFILE } from "@/data/portfolio";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { SectionBackdrop } from "@/components/ui/StudioBackdrop";
+import {
+  ScrollScaleStage,
+  SectionReveal,
+  StaggerGroup,
+  StaggerItem,
+} from "@/components/motion/MotionPrimitives";
 
 export function ContactFooter() {
   const [copied, setCopied] = useState(false);
@@ -36,11 +42,12 @@ export function ContactFooter() {
   return (
     <footer
       id="contact"
-      className="cv-auto-footer relative z-10 border-t border-border py-16 sm:py-24"
+      className="cv-auto-footer relative z-10 overflow-x-clip border-t border-border py-16 sm:py-24"
     >
       <SectionBackdrop variant="contact" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
+        <ScrollScaleStage>
         <div className="studio-card-featured relative overflow-hidden rounded-3xl p-6 sm:p-10 lg:p-12">
           {/* Subtle Ambient Corner Highlight */}
           <div
@@ -53,7 +60,7 @@ export function ContactFooter() {
           />
 
           <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
-            <div className="space-y-4 lg:col-span-7">
+            <SectionReveal className="space-y-4 lg:col-span-7">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary-soft px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 <span>06 / Let&apos;s Work Together</span>
@@ -112,77 +119,88 @@ export function ContactFooter() {
               <span className="sr-only" aria-live="polite">
                 {copied ? "Email address copied to clipboard." : ""}
               </span>
-            </div>
+            </SectionReveal>
 
             {/* Right Direct Channels */}
-            <div className="space-y-3 lg:col-span-5">
-              <a
-                href={PROFILE.phoneHref}
-                className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
-              >
-                <span className="flex items-center gap-2.5 font-mono text-xs">
-                  <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
-                  <span>{PROFILE.phone}</span>
-                </span>
-                <span className="font-mono text-[11px] text-muted">Situbondo, ID</span>
-              </a>
+            <StaggerGroup className="space-y-3 lg:col-span-5">
+              <StaggerItem>
+                <a
+                  href={PROFILE.phoneHref}
+                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 text-sm text-foreground hover:border-primary"
+                >
+                  <span className="flex items-center gap-2.5 font-mono text-xs">
+                    <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <span>{PROFILE.phone}</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-muted">Situbondo, ID</span>
+                </a>
+              </StaggerItem>
 
               <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={PROFILE.socials.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                >
-                  <span className="flex items-center gap-2">
-                    <Github className="h-4 w-4" aria-hidden="true" />
-                    <span>GitHub</span>
-                  </span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                <StaggerItem>
+                  <a
+                    href={PROFILE.socials.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Github className="h-4 w-4" aria-hidden="true" />
+                      <span>GitHub</span>
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </StaggerItem>
 
-                <a
-                  href={PROFILE.socials.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                >
-                  <span className="flex items-center gap-2">
-                    <Linkedin className="h-4 w-4" aria-hidden="true" />
-                    <span>LinkedIn</span>
-                  </span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                <StaggerItem>
+                  <a
+                    href={PROFILE.socials.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Linkedin className="h-4 w-4" aria-hidden="true" />
+                      <span>LinkedIn</span>
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </StaggerItem>
 
-                <a
-                  href={PROFILE.socials.craftrig}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                >
-                  <span className="flex items-center gap-2">
-                    <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <span>Craftrig MCP</span>
-                  </span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                <StaggerItem>
+                  <a
+                    href={PROFILE.socials.craftrig}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span>Craftrig MCP</span>
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </StaggerItem>
 
-                <a
-                  href={PROFILE.socials.portfolio3d}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                >
-                  <span className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-accent" aria-hidden="true" />
-                    <span>3D Portfolio</span>
-                  </span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                <StaggerItem>
+                  <a
+                    href={PROFILE.socials.portfolio3d}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-12 items-center justify-between rounded-2xl border border-border bg-surface-elevated/60 px-4 py-3 font-mono text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-accent" aria-hidden="true" />
+                      <span>3D Portfolio</span>
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </StaggerItem>
               </div>
-            </div>
+            </StaggerGroup>
           </div>
         </div>
+        </ScrollScaleStage>
 
         {/* Bottom Copyright & Back to Top */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 font-mono text-xs text-muted sm:flex-row">

@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { ReactLenis } from "lenis/react";
 import type { LenisRef } from "lenis/react";
-import { LazyMotion, MotionConfig, cancelFrame, domAnimation, frame } from "framer-motion";
+import { LazyMotion, MotionConfig, cancelFrame, domMax, frame } from "framer-motion";
 import "lenis/dist/lenis.css";
 
 interface SmoothScrollContextValue {
@@ -140,7 +140,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
   );
 
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       <MotionConfig reducedMotion="user">
         <SmoothScrollContext.Provider value={value}>
           <ReactLenis
