@@ -4,13 +4,15 @@ export type FlagshipCaseStudySlug =
   | "buildflow-erp"
   | "arven-ecommerce"
   | "nexapip-marketplace"
-  | "mcp-craftrig";
+  | "mcp-craftrig"
+  | "beyond-rag";
 
 export const CASE_STUDY_SLUGS: readonly FlagshipCaseStudySlug[] = [
   "buildflow-erp",
   "arven-ecommerce",
   "nexapip-marketplace",
   "mcp-craftrig",
+  "beyond-rag",
 ] as const;
 
 export function isCaseStudySlug(value: string): value is FlagshipCaseStudySlug {
@@ -76,7 +78,11 @@ export type MockupScreenId =
   | "craftrig-dag-locks"
   | "craftrig-playwright-qa"
   | "craftrig-blueprint-sqlite"
-  | "craftrig-quality-gate";
+  | "craftrig-quality-gate"
+  | "beyond-rag-chat-ui"
+  | "beyond-rag-admin-dashboard"
+  | "beyond-rag-asi-pipeline"
+  | "beyond-rag-llm-cascade";
 
 export interface UiScreenShowcase {
   id: MockupScreenId;
@@ -1007,54 +1013,54 @@ export const CASE_STUDIES: Record<FlagshipCaseStudySlug, CaseStudyRecord> = {
     uiScreens: [
       {
         id: "nexapip-catalog-tester",
-        tabLabel: "Market & Equity Curve",
-        title: "MT5 EA Catalog & 99.9% Real Tick Strategy Tester Panel",
-        routeBadge: "/market/[slug] · Orvyn Charcoal Terminal UI",
+        tabLabel: "Live Market UI",
+        title: "Live /market Catalog Screenshot & 99.9% Real Tick Equity Panel",
+        routeBadge: "/market · Real 1440px App Screenshot + Telemetry",
         summary:
-          "Compare verified MT5 Expert Advisors (QuantGridPro v6.0 and ScalpZone EA v5.10) with interactive equity curve telemetry, drawdown ratios, parameter disclosures, and Lifetime IDR checkout triggers.",
+          "Actual 1440px live desktop screenshot of NexaPip's /market catalog (ScalpZone EA v5.10 Rp 800.000 & QuantGridPro v6.0 Rp 890.000, MT5 Build 4260+, 7 strategy filters) paired with its verified Equity Curve panel and live strategy switcher.",
         uxHighlights: [
-          "Interactive switcher compares real strategy metrics (Net Profit, Max DD, Profit Factor, Sharpe Ratio).",
-          "Inline SVG equity curve plots balance progression cleanly with zero third-party charting bloat.",
-          "Displays exact StrategyCategory taxonomy (Grid, Scalping, Trend, Gold/XAUUSD, Risk Utility).",
+          "Real live screenshot proves NexaPip's Orvyn Charcoal + Chartreuse-Lime anti-slop visual craft.",
+          "Surfaces promo pricing, Lifetime ownership tags, minimum deposit, and official .SET preset badges above the fold.",
+          "Interactive switcher below compares real Strategy Tester metrics and SHA-256 release digests.",
         ],
       },
       {
         id: "nexapip-ex5-vault",
-        tabLabel: ".EX5 SHA-256 Vault",
-        title: "Interactive Binary Inspector & Private Storage Gatekeeper",
-        routeBadge: "src/domain/ex5.ts · Binary Security Engine",
+        tabLabel: "Detail & .EX5 Vault",
+        title: "Live /market/[slug] Detail UI & Binary .EX5 SHA-256 Validation",
+        routeBadge: "/market/quantgridpro-v6 · Real UI + src/domain/ex5.ts",
         summary:
-          "Test NexaPip's pure domain binary inspector interactively: inspect how authentic compiled .ex5 files pass header/size/SHA-256 checks while MT4 (.ex4), raw source (.mq5), or disguised text files are rejected instantly.",
+          "Real desktop capture of QuantGridPro v6.0's product page (sticky Mayar Lifetime checkout card, 6 detail tabs, MT5 installation steps) paired with NexaPip's official .EX5 validation artwork and interactive binary inspector.",
         uxHighlights: [
-          "Click sample upload payloads to watch extension, magic header, anti-source, and size checks evaluate live.",
-          "Demonstrates why binaries store in ./storage/ex5/ outside public/ with authenticated streaming.",
-          "Computes immutable SHA-256 release fingerprints displayed directly in buyers' libraries.",
+          "Displays the authentic 6-tab EA detail architecture (Ringkasan, Backtest, Parameter & .SET, Chart, Rilis .ex5, Ulasan).",
+          "Interactive binary test verifies how .ex5 magic headers pass while .ex4 and disguised MQL source files are rejected.",
+          "Confirms private ./storage/ex5/ vault isolation outside Next.js public/.",
         ],
       },
       {
         id: "nexapip-buyer-library",
-        tabLabel: "Library & Admin Studio",
-        title: "Permanent Buyer Library (/library) & Seller Release Studio (/admin)",
-        routeBadge: "/library & /admin · Ownership & Release Ops",
+        tabLabel: "Studio & Library",
+        title: "Seller Release Dashboard, .EX5 Upload Dropzone & Buyer /library",
+        routeBadge: "/admin & /library · Official Studio UI Visuals",
         summary:
-          "Toggle between the Buyer's permanent 'Koleksi Saya' dashboard (one-click .ex5 binary & official .set preset downloads with free lifetime updates) and the Admin Studio where new versions publish straight to existing owners.",
+          "Pairs NexaPip's real studio dashboard & .EX5 dropzone visuals from the repository with an interactive switcher comparing the Buyer's permanent 'Koleksi Saya' library against the Seller Release Studio.",
         uxHighlights: [
-          "Every download logs to DownloadLog for usage telemetry and entitlement auditing.",
-          "Bundled .set presets save traders from manually mistyping risk and lot-sizing parameters in MT5.",
-          "Publishing v6.1 in /admin immediately unlocks the new build in every paid buyer's library.",
+          "Shows Lifetime Revenue, Release Velocity, and instant .EX5 upload validation dropzone visuals.",
+          "Every download logs to DownloadLog and delivers both compiled .ex5 binaries and official .set presets.",
+          "Publishing a new version in /admin unlocks free updates immediately for every paid buyer.",
         ],
       },
       {
         id: "nexapip-mayar-circuit",
-        tabLabel: "4-Stage Circuit",
-        title: "End-to-End Curated EA Marketplace & Mayar IDR Flow",
-        routeBadge: "NexaPipMarketplaceFlow · Core User Journey",
+        tabLabel: "Full Landing & Flow",
+        title: "Full-Page Live Homepage Capture & 4-Stage Mayar IDR Circuit",
+        routeBadge: "/ · Full-Page 1440px Live Capture",
         summary:
-          "Visualizes NexaPip's 4-stage marketplace circuit from strategy curation and SHA-256 binary audit through Mayar IDR payment settlement to permanent lifetime buyer library fulfillment.",
+          "Scroll through the real full-page desktop capture of NexaPip's homepage—featuring the 3D hooded mascot hero, 4-stage neon-lime circuit diagram, .EX5 security showcase, curated EA cards, and Developer Studio.",
         uxHighlights: [
-          "Maps Indonesian payment rails (QRIS, E-Wallet, Virtual Account) directly to Prisma Order states.",
-          "Highlights clean separation across Domain, Application, Infrastructure, and App Router layers.",
-          "Tracks verified purchase entitlements governing both binary downloads and buyer reviews.",
+          "Interactive scrollable browser viewport lets reviewers inspect the entire live landing page cleanly.",
+          "Demonstrates seamless dark continuity across all 5 homepage chapters with zero horizontal overflow.",
+          "Maps every visual section directly to the 4-stage verified Mayar IDR checkout & vault lifecycle.",
         ],
       },
     ],
@@ -1588,6 +1594,363 @@ export const CASE_STUDIES: Record<FlagshipCaseStudySlug, CaseStudyRecord> = {
       "Brotli Compression",
       "Clean Architecture",
       "50/50 Automated Tests",
+    ],
+  },
+
+  "beyond-rag": {
+    slug: "beyond-rag",
+    index: "05",
+    title: "Beyond RAG: Agentic Search Platform",
+    shortTitle: "Beyond RAG",
+    subtitle: "BE + FE_Beyond-RAG-Artificial-Super-Intelligence · 17-Module Edge ASI Engine & Virtualized Chat PWA",
+    tagline:
+      "An edge-deployed Agentic RAG platform on Cloudflare Workers + Hono + Neon pgvector achieving 100/100 evaluation accuracy with Quad-Fusion D-RRF, 5-layer anti-hallucination verification, automatic 4-LLM failover, and a 60fps TanStack Virtual Next.js chat & admin PWA.",
+    category: "Agentic AI & Edge Search Platform",
+    year: "2026",
+    role: "Creator, Edge AI Architect & Full-Stack Engineer",
+    scopeBadge: "17 ASI Modules · 100/100 Eval · 4-LLM Cascade",
+    heroImage: "/images/redesign/proj-beyond-rag.jpg",
+    repoUrl: "https://github.com/vickyymosafan/BE_Beyond-RAG-Artificial-Super-Intelligence",
+    repoLabel: "Backend Repo (ASI Edge)",
+    secondaryLink: {
+      label: "Frontend Repo (Next.js UI)",
+      href: "https://github.com/vickyymosafan/FE_Beyond-RAG-Artificial-Super-Intelligence",
+    },
+    stats: [
+      {
+        value: "100/100",
+        label: "Eval Benchmark",
+        detail: "100% accuracy (evaluation_results_100.json)",
+      },
+      {
+        value: "17 Modules",
+        label: "Edge ASI Pipeline",
+        detail: "Quad-Fusion D-RRF, Multi-Hop & Self-Critic",
+      },
+      {
+        value: "4-LLM",
+        label: "Failover Cascade",
+        detail: "Gemini -> Groq -> Cohere -> OpenRouter",
+      },
+      {
+        value: "350 Users",
+        label: "$0/mo Free-Tier",
+        detail: "2 SQLite Durable Objects + KV L1/L2 Cache",
+      },
+    ],
+    storyIntro:
+      "Standard single-pass RAG chatbots break down when university students ask compound questions spanning 144 pages, 40 tables, and 133 figures across thesis, internship, and curriculum guidebooks—hallucinating rules or crashing the moment a single LLM provider hits its daily rate limit.",
+    storyChapters: [
+      {
+        index: "01",
+        eyebrow: "BEYOND SINGLE-PASS RAG",
+        title: "17-Module Agentic Reasoning & 5-Layer Hallucination Prevention",
+        body: "Rather than sending raw user queries straight to one vector lookup, Beyond RAG's Cloudflare Workers + Hono backend runs a 17-module ASI pipeline under src/asi/: query classification, rewriting, conditional sub-question decomposition, Dynamic Score-Aware Quad-Fusion D-RRF across Neon pgvector (768-dim) and Indonesian tsvector full-text search, multi-hop retrieval, reranking, context compression, Jaccard grounding checks, and a Self-Critic corrective loop that retries automatically whenever grounding falls below 0.80.",
+        calloutLabel: "Verified Benchmark",
+        calloutValue: "100 / 100 queries passed (0 failed, 1.00 accuracyRate) in evaluation_results_100.json.",
+      },
+      {
+        index: "02",
+        eyebrow: "ZERO-COST EDGE RESILIENCE",
+        title: "4-LLM Circuit Breaker, Durable Objects & Self-Improving KV Cache",
+        body: "Architected to serve 350 concurrent students on a $0/month free-tier budget. Two SQLite-backed Cloudflare Durable Objects (RateLimiterDO and ProviderRateLimiterDO) govern per-user concurrency and provider RPD quotas with a 5-failures/minute circuit breaker cascading across Gemini 2.5/2.0 Flash, Groq, Cohere Command-A, and OpenRouter. L1 exact + L2 semantic KV caching keeps repeat answers under 500ms while Edge License Guard (Origin binding + owner secret) blocks unauthorized clones.",
+        calloutLabel: "Multimodal Corpus",
+        calloutValue: "unpdf + mammoth.js ingest PDF/DOCX text chunks, Markdown tables & R2 image captions.",
+      },
+      {
+        index: "03",
+        eyebrow: "ACADEMIC CONVERSATIONAL UI/UX",
+        title: "60fps Virtualized Chat PWA, Inline Citations & Admin Ingestion Console",
+        body: "The companion Next.js + React + Shadcn UI frontend pairs a deep cyan-teal OKLCH science-terminal palette with TanStack Virtual for 60fps long conversations, react-markdown + GFM tables + LaTeX math rendering, clickable page-level citations ([Panduan TA SI 2026, Hal 34]), voice speech recognition, driver.js onboarding tours, PWA offline install, an authenticated /admin/dashboard for PDF/DOCX management, and a built-in Mock Engine Mode so reviewers can test UI flows locally without API keys.",
+        calloutLabel: "OpenAPI + Mock Mode",
+        calloutValue: "Typed client generated from openapi.yaml + synthetic streaming dev mode.",
+      },
+    ],
+    designSystem: {
+      themeLabel: "Deep Teal-Obsidian OKLCH Science Terminal System",
+      philosophy:
+        "Clarity-first academic research interface balancing glassmorphic focus with dense citation transparency—every factual claim visibly links to its exact source document and page number.",
+      geometryRule: "Precision terminal radii (2px–12px cards), crisp cyan hairlines, and high-contrast verification badges.",
+      densityRule: "Collapsible history sidebar + virtualized 60fps reading column + clean tabular admin corpus console.",
+      swatches: [
+        { name: "Deep Teal Canvas", hex: "#061014", role: "Primary Dark Science-Terminal Surface", onHex: "#E2F8FA" },
+        { name: "Glass Panel", hex: "#0D1D25", role: "AI Answer Card & Sidebar Surface", onHex: "#E2F8FA" },
+        { name: "Electric Cyan", hex: "#22D3EE", role: "Primary CTA, Active Citations & Focus", onHex: "#061014" },
+        { name: "Grounded Emerald", hex: "#34D399", role: "Self-Critic PASS & Grounded Proof", onHex: "#061014" },
+        { name: "Multi-Hop Amber", hex: "#F5A623", role: "Sub-Question, LaTeX & RPD Telemetry", onHex: "#061014" },
+        { name: "Ice Cyan Ink", hex: "#E2F8FA", role: "Primary High-Contrast Reading Copy", onHex: "#061014" },
+        { name: "Muted Slate", hex: "#94A3B8", role: "Reasoning Trace & Secondary Labels", onHex: "#061014" },
+      ],
+      typography: [
+        {
+          role: "Conversational Reading & UI",
+          family: "Inter / Plus Jakarta Sans",
+          usage: "Academic answers, Markdown tables, admin corpus forms, navigation",
+          sample: "Bobot Tugas Akhir 6 SKS · [Panduan TA SI 2026, Hal 34]",
+        },
+        {
+          role: "Reasoning Trace & Telemetry",
+          family: "Source Code Pro / JetBrains Mono",
+          usage: "ASI pipeline logs, citation chips, LaTeX equations, confidence & RPD counters",
+          sample: "Quad-Fusion D-RRF: 0.91 · Self-Critic: 0.94 PASS",
+        },
+      ],
+      uxPrinciples: [
+        "Every answer shows inline [Document, Page X] chips plus confidence and grounding status so students verify facts immediately.",
+        "TanStack Virtual keeps scrolling locked at 60fps even across long multi-turn thesis research threads.",
+        "Voice speech input and PWA installability support mobile-first students checking campus guidelines on the go.",
+        "Mock Engine Mode enables full local frontend testing with zero API key friction during technical reviews.",
+      ],
+    },
+    uiScreens: [
+      {
+        id: "beyond-rag-chat-ui",
+        tabLabel: "Agentic Chat UI",
+        title: "Virtualized 60fps Academic Chat with Citations, Tables & LaTeX",
+        routeBadge: "/ · Next.js + TanStack Virtual + Shadcn UI",
+        summary:
+          "Showcases the conversational research UI rendering Markdown tables, LaTeX equations, clickable page-level citation chips, voice speech input, and live ASI reasoning traces.",
+        uxHighlights: [
+          "Renders structured GFM Markdown tables & LaTeX formulas inline without layout jank.",
+          "Reasoning trace card exposes query class, D-RRF score, Jaccard grounding, and winning LLM provider.",
+          "Supports speech-to-text voice input, onboarding tour, and PWA installation.",
+        ],
+      },
+      {
+        id: "beyond-rag-admin-dashboard",
+        tabLabel: "Admin & Ingestion",
+        title: "JWT-Protected /admin/dashboard & Multimodal PDF/DOCX Pipeline",
+        routeBadge: "/admin/dashboard · unpdf + mammoth.js + Neon",
+        summary:
+          "Displays the administrator console for uploading versioned PDF/DOCX guidebooks, inspecting extracted chunks, tables, and R2 images, viewing ASI learning logs, and invalidating stale KV cache entries automatically.",
+        uxHighlights: [
+          "Tracks document versions, page counts, chunk counts, extracted tables, and R2 image references.",
+          "Soft-deletes superseded chunks (is_active = false) and purges affected KV cache keys automatically.",
+          "Protected by HMAC-SHA256 JWT admin login and Edge License Guard.",
+        ],
+      },
+      {
+        id: "beyond-rag-asi-pipeline",
+        tabLabel: "17-Module ASI Flow",
+        title: "Quad-Fusion D-RRF, Multi-Hop Retrieval & 5-Layer Hallucination Guard",
+        routeBadge: "src/asi/* · Cloudflare Workers + Hono 4.7",
+        summary:
+          "Visualizes all 17 backend ASI modules plus an interactive 5-Layer Hallucination Prevention tester demonstrating exact retrieval thresholds (>= 0.82 answer, < 0.55 abstain) and Self-Critic regeneration.",
+        uxHighlights: [
+          "Combines 768-dim Neon pgvector dense search with Indonesian tsvector lexical search via D-RRF.",
+          "Enforces 5 independent hallucination barriers from strict prompt rules down to Jaccard verification.",
+          "Verified against 100 real Indonesian academic evaluation queries with 100/100 PASS.",
+        ],
+      },
+      {
+        id: "beyond-rag-llm-cascade",
+        tabLabel: "4-LLM Failover & DO",
+        title: "Circuit-Breaker LLM Router, SQLite Durable Objects & KV Cache",
+        routeBadge: "wrangler.jsonc · RateLimiterDO + ProviderRateLimiterDO",
+        summary:
+          "Interactive resilience console showcasing automatic 4-provider failover (Gemini -> Groq -> Cohere -> OpenRouter), Durable Object concurrency control for 350 users, and $0/month RPD budget pacing.",
+        uxHighlights: [
+          "Click any provider tier to simulate quota exhaustion and watch circuit-breaker failover route cleanly.",
+          "Offloads preprocessing (rewrite, critic, corrective) to Groq (14.4K RPD) to protect Gemini quota.",
+          "Self-improving L1 exact + L2 semantic KV cache achieves >80% cache hit rates under 500ms.",
+        ],
+      },
+    ],
+    workflowTitle: "End-to-End Agentic ASI Search & Verification Workflow",
+    workflowSubtitle:
+      "How a student's natural-language question travels from the virtualized Next.js PWA through 17 Cloudflare Workers ASI modules, Neon pgvector, 5 hallucination checks, and 4-LLM failover.",
+    workflowSteps: [
+      {
+        step: "01",
+        phase: "INGEST",
+        title: "Multimodal PDF/DOCX Parsing, Hierarchy Chunking & Indexing",
+        actor: "Academic Admin (/admin/dashboard)",
+        userAction:
+          "Authenticates via HMAC-SHA256 JWT and uploads a new or updated academic guidebook (PDF or DOCX).",
+        systemAction:
+          "unpdf & mammoth.js extract text hierarchy (chapter -> section -> paragraph), Markdown/JSON tables into extracted_tables, and figures into R2 extracted_images; generates 768-dim embeddings in Neon pgvector + Indonesian tsvector FTS, and triggers cache-invalidation.ts.",
+        guarantee: "Old document versions soft-delete cleanly (is_active = false) and stale KV cache entries purge immediately.",
+      },
+      {
+        step: "02",
+        phase: "EDGE GUARD",
+        title: "Origin License Binding, Durable Object Rate Limiting & Cache Probe",
+        actor: "Cloudflare Worker + SQLite Durable Objects",
+        userAction:
+          "Student submits a typed or voice-transcribed academic question from the Next.js PWA.",
+        systemAction:
+          "Edge License Guard verifies authorized Origin/Secret; RateLimiterDO enforces fair concurrency across 350 users; cache.ts probes L1 exact and L2 semantic KV cache before spending any LLM tokens.",
+        guarantee: "Unauthorized clones receive 403 Forbidden; >80% repeated queries return in <500ms at zero token cost.",
+      },
+      {
+        step: "03",
+        phase: "CLASSIFY & EXPAND",
+        title: "Query Classification, Rewriting & Multi-Hop Sub-Questions",
+        actor: "ASI Pre-Processor (classifier.ts, rewriter.ts, sub-question.ts)",
+        userAction:
+          "Waits smoothly with live thinking-stage feedback in the chat viewport.",
+        systemAction:
+          "Rule-based classifier detects text, table, image, or complex intent; Groq rewrites the query into semantic variants and conditionally decomposes multi-part questions into targeted sub-queries.",
+        guarantee: "Offloading preprocessing to Groq (14,400 RPD) preserves Gemini's 1,500 RPD budget for final synthesis.",
+      },
+      {
+        step: "04",
+        phase: "QUAD-FUSION",
+        title: "Dynamic Score-Aware Quad-Fusion D-RRF & Multi-Hop Retrieval",
+        actor: "Retrieval Engine (retrieval.ts, multi-hop.ts, rerank.ts, compressor.ts)",
+        userAction:
+          "Receives cross-document accuracy across TA, KP, KKN, and Curriculum manuals automatically.",
+        systemAction:
+          "Queries Neon pgvector cosine similarity + Indonesian tsvector BM25 + extracted_tables + extracted_images, fuses ranks via score-aware D-RRF, executes follow-up hops when needed, and compresses context.",
+        guarantee: "Retrieval gate rejects weak matches (< 0.55 abstain; >= 0.82 direct grounded synthesis).",
+      },
+      {
+        step: "05",
+        phase: "SELF-CRITIC",
+        title: "5-Layer Anti-Hallucination Grounding & Corrective Regeneration",
+        actor: "Verification Loop (grounding.ts, critic.ts, corrective.ts, self-improver.ts)",
+        userAction:
+          "Receives strictly grounded claims tagged with exact [Document, Page X] citations.",
+        systemAction:
+          "Provider router generates answer via Gemini 2.5 Flash (falling back across Groq -> Cohere -> OpenRouter on circuit break); Grounding Validator (Jaccard + exact phrase check) and Groq Self-Critic score faithfulness and trigger up to 2 corrective retries if score < 0.80.",
+        guarantee: "100/100 evaluation accuracy with zero fabricated regulations or uncited page references.",
+      },
+      {
+        step: "06",
+        phase: "STREAM & LEARN",
+        title: "60fps Virtualized Rendering, Dynamic KV Caching & Feedback Logs",
+        actor: "Next.js PWA + KV Cache (feedback.ts)",
+        userAction:
+          "Reads Markdown tables, LaTeX formulas, and clicks inline citation chips to inspect source pages; optionally submits feedback.",
+        systemAction:
+          "TanStack Virtual renders message history at 60fps; verified high-confidence answers write into self-improving KV cache with hit-scaled TTL and log telemetry to ASI learning tables.",
+        guarantee: "Fast, resilient student UX that improves cache hit efficiency organically over time.",
+      },
+    ],
+    moduleGroups: [
+      "All",
+      "17-Module Edge ASI Engine",
+      "Multimodal Ingestion & DB",
+      "Frontend PWA & Edge Security",
+    ],
+    modules: [
+      {
+        code: "ASI-01",
+        name: "Query Intelligence (classifier, router, rewriter, sub-question)",
+        group: "17-Module Edge ASI Engine",
+        summary: "Intent detection, semantic query rewriting, and conditional multi-hop decomposition.",
+        capabilities: [
+          "Rule-based classifier detects text, table, image, and compound query shapes at $0 cost",
+          "Groq-powered query rewriter expands academic acronyms (TA, KP, KKN, SKS, IPK)",
+          "Sub-question engine splits multi-part regulations into atomic retrievable queries",
+        ],
+      },
+      {
+        code: "ASI-02",
+        name: "Quad-Fusion Retrieval, Multi-Hop, Rerank & Compression",
+        group: "17-Module Edge ASI Engine",
+        summary: "Score-aware hybrid retrieval combining vector semantics, Indonesian FTS, tables, and image metadata.",
+        capabilities: [
+          "Dynamic Score-Aware Quad-Fusion D-RRF fusing Neon pgvector (768-dim) + tsvector('indonesian')",
+          "Multi-hop loop follows cross-references between thesis chapters and appendix tables",
+          "Reranker & context compressor strip noise so LLM context stays sharp and token-efficient",
+        ],
+      },
+      {
+        code: "ASI-03",
+        name: "5-Layer Anti-Hallucination, Self-Critic & Self-Improver",
+        group: "17-Module Edge ASI Engine",
+        summary: "Closed-loop faithfulness verification preventing unsupported academic claims.",
+        capabilities: [
+          "Grounding validator combines Jaccard similarity + exact phrase matching against retrieved chunks",
+          "Groq Self-Critic scores faithfulness (0–1) and triggers corrective.ts retries when < 0.80",
+          "Parallel self-improver, swarm, and feedback modules track quality telemetry across 100-query evals",
+        ],
+      },
+      {
+        code: "ASI-04",
+        name: "4-LLM Circuit-Breaker Cascade & Self-Improving KV Cache",
+        group: "17-Module Edge ASI Engine",
+        summary: "Zero-downtime multi-provider routing paired with hit-scaled L1/L2 Cloudflare KV caching.",
+        capabilities: [
+          "Automatic failover chain: Gemini 2.5/2.0 Flash -> Groq -> Cohere Command-A -> OpenRouter free",
+          "Circuit breaker opens after 5 provider failures in 1 minute via ProviderRateLimiterDO",
+          "L1 exact + L2 semantic cache with dynamic TTL and instant invalidation on document update",
+        ],
+      },
+      {
+        code: "ING-01",
+        name: "Multimodal Ingestion Pipeline (unpdf, mammoth, AcademicChunker)",
+        group: "Multimodal Ingestion & DB",
+        summary: "Automated parsing and hierarchical indexing for academic PDF and DOCX guidebooks.",
+        capabilities: [
+          "Extracts 144+ pages, 40 Markdown/JSON tables (extracted_tables), and 133 R2 images (extracted_images)",
+          "Parent-child hierarchy-aware chunking preserving Bab -> Sub-bab -> Pasal context",
+          "Normalized Neon Serverless PostgreSQL schema with document_versions and soft-delete flags",
+        ],
+      },
+      {
+        code: "FE-01",
+        name: "Next.js Virtualized Chat PWA, Admin Console & Mock Mode",
+        group: "Frontend PWA & Edge Security",
+        summary: "60fps conversational research UI, admin corpus management, and zero-key recruiter dev mode.",
+        capabilities: [
+          "TanStack Virtual message virtualization, react-markdown + GFM tables + LaTeX math + voice input",
+          "Admin dashboard (/admin/dashboard) with JWT auth, stats cards, upload dialog, & ASI learning logs",
+          "OpenAPI-generated typed client (openapi.yaml), PWA sw.js, driver.js tour, & Mock Engine Mode",
+        ],
+      },
+      {
+        code: "SEC-01",
+        name: "Edge License Guard & SQLite Durable Object Rate Limiters",
+        group: "Frontend PWA & Edge Security",
+        summary: "Production edge hardening defending API routes, quotas, and intellectual property.",
+        capabilities: [
+          "Origin/Domain Binding + Owner Secret Token returns 403 Forbidden on unauthorized clones",
+          "RateLimiterDO & ProviderRateLimiterDO (SQLite-backed Durable Objects) cap abuse across 350 users",
+          "Strict security headers, input sanitization, and RPD quota monitor (rpd-tracker.ts)",
+        ],
+      },
+    ],
+    architecture: [
+      { id: "br-fe", label: "Next.js PWA + Admin", sublabel: "TanStack Virtual · LaTeX · Voice", layer: "client" },
+      { id: "br-edge", label: "Cloudflare Workers + Hono", sublabel: "17 ASI Modules · 2 SQLite DOs", layer: "orchestration" },
+      { id: "br-llm", label: "4-LLM Circuit Cascade", sublabel: "Gemini · Groq · Cohere · OpenRouter", layer: "ai" },
+      { id: "br-db", label: "Neon pgvector + KV + R2", sublabel: "768-dim + ID FTS · 100/100 Eval", layer: "data" },
+    ],
+    invariants: [
+      {
+        title: "5-Layer Anti-Hallucination & Citation Enforcement",
+        category: "AI Grounding",
+        detail: "Combines strict abstain prompts, >= 0.82 / < 0.55 retrieval thresholds, mandatory [Document, Hal X] citations, Jaccard grounding checks, and corrective regeneration when score < 0.80.",
+      },
+      {
+        title: "Automatic 4-Provider Circuit-Breaker Failover",
+        category: "High Availability",
+        detail: "Trips after 5 errors/minute via ProviderRateLimiterDO and seamlessly cascades across Gemini, Groq, Cohere Command-A, and OpenRouter within $0/month free-tier budgets.",
+      },
+      {
+        title: "Edge License Guard & Durable Object Rate Limiting",
+        category: "Edge Security",
+        detail: "Origin/Domain binding and Owner Secret verification protect Cloudflare Worker endpoints while SQLite Durable Objects guarantee fair concurrency for 350 users.",
+      },
+      {
+        title: "Versioned Corpus & Automatic KV Cache Invalidation",
+        category: "Data Consistency",
+        detail: "Document re-uploads soft-delete superseded chunks (is_active = false) and immediately invalidate affected KV cache entries so outdated academic rules are never served.",
+      },
+    ],
+    techStack: [
+      "Cloudflare Workers",
+      "Hono 4.7 + Zod",
+      "SQLite Durable Objects",
+      "Cloudflare KV + R2",
+      "Neon Serverless PostgreSQL",
+      "pgvector (768-dim) + ID FTS",
+      "Next.js + React + Shadcn UI",
+      "TanStack Virtual",
+      "Gemini · Groq · Cohere · OpenRouter",
+      "unpdf + mammoth.js",
     ],
   },
 };

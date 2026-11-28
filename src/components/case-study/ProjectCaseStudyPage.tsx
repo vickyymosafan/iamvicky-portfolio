@@ -226,6 +226,18 @@ export function ProjectCaseStudyPage({
                     <span>{study.repoLabel}</span>
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </RippleLink>
+                  {study.secondaryLink ? (
+                    <RippleLink
+                      href={study.secondaryLink.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-surface-elevated px-5 py-3 font-mono text-xs font-semibold text-foreground hover:border-primary hover:text-primary sm:text-sm"
+                    >
+                      <Github className="h-4 w-4" aria-hidden="true" />
+                      <span>{study.secondaryLink.label}</span>
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                    </RippleLink>
+                  ) : null}
                 </div>
               </div>
 

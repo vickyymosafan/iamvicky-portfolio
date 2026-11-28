@@ -943,7 +943,7 @@ function ArvenWorkerQueuesScreen() {
 }
 
 /* ============================================================================
-   NEXAPIP MARKETPLACE — 4 VISUAL UI/UX SCREENS
+   NEXAPIP MARKETPLACE — 4 REAL UI/UX SCREENSHOTS & INTERACTIVE TERMINALS
    Orvyn Charcoal #090A09 / Surface #101210 / Raised #161916 / Border #2D332C /
    Chartreuse-Lime #C8F970 / Ink #F4F6F4
    ============================================================================ */
@@ -952,31 +952,33 @@ const NEXAPIP_PRODUCTS = [
   {
     id: "quantgridpro",
     name: "QuantGridPro v6.0",
-    category: "Adaptive Grid · XAUUSD / EURUSD",
-    priceIdr: "Rp 1.850.000",
-    netProfit: "+184.6%",
+    category: "Grid & Hedging · XAUUSD / EURUSD / GBPUSD",
+    priceIdr: "Rp 890.000",
+    promoNote: "Promo -26% (Normal Rp 1.200.000)",
+    netProfit: "+247.8%",
     maxDd: "8.4%",
     profitFactor: "2.48",
     winRate: "74.2%",
     sharpe: "3.12",
     trades: "1,428",
     sha256: "9f4b21c8e7d3a049...7e12c71a",
-    mt5Build: "Build 4410+",
+    mt5Build: "Build 4260+ · 238.6 KB",
     equityPoints: "10,130 60,118 110,112 160,116 210,94 260,82 310,66 360,54 410,36 470,18",
   },
   {
     id: "scalpzone",
     name: "ScalpZone EA v5.10",
-    category: "Precision Scalping · EURUSD / USDJPY",
-    priceIdr: "Rp 1.450.000",
-    netProfit: "+126.2%",
+    category: "Scalper ECN · XAUUSD / EURUSD / GBPUSD",
+    priceIdr: "Rp 800.000",
+    promoNote: "Promo -20% (Normal Rp 1.000.000 · 5.0★)",
+    netProfit: "+168.4%",
     maxDd: "5.1%",
     profitFactor: "2.21",
     winRate: "69.8%",
     sharpe: "2.89",
     trades: "2,190",
     sha256: "4a88e01f9c24bb53...c4902d0e",
-    mt5Build: "Build 4410+",
+    mt5Build: "Build 4260+ · .EX5 Asli",
     equityPoints: "10,132 60,124 110,110 160,104 210,98 260,88 310,74 360,60 410,44 470,28",
   },
 ];
@@ -997,7 +999,7 @@ function NexaPipCatalogTesterScreen() {
       >
         <div className="flex items-center gap-2 font-mono text-xs font-bold">
           <TrendingUp className="h-4 w-4" style={{ color: "#C8F970" }} aria-hidden="true" />
-          <span>NEXAPIP MARKET · 99,9% TICK RIIL TELEMETRY</span>
+          <span>NEXAPIP /market · REAL 1440px LIVE APP SCREENSHOT</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {NEXAPIP_PRODUCTS.map((prod) => {
@@ -1020,98 +1022,86 @@ function NexaPipCatalogTesterScreen() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 p-4 sm:p-6 lg:grid-cols-12">
-        {/* SVG Equity Curve + Metrics */}
-        <div className="space-y-4 lg:col-span-7">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div>
-              <h4 className="font-heading text-xl font-bold">{active.name}</h4>
-              <p className="font-mono text-xs" style={{ color: "#A9B4A8" }}>
-                {active.category} · MT5 {active.mt5Build}
-              </p>
-            </div>
-            <span
-              className="rounded-full px-3 py-1 font-mono text-xs font-bold"
-              style={{ backgroundColor: "#C8F970", color: "#090A09" }}
-            >
-              {active.priceIdr} · Lifetime
-            </span>
-          </div>
-
+      {/* Real Live /market Screenshot + Equity Artwork */}
+      <div className="space-y-5 p-4 sm:p-6">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <div
-            className="rounded-xl border p-4"
+            className="overflow-hidden rounded-xl border lg:col-span-8"
             style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
           >
-            <div className="mb-2 flex items-center justify-between font-mono text-[11px]" style={{ color: "#A9B4A8" }}>
-              <span>MT5 Strategy Tester Equity Curve (99,9% Tick Riil)</span>
-              <span style={{ color: "#C8F970" }}>Net {active.netProfit}</span>
-            </div>
-            <svg
-              viewBox="0 0 480 150"
-              className="h-36 w-full"
-              role="img"
-              aria-label={`Simulated MT5 Strategy Tester equity curve for ${active.name}`}
+            <div
+              className="flex items-center justify-between border-b px-3 py-2 font-mono text-[11px]"
+              style={{ borderColor: "#1F231F", color: "#A9B4A8" }}
             >
-              <defs>
-                <linearGradient id="nexapip-eq-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#C8F970" stopOpacity="0.28" />
-                  <stop offset="100%" stopColor="#C8F970" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-              <line x1="10" y1="35" x2="470" y2="35" stroke="#1F231F" strokeWidth="1" />
-              <line x1="10" y1="80" x2="470" y2="80" stroke="#1F231F" strokeWidth="1" />
-              <line x1="10" y1="125" x2="470" y2="125" stroke="#1F231F" strokeWidth="1" />
-              <polygon
-                points={`${active.equityPoints} 470,140 10,140`}
-                fill="url(#nexapip-eq-fill)"
+              <span>Live Capture · nexapip.id/market (Desktop 1440px)</span>
+              <span style={{ color: "#C8F970" }}>Orvyn Charcoal + Lime</span>
+            </div>
+            <Image
+              src="/images/case-studies/nexapip-market-ui.jpg"
+              alt="Live desktop screenshot of NexaPip Marketplace /market catalog displaying ScalpZone EA v5.10 and QuantGridPro v6.0 cards with Lifetime IDR pricing and strategy filters"
+              width={1440}
+              height={1780}
+              className="h-auto max-h-[460px] w-full object-cover object-top"
+              priority
+            />
+          </div>
+
+          <div className="flex flex-col justify-between gap-4 lg:col-span-4">
+            <div
+              className="overflow-hidden rounded-xl border"
+              style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+            >
+              <Image
+                src="/images/case-studies/nexapip-equity-panel.webp"
+                alt="NexaPip Equity Curve +247.8% official visual panel"
+                width={640}
+                height={640}
+                className="h-auto w-full object-cover"
               />
-              <polyline
-                fill="none"
-                stroke="#C8F970"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={active.equityPoints}
-              />
-            </svg>
+            </div>
+            <div
+              className="rounded-xl border p-3.5 space-y-1.5"
+              style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+            >
+              <p className="font-mono text-[11px] font-bold" style={{ color: "#C8F970" }}>
+                {active.name} · {active.priceIdr}
+              </p>
+              <p className="font-mono text-[11px]" style={{ color: "#A9B4A8" }}>
+                {active.promoNote}
+              </p>
+              <p className="font-mono text-[11px]" style={{ color: "#D7FB94" }}>
+                PF {active.profitFactor} · DD {active.maxDd} · {active.mt5Build}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Tabular Strategy Metrics Grid */}
-        <div className="flex flex-col justify-between space-y-3 lg:col-span-5">
-          <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { label: "Net Profit", value: active.netProfit, highlight: true },
-              { label: "Max Drawdown", value: active.maxDd, highlight: false },
-              { label: "Profit Factor", value: active.profitFactor, highlight: true },
-              { label: "Win Rate", value: active.winRate, highlight: false },
-              { label: "Sharpe Ratio", value: active.sharpe, highlight: false },
-              { label: "Total Trades", value: active.trades, highlight: false },
-            ].map((m) => (
-              <div
-                key={m.label}
-                className="rounded-xl border p-3"
-                style={{ backgroundColor: "#161916", borderColor: "#2D332C" }}
+        {/* Interactive Strategy Tester Metrics Bar */}
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          {[
+            { label: "Net Profit", value: active.netProfit, highlight: true },
+            { label: "Max Drawdown", value: active.maxDd, highlight: false },
+            { label: "Profit Factor", value: active.profitFactor, highlight: true },
+            { label: "Win Rate", value: active.winRate, highlight: false },
+            { label: "Sharpe Ratio", value: active.sharpe, highlight: false },
+            { label: "Total Trades", value: active.trades, highlight: false },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border p-3"
+              style={{ backgroundColor: "#161916", borderColor: "#2D332C" }}
+            >
+              <p className="font-mono text-[11px]" style={{ color: "#A9B4A8" }}>
+                {m.label}
+              </p>
+              <p
+                className="mt-1 font-mono text-base font-bold tabular-nums"
+                style={{ color: m.highlight ? "#C8F970" : "#F4F6F4" }}
               >
-                <p className="font-mono text-[11px]" style={{ color: "#A9B4A8" }}>
-                  {m.label}
-                </p>
-                <p
-                  className="mt-1 font-mono text-base font-bold tabular-nums"
-                  style={{ color: m.highlight ? "#C8F970" : "#F4F6F4" }}
-                >
-                  {m.value}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div
-            className="rounded-xl border p-3 font-mono text-[11px]"
-            style={{ backgroundColor: "#101210", borderColor: "#2D332C", color: "#D7FB94" }}
-          >
-            SHA-256 Vault: {active.sha256}
-          </div>
+                {m.value}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -1122,7 +1112,7 @@ const EX5_SAMPLES = [
   {
     id: "valid-ex5",
     filename: "QuantGridPro_v6.0.ex5",
-    size: "428 KB",
+    size: "238.6 KB",
     magic: "EX5\\0 (MetaEditor 5 Compiled Binary)",
     verdict: "PASS" as const,
     checks: [
@@ -1178,7 +1168,7 @@ function NexaPipEx5VaultScreen() {
       >
         <div className="flex items-center gap-2 font-mono text-xs font-bold">
           <FileCheck2 className="h-4 w-4" style={{ color: "#C8F970" }} aria-hidden="true" />
-          <span>src/domain/ex5.ts · BINARY VAULT INSPECTOR</span>
+          <span>/market/quantgridpro-v6 + src/domain/ex5.ts VAULT INSPECTOR</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {EX5_SAMPLES.map((item) => {
@@ -1201,28 +1191,63 @@ function NexaPipEx5VaultScreen() {
         </div>
       </div>
 
-      <div className="space-y-4 p-4 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4" style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}>
-          <div className="font-mono text-xs space-y-1">
-            <p className="font-bold text-sm">{sample.filename}</p>
-            <p style={{ color: "#A9B4A8" }}>
-              Payload Size: {sample.size} · Detected Header: {sample.magic}
-            </p>
-          </div>
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 font-mono text-xs font-bold"
-            style={{
-              backgroundColor: sample.verdict === "PASS" ? "#C8F970" : "#FCA5A5",
-              color: "#090A09",
-            }}
+      <div className="space-y-5 p-4 sm:p-6">
+        {/* Real Product Detail Screenshot + Official .EX5 Validation Panel */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div
+            className="overflow-hidden rounded-xl border lg:col-span-7"
+            style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
           >
-            {sample.verdict === "PASS" ? (
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            ) : (
-              <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-            <span>{sample.verdict === "PASS" ? "VAULT ACCEPTED" : "UPLOAD REJECTED"}</span>
-          </span>
+            <div
+              className="flex items-center justify-between border-b px-3 py-2 font-mono text-[11px]"
+              style={{ borderColor: "#1F231F", color: "#A9B4A8" }}
+            >
+              <span>Live Capture · /market/quantgridpro-v6</span>
+              <span style={{ color: "#C8F970" }}>Mayar Checkout + 6 Tabs</span>
+            </div>
+            <Image
+              src="/images/case-studies/nexapip-product-detail-ui.jpg"
+              alt="Live desktop screenshot of NexaPip QuantGridPro v6.0 detail page showing Lifetime IDR Rp 890.000 checkout card, technical specifications, and strategy architecture"
+              width={1440}
+              height={2200}
+              className="h-auto max-h-[380px] w-full object-cover object-top"
+            />
+          </div>
+
+          <div
+            className="flex flex-col justify-between overflow-hidden rounded-xl border lg:col-span-5"
+            style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+          >
+            <Image
+              src="/images/case-studies/nexapip-validation-panel.webp"
+              alt="NexaPip Binary .EX5 Validation SHA-256 Security Check MT5 64-bit Verified artwork"
+              width={960}
+              height={540}
+              className="h-auto w-full object-cover"
+            />
+            <div className="space-y-2 p-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-mono text-xs font-bold">{sample.filename}</p>
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 font-mono text-[11px] font-bold"
+                  style={{
+                    backgroundColor: sample.verdict === "PASS" ? "#C8F970" : "#FCA5A5",
+                    color: "#090A09",
+                  }}
+                >
+                  {sample.verdict === "PASS" ? (
+                    <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
+                  <span>{sample.verdict === "PASS" ? "VAULT ACCEPTED" : "UPLOAD REJECTED"}</span>
+                </span>
+              </div>
+              <p className="font-mono text-[11px]" style={{ color: "#A9B4A8" }}>
+                Size: {sample.size} · Header: {sample.magic}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -1272,7 +1297,7 @@ function NexaPipBuyerLibraryScreen() {
         <span className="font-mono text-xs font-bold" style={{ color: "#C8F970" }}>
           {view === "buyer"
             ? "/library · KOLEKSI SAYA (LIFETIME OWNERSHIP)"
-            : "/admin · SELLER RELEASE STUDIO"}
+            : "/admin · SELLER RELEASE STUDIO VISUALS"}
         </span>
         <div className="flex gap-1.5">
           <button
@@ -1300,19 +1325,47 @@ function NexaPipBuyerLibraryScreen() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6">
+      <div className="space-y-5 p-4 sm:p-6">
+        {/* Official Studio Dashboard & .EX5 Upload Visuals from NexaPip Repo */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div
+            className="overflow-hidden rounded-xl border"
+            style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+          >
+            <Image
+              src="/images/case-studies/nexapip-studio-dashboard.webp"
+              alt="NexaPip EA Product Dashboard visual showing Lifetime Revenue IDR, Total Licenses, and Release Velocity"
+              width={1024}
+              height={576}
+              className="h-auto w-full object-cover"
+            />
+          </div>
+          <div
+            className="overflow-hidden rounded-xl border"
+            style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+          >
+            <Image
+              src="/images/case-studies/nexapip-upload-dropzone.webp"
+              alt="NexaPip Upload .EX5 Studio dropzone visual component"
+              width={1024}
+              height={576}
+              className="h-auto w-full object-cover"
+            />
+          </div>
+        </div>
+
         {view === "buyer" ? (
           <div className="space-y-3">
             {[
               {
                 name: "QuantGridPro v6.0",
-                orderId: "ORD-NXP-2026-0194 · PAID via QRIS",
+                orderId: "ORD-NXP-2026-0194 · PAID Rp 890.000 via QRIS",
                 sha: "sha256:9f4b21c8e7d3...c71a",
                 downloads: "3 logged fetches",
               },
               {
                 name: "ScalpZone EA v5.10",
-                orderId: "ORD-NXP-2026-0211 · PAID via BCA VA",
+                orderId: "ORD-NXP-2026-0211 · PAID Rp 800.000 via BCA VA",
                 sha: "sha256:4a88e01f9c24...2d0e",
                 downloads: "1 logged fetch",
               },
@@ -1411,12 +1464,31 @@ function NexaPipMayarCircuitScreen() {
 
   return (
     <div
-      className="overflow-hidden rounded-2xl border p-4 sm:p-6"
+      className="overflow-hidden rounded-2xl border p-4 sm:p-6 space-y-5"
       style={{ backgroundColor: "#090A09", borderColor: "#2D332C", color: "#F4F6F4" }}
     >
-      <p className="mb-4 font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "#C8F970" }}>
-        NexaPipMarketplaceFlow · 4-Stage Verified Circuit
-      </p>
+      <div
+        className="overflow-hidden rounded-xl border"
+        style={{ backgroundColor: "#101210", borderColor: "#2D332C" }}
+      >
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 border-b px-3.5 py-2.5 font-mono text-[11px]"
+          style={{ borderColor: "#1F231F", color: "#A9B4A8" }}
+        >
+          <span>Full-Page Live Capture · nexapip.id/ (Scroll inside frame to explore all 5 chapters)</span>
+          <span style={{ color: "#C8F970" }}>3D Mascot · Circuit · .EX5 · Studio</span>
+        </div>
+        <div data-lenis-prevent className="max-h-[460px] overflow-y-auto">
+          <Image
+            src="/images/case-studies/nexapip-home-full.jpg"
+            alt="Full-page live desktop screenshot of NexaPip Marketplace homepage showing 3D mascot hero, 4-stage neon-lime circuit, .EX5 security shield, featured EA cards, and Developer Studio"
+            width={1440}
+            height={5200}
+            className="h-auto w-full object-contain"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stages.map((st) => (
           <div
@@ -1442,7 +1514,7 @@ function NexaPipMayarCircuitScreen() {
 }
 
 /* ============================================================================
-   CRAFTRIG MCP GOVERNANCE RIG — 4 VISUAL UI/UX SCREENS
+   CRAFTRIG MCP GOVERNANCE RIG — 4 HIGH-DPI STUDIO VISUAL PLATES + TELEMETRY
    Obsidian #0B0E15 / Panel #151B27 / Amber #F5A623 / Cyan #38BDF8 / Pass #34D399
    ============================================================================ */
 
@@ -1493,7 +1565,7 @@ function CraftrigDagLocksScreen() {
       >
         <div className="flex items-center gap-2 font-mono text-xs font-bold">
           <GitBranch className="h-4 w-4" style={{ color: "#F5A623" }} aria-hidden="true" />
-          <span>KAHN TOPOLOGICAL DAG · EXCLUSIVE FILE-LOCK MATRIX</span>
+          <span>KAHN TOPOLOGICAL DAG · EXCLUSIVE FILE-LOCK STUDIO</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {CRAFTRIG_WAVES.map((w) => {
@@ -1516,15 +1588,26 @@ function CraftrigDagLocksScreen() {
         </div>
       </div>
 
-      <div className="space-y-3 p-4 sm:p-6">
+      <div className="space-y-4 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#243045" }}>
+          <Image
+            src="/images/case-studies/craftrig-dag-studio.png"
+            alt="Craftrig MCP Studio visual showing Kahn Critical-Path DAG across 6 dependency waves, connected Claude Code and Google Antigravity hosts, and Exclusive Write Locks panel with 0 collisions"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+            priority
+          />
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
           <span style={{ color: "#38BDF8" }}>
-            Active Wave: {activeWave.label} ({activeWave.criticalDepth})
+            Inspecting Live Wave: {activeWave.label} ({activeWave.criticalDepth})
           </span>
           <span style={{ color: "#34D399" }}>0 Path Overlap Collisions · Lease Heartbeat ON</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-2.5">
           {activeWave.tasks.map((t) => (
             <div
               key={t.role}
@@ -1608,26 +1691,14 @@ function CraftrigPlaywrightQaScreen() {
       </div>
 
       <div className="space-y-4 p-4 sm:p-6">
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          {[
-            { label: "Axe Violations", value: "0", color: "#34D399" },
-            { label: "Contrast Failures", value: "0", color: "#34D399" },
-            { label: "Doc Overflow", value: "0 px", color: "#38BDF8" },
-            { label: "Reduced Motion Hidden", value: "0", color: "#F5A623" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border p-3 font-mono"
-              style={{ backgroundColor: "#151B27", borderColor: "#243045" }}
-            >
-              <p className="text-[11px]" style={{ color: "#94A3B8" }}>
-                {stat.label}
-              </p>
-              <p className="mt-1 text-lg font-bold" style={{ color: stat.color }}>
-                {stat.value}
-              </p>
-            </div>
-          ))}
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#243045" }}>
+          <Image
+            src="/images/case-studies/craftrig-playwright-qa.png"
+            alt="Craftrig MCP 13-Viewport Dual-Theme Playwright Visual and Accessibility QA Console showing side-by-side Dark 1440px, Light 1440px, and Mobile 390px audit frames with 0 Axe Violations and 0px overflow"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+          />
         </div>
 
         <div
@@ -1661,65 +1732,43 @@ function CraftrigPlaywrightQaScreen() {
 function CraftrigBlueprintSqliteScreen() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border p-4 sm:p-6"
+      className="overflow-hidden rounded-2xl border p-4 sm:p-6 space-y-4"
       style={{ backgroundColor: "#0B0E15", borderColor: "#243045", color: "#F5F6F8" }}
     >
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#243045" }}>
+        <Image
+          src="/images/case-studies/craftrig-blueprint-sqlite.png"
+          alt="Craftrig MCP Blueprint Architect Spec-First Compiler and Lean node:sqlite WAL 50 MB Evidence Diet visual dashboard"
+          width={1280}
+          height={760}
+          className="h-auto w-full object-contain"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div
-          className="rounded-xl border p-4 space-y-3"
+          className="rounded-xl border p-4 space-y-1.5"
           style={{ backgroundColor: "#151B27", borderColor: "#243045" }}
         >
           <div className="flex items-center gap-2 font-mono text-xs font-bold" style={{ color: "#F5A623" }}>
             <Sparkles className="h-4 w-4" aria-hidden="true" />
-            <span>BLUEPRINT ARCHITECT PIPELINE</span>
+            <span>Spec-First REQ-ID Compilation</span>
           </div>
-          {[
-            "1. WorkspaceRepoScanner detects Next.js/NestJS + scripts",
-            "2. Adaptive Deep Interview captures architecture & security rules",
-            "3. Blueprint Linter flags contradictory constraints pre-code",
-            "4. SkillRouter + EffortScaler maps 1 primary skill per REQ-ID",
-          ].map((line) => (
-            <div
-              key={line}
-              className="rounded-lg border px-3 py-2 font-mono text-xs"
-              style={{ backgroundColor: "#0B0E15", borderColor: "#243045", color: "#E2E8F0" }}
-            >
-              {line}
-            </div>
-          ))}
+          <p className="text-xs leading-relaxed" style={{ color: "#CBD5E1" }}>
+            WorkspaceRepoScanner + Contradiction Linter + SkillRouter prevent scope drift before a single code line is edited.
+          </p>
         </div>
 
         <div
-          className="rounded-xl border p-4 space-y-3"
+          className="rounded-xl border p-4 space-y-1.5"
           style={{ backgroundColor: "#151B27", borderColor: "#243045" }}
         >
           <div className="flex items-center gap-2 font-mono text-xs font-bold" style={{ color: "#38BDF8" }}>
             <Database className="h-4 w-4" aria-hidden="true" />
-            <span>LEAN node:sqlite WAL &amp; 50 MB EVIDENCE DIET</span>
+            <span>Zero-Bloat Native node:sqlite WAL</span>
           </div>
-          <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
-            {[
-              { k: "Page Cache Cap", v: "512 KB" },
-              { k: "WAL Bound", v: "1 MB max" },
-              { k: "Idle Auto-Close", v: "30s -> 0 RAM" },
-              { k: "Plan Archive", v: "Brotli .json.br" },
-            ].map((item) => (
-              <div
-                key={item.k}
-                className="rounded-lg border p-3"
-                style={{ backgroundColor: "#0B0E15", borderColor: "#243045" }}
-              >
-                <p className="text-[11px]" style={{ color: "#94A3B8" }}>
-                  {item.k}
-                </p>
-                <p className="mt-1 font-bold" style={{ color: "#34D399" }}>
-                  {item.v}
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="font-mono text-[11px]" style={{ color: "#CBD5E1" }}>
-            SHA-256 content-addressed failure screenshots + LRU quota eviction keep .craftrig/ strictly &lt;= 50 MB.
+          <p className="text-xs leading-relaxed" style={{ color: "#CBD5E1" }}>
+            512 KB page cache cap, 1 MB WAL bound, 30s idle auto-close, SHA-256 JPEG dedup, and Brotli .json.br archives.
           </p>
         </div>
       </div>
@@ -1728,61 +1777,341 @@ function CraftrigBlueprintSqliteScreen() {
 }
 
 function CraftrigQualityGateScreen() {
-  const checkpoints = [
-    "responsive",
-    "layout",
-    "interaction",
-    "typography-color",
-    "motion",
-    "accessibility",
-    "performance",
-    "security",
-    "final-regression",
-  ];
-
   return (
     <div
       className="overflow-hidden rounded-2xl border p-4 sm:p-6 space-y-4"
       style={{ backgroundColor: "#0B0E15", borderColor: "#243045", color: "#F5F6F8" }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 font-mono text-xs font-bold" style={{ color: "#34D399" }}>
+      <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#243045" }}>
+        <Image
+          src="/images/case-studies/craftrig-architecture-gate.png"
+          alt="Craftrig MCP Clean Architecture 4-layer diagram and Zero-Trust Evidence Quality Gate showing 9/9 PASS checkpoints and noPush local commit safety"
+          width={1280}
+          height={760}
+          className="h-auto w-full object-contain"
+        />
+      </div>
+
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3.5 font-mono text-xs"
+        style={{ backgroundColor: "#111723", borderColor: "#243045" }}
+      >
+        <div className="flex items-center gap-2 font-bold" style={{ color: "#34D399" }}>
           <Terminal className="h-4 w-4" aria-hidden="true" />
-          <span>craftrig_evaluate_quality_gate · STATUS: PASS</span>
+          <span>craftrig_evaluate_quality_gate -&gt; PASS (9/9 evidence-backed checkpoints)</span>
         </div>
         <span
-          className="rounded-full px-3 py-1 font-mono text-[11px] font-bold"
+          className="rounded-full px-3 py-1 text-[11px] font-bold"
           style={{ backgroundColor: "#3D2B0D", color: "#F5A623" }}
         >
           noPush: true · LOCAL COMMIT ONLY
         </span>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {checkpoints.map((dim) => (
-          <div
-            key={dim}
-            className="flex items-center justify-between rounded-lg border px-3 py-2 font-mono text-xs"
-            style={{ backgroundColor: "#151B27", borderColor: "#243045" }}
-          >
-            <span>{dim}</span>
-            <span className="font-bold" style={{ color: "#34D399" }}>
-              PASS
-            </span>
-          </div>
-        ))}
+/* ============================================================================
+   BEYOND RAG: ARTIFICIAL SUPER INTELLIGENCE — 4 VISUAL UI/UX SCREENS
+   Deep Teal-Obsidian #061014 / Glass #0D1D25 / Electric Cyan #22D3EE /
+   Grounded Emerald #34D399 / Multi-Hop Amber #F5A623
+   ============================================================================ */
+
+function BeyondRagChatUiScreen() {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{ backgroundColor: "#061014", borderColor: "#1D3B46", color: "#E2F8FA" }}
+    >
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 font-mono text-xs"
+        style={{ backgroundColor: "#0A181F", borderColor: "#1D3B46" }}
+      >
+        <span className="font-bold" style={{ color: "#22D3EE" }}>
+          BEYOND RAG · VIRTUALIZED 60fps ACADEMIC CHAT UI (NEXT.JS + SHADCN)
+        </span>
+        <span
+          className="rounded-full px-3 py-0.5 text-[11px] font-bold"
+          style={{ backgroundColor: "#0F2F28", color: "#34D399" }}
+        >
+          SELF-CRITIC 0.94 PASS
+        </span>
       </div>
 
+      <div className="space-y-4 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#1D3B46" }}>
+          <Image
+            src="/images/case-studies/beyond-rag-chat-ui.png"
+            alt="Beyond RAG Smartchat AI Assistant UI displaying chat history sidebar, Markdown table, LaTeX formula, clickable page citation badges, voice input, and live ASI reasoning trace"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+            priority
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          {[
+            { label: "TanStack Virtual", detail: "Zero-jank 60fps message scrolling across long academic threads." },
+            { label: "Inline Citations + LaTeX", detail: "Every fact tags [Panduan TA SI 2026, Hal X] with GFM tables & formulas." },
+            { label: "Voice + PWA + Mock Mode", detail: "Speech-to-text input, installable PWA, & local synthetic dev streaming." },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="rounded-xl border p-3.5"
+              style={{ backgroundColor: "#0D1D25", borderColor: "#1D3B46" }}
+            >
+              <p className="font-mono text-[11px] font-bold uppercase" style={{ color: "#22D3EE" }}>
+                {item.label}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: "#CBD5E1" }}>
+                {item.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BeyondRagAdminDashboardScreen() {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{ backgroundColor: "#061014", borderColor: "#1D3B46", color: "#E2F8FA" }}
+    >
       <div
-        className="rounded-xl border p-3.5 font-mono text-xs space-y-1.5"
-        style={{ backgroundColor: "#111723", borderColor: "#243045" }}
+        className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 font-mono text-xs"
+        style={{ backgroundColor: "#0A181F", borderColor: "#1D3B46" }}
       >
-        <p style={{ color: "#F5A623" }}>
-          fileSyncAudit: SHA-256 &amp; mtime verified across all modified workspace paths (0 external conflicts)
-        </p>
-        <p style={{ color: "#CBD5E1" }}>
-          Conventional Commit 1.0.0 ready -&gt; feat(case-studies): add flagship project storytelling and interactive UI/UX pages
-        </p>
+        <span className="font-bold" style={{ color: "#22D3EE" }}>
+          /admin/dashboard · MULTIMODAL PDF/DOCX CORPUS &amp; VERSION CONTROL
+        </span>
+        <span
+          className="rounded-full px-3 py-0.5 text-[11px] font-bold"
+          style={{ backgroundColor: "#3D2B0D", color: "#F5A623" }}
+        >
+          100/100 EVAL BENCHMARK
+        </span>
+      </div>
+
+      <div className="space-y-4 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#1D3B46" }}>
+          <Image
+            src="/images/case-studies/beyond-rag-admin-ui.png"
+            alt="Beyond RAG Admin Document Management Dashboard displaying 100/100 eval accuracy, 842 indexed chunks, 40 tables, 133 images, and PDF/DOCX document corpus table"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const HALLUCINATION_SCENARIOS = [
+  {
+    id: "grounded",
+    label: "High Grounding (0.94)",
+    retrievalScore: "0.91 (>= 0.82 direct pass)",
+    groundingScore: "0.94 (>= 0.80 verified)",
+    action: "SERVE CITED ANSWER + WRITE KV CACHE",
+    verdict: "PASS" as const,
+    note: "All claims matched verbatim against Panduan TA SI 2026 p.34-36 via Jaccard + exact phrase check.",
+  },
+  {
+    id: "retry",
+    label: "Partial Drift (0.68)",
+    retrievalScore: "0.74 (borderline)",
+    groundingScore: "0.68 (< 0.80 critic fail)",
+    action: "TRIGGER corrective.ts MULTI-HOP RETRY (MAX 2x)",
+    verdict: "RETRY" as const,
+    note: "Groq Self-Critic detected missing prerequisite detail; expanded sub-query fetched Bab 3.2 cleanly.",
+  },
+  {
+    id: "abstain",
+    label: "Out-of-Scope (0.31)",
+    retrievalScore: "0.31 (< 0.55 abstain gate)",
+    groundingScore: "Abstained prior to generation",
+    action: "SAFE ABSTAIN — ZERO HALLUCINATION",
+    verdict: "ABSTAIN" as const,
+    note: "Layer 2 Retrieval Gate blocked fabrication and guided student to official academic office.",
+  },
+];
+
+function BeyondRagAsiPipelineScreen() {
+  const [scenarioId, setScenarioId] = useState(HALLUCINATION_SCENARIOS[0].id);
+  const active =
+    HALLUCINATION_SCENARIOS.find((s) => s.id === scenarioId) ?? HALLUCINATION_SCENARIOS[0];
+
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{ backgroundColor: "#061014", borderColor: "#1D3B46", color: "#E2F8FA" }}
+    >
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3"
+        style={{ backgroundColor: "#0A181F", borderColor: "#1D3B46" }}
+      >
+        <span className="font-mono text-xs font-bold" style={{ color: "#22D3EE" }}>
+          17-MODULE ASI ENGINE · INTERACTIVE 5-LAYER GUARD TESTER
+        </span>
+        <div className="flex flex-wrap gap-1.5">
+          {HALLUCINATION_SCENARIOS.map((sc) => {
+            const isSelected = sc.id === active.id;
+            return (
+              <button
+                key={sc.id}
+                type="button"
+                onClick={() => setScenarioId(sc.id)}
+                className="min-h-8 cursor-pointer rounded-full px-3 py-1 font-mono text-[11px] font-bold"
+                style={{
+                  backgroundColor: isSelected ? "#22D3EE" : "#11252E",
+                  color: isSelected ? "#061014" : "#E2F8FA",
+                }}
+              >
+                {sc.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="space-y-4 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#1D3B46" }}>
+          <Image
+            src="/images/case-studies/beyond-rag-asi-pipeline.png"
+            alt="Beyond RAG 17-Module Cloudflare Workers Edge ASI Pipeline and 5-Layer Anti-Hallucination Shield architecture visual"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+          />
+        </div>
+
+        <div
+          className="rounded-xl border p-4 font-mono text-xs space-y-2"
+          style={{ backgroundColor: "#0D1D25", borderColor: "#1D3B46" }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span style={{ color: "#22D3EE" }}>Retrieval: {active.retrievalScore}</span>
+            <span style={{ color: "#F5A623" }}>Grounding: {active.groundingScore}</span>
+            <span
+              className="rounded-full px-3 py-0.5 text-[11px] font-bold"
+              style={{
+                backgroundColor:
+                  active.verdict === "PASS"
+                    ? "#0F2F28"
+                    : active.verdict === "RETRY"
+                    ? "#3D2B0D"
+                    : "#3B1820",
+                color:
+                  active.verdict === "PASS"
+                    ? "#34D399"
+                    : active.verdict === "RETRY"
+                    ? "#F5A623"
+                    : "#FCA5A5",
+              }}
+            >
+              {active.action}
+            </span>
+          </div>
+          <p className="leading-relaxed" style={{ color: "#CBD5E1" }}>
+            {active.note}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LLM_TIERS = [
+  {
+    id: "tier1",
+    label: "Normal (Gemini Primary)",
+    activeProvider: "Gemini 2.5 Flash + Groq ASI Preprocessing",
+    status: "HEALTHY · 700 / 1,500 RPD",
+    detail: "Gemini handles final grounded synthesis & 768-dim embeddings while Groq handles query rewrite & self-critic.",
+  },
+  {
+    id: "tier2",
+    label: "Gemini 429 Failover",
+    activeProvider: "Cohere Command-A (Emergency Cascade)",
+    status: "CIRCUIT OPEN ON TIER 1 (5 fails/1m)",
+    detail: "ProviderRateLimiterDO opens circuit on Gemini and seamlessly routes synthesis to Cohere Command-A with 0 user errors.",
+  },
+  {
+    id: "tier3",
+    label: "All Primary Busy",
+    activeProvider: "OpenRouter Free + KV L1/L2 Cache",
+    status: "LAST-RESORT SAFETY NET ACTIVE",
+    detail: "KV cache serves >80% repeat academic queries in <500ms while OpenRouter free handles uncached edge bursts.",
+  },
+];
+
+function BeyondRagLlmCascadeScreen() {
+  const [tierId, setTierId] = useState(LLM_TIERS[0].id);
+  const activeTier = LLM_TIERS.find((t) => t.id === tierId) ?? LLM_TIERS[0];
+
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{ backgroundColor: "#061014", borderColor: "#1D3B46", color: "#E2F8FA" }}
+    >
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3"
+        style={{ backgroundColor: "#0A181F", borderColor: "#1D3B46" }}
+      >
+        <span className="font-mono text-xs font-bold" style={{ color: "#F5A623" }}>
+          4-LLM CIRCUIT BREAKER &amp; DURABLE OBJECTS SIMULATOR
+        </span>
+        <div className="flex flex-wrap gap-1.5">
+          {LLM_TIERS.map((tier) => {
+            const selected = tier.id === activeTier.id;
+            return (
+              <button
+                key={tier.id}
+                type="button"
+                onClick={() => setTierId(tier.id)}
+                className="min-h-8 cursor-pointer rounded-full px-3 py-1 font-mono text-[11px] font-bold"
+                style={{
+                  backgroundColor: selected ? "#F5A623" : "#11252E",
+                  color: selected ? "#061014" : "#E2F8FA",
+                }}
+              >
+                {tier.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="space-y-4 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-xl border" style={{ borderColor: "#1D3B46" }}>
+          <Image
+            src="/images/case-studies/beyond-rag-llm-cascade.png"
+            alt="Beyond RAG 4-Provider LLM Circuit Breaker and SQLite Durable Objects Edge Guard telemetry visual"
+            width={1280}
+            height={760}
+            className="h-auto w-full object-contain"
+          />
+        </div>
+
+        <div
+          className="rounded-xl border p-4 font-mono text-xs space-y-1.5"
+          style={{ backgroundColor: "#0D1D25", borderColor: "#1D3B46" }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-bold" style={{ color: "#22D3EE" }}>
+              Active Route: {activeTier.activeProvider}
+            </span>
+            <span style={{ color: "#34D399" }}>{activeTier.status}</span>
+          </div>
+          <p className="leading-relaxed" style={{ color: "#CBD5E1" }}>
+            {activeTier.detail}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -1822,6 +2151,14 @@ export function ProjectVisualMockups({ screenId }: { screenId: MockupScreenId })
       return <CraftrigBlueprintSqliteScreen />;
     case "craftrig-quality-gate":
       return <CraftrigQualityGateScreen />;
+    case "beyond-rag-chat-ui":
+      return <BeyondRagChatUiScreen />;
+    case "beyond-rag-admin-dashboard":
+      return <BeyondRagAdminDashboardScreen />;
+    case "beyond-rag-asi-pipeline":
+      return <BeyondRagAsiPipelineScreen />;
+    case "beyond-rag-llm-cascade":
+      return <BeyondRagLlmCascadeScreen />;
     default:
       return (
         <div className="flex items-center gap-2 rounded-xl border border-border bg-surface p-6 font-mono text-xs text-muted">
