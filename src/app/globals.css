@@ -678,6 +678,69 @@ dialog.native-modal::backdrop {
 }
 
 /* ==========================================================================
+   Modern Web Guidance: Accessible Breadcrumbs & Single-Row Scrollable Tabs
+   ========================================================================== */
+.cs-breadcrumb > ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.25rem;
+}
+
+.cs-breadcrumb > ol > li {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.cs-breadcrumb > ol > li + li::before {
+  content: "/" / "";
+  margin-inline: 0.45rem;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.cs-tablist-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 45%, transparent) transparent;
+}
+
+.cs-tab {
+  position: relative;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  scroll-snap-align: start;
+}
+
+.cs-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.65rem;
+  inset-block-end: 0;
+  border-block-end: 2px solid var(--primary);
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .cs-tab[aria-selected="true"]::after {
+    border-block-end-color: Highlight;
+  }
+}
+
+/* ==========================================================================
    CSS Layout & Style Containment for smooth 60fps scrolling
    ========================================================================== */
 .cv-auto-section,

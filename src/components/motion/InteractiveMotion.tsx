@@ -411,9 +411,9 @@ export function TypewriterText({ phrases, prefix, className }: TypewriterTextPro
       <span
         aria-live="off"
         title={phrases.join(" · ")}
-        className="min-w-0 truncate text-ink-secondary"
+        className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-ink-secondary"
       >
-        <span>{visibleText}</span>
+        {visibleText}
         {!shouldReduceMotion && !paused ? (
           <span aria-hidden="true" className="typewriter-caret ml-1" />
         ) : null}
@@ -473,12 +473,10 @@ export function OneShotTypewriter({
 
   return (
     <span aria-label={text} title={text} className={className}>
-      <span>
-        {rendered}
-        {!shouldReduceMotion && !done ? (
-          <span aria-hidden="true" className="typewriter-caret ml-0.5" />
-        ) : null}
-      </span>
+      {rendered}
+      {!shouldReduceMotion && !done ? (
+        <span aria-hidden="true" className="typewriter-caret ml-0.5" />
+      ) : null}
     </span>
   );
 }

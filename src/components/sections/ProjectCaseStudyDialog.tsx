@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useId, useRef } from "react";
-import { CheckCircle2, ExternalLink, Github, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, BookOpen, CheckCircle2, ExternalLink, Github, X } from "lucide-react";
 import { FeaturedProject } from "@/data/portfolio";
+import { hasCaseStudyPage } from "@/data/caseStudies";
 import { ProjectArchitectureDiagram } from "@/components/motion/ProjectArchitectureDiagram";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 
@@ -213,13 +215,28 @@ export function ProjectCaseStudyDialog({
           {/* Footer Links */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-elevated/60 px-5 py-4 sm:px-7">
             <div className="flex flex-wrap items-center gap-2.5">
+              {hasCaseStudyPage(project.id) ? (
+                <Link
+                  href={`/projects/${project.id}`}
+                  onClick={() => dialogRef.current?.close()}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+                >
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
+                  <span>Full UI/UX Case Study</span>
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              ) : null}
               {project.links.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+                  className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 font-mono text-xs font-semibold ${
+                    hasCaseStudyPage(project.id)
+                      ? "border border-border-strong bg-surface text-foreground hover:border-primary hover:text-primary"
+                      : "bg-primary text-primary-foreground hover:bg-primary-hover"
+                  }`}
                 >
                   {link.kind === "github" ? (
                     <Github className="h-4 w-4" aria-hidden="true" />

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   m,
   useMotionValueEvent,
@@ -14,6 +15,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  BookOpen,
   ExternalLink,
   Github,
   Layers,
@@ -28,6 +30,7 @@ import {
   FeaturedProject,
   PROFILE,
 } from "@/data/portfolio";
+import { hasCaseStudyPage } from "@/data/caseStudies";
 import { useSmoothScroll } from "@/components/providers/SmoothScrollProvider";
 import {
   ARCHITECTURAL_EASE,
@@ -93,6 +96,8 @@ function FeaturedProjectCard({
 }: FeaturedCardProps) {
   const { ref, onPointerEnter, onPointerMove } = usePointerSpotlight<HTMLElement>();
   const primaryLink = project.links[0];
+  const hasFullCaseStudy = hasCaseStudyPage(project.id);
+  const caseStudyHref = `/projects/${project.id}`;
 
   return (
     <m.article
@@ -125,25 +130,56 @@ function FeaturedProjectCard({
       </div>
 
       {/* Studio 3D Project Visual */}
-      <div className="relative z-10 aspect-[16/9] w-full overflow-hidden border-b border-border bg-[#0e1117]">
-        <Image
-          src={project.image}
-          alt={`Visual showcase for ${project.title}`}
-          fill
-          sizes="(max-width: 768px) 86vw, 390px"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
-        />
-        <span className="absolute bottom-2.5 left-3 rounded-full border border-white/15 bg-[#0b0e15]/90 px-2.5 py-1 font-mono text-[11px] font-semibold text-[#f5a623]">
-          {project.featuredTag}
-        </span>
-      </div>
+      {hasFullCaseStudy ? (
+        <Link
+          href={caseStudyHref}
+          aria-label={`Open full UI/UX and architecture case study for ${project.title}`}
+          className="relative z-10 block aspect-[16/9] w-full overflow-hidden border-b border-border bg-[#0e1117]"
+        >
+          <Image
+            src={project.image}
+            alt={`Visual showcase for ${project.title}`}
+            fill
+            sizes="(max-width: 768px) 86vw, 390px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+          />
+          <span className="absolute top-2.5 right-3 rounded-full border border-white/20 bg-[#0b0e15]/90 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#f5f6f8]">
+            Full UI/UX Page
+          </span>
+          <span className="absolute bottom-2.5 left-3 rounded-full border border-white/15 bg-[#0b0e15]/90 px-2.5 py-1 font-mono text-[11px] font-semibold text-[#f5a623]">
+            {project.featuredTag}
+          </span>
+        </Link>
+      ) : (
+        <div className="relative z-10 aspect-[16/9] w-full overflow-hidden border-b border-border bg-[#0e1117]">
+          <Image
+            src={project.image}
+            alt={`Visual showcase for ${project.title}`}
+            fill
+            sizes="(max-width: 768px) 86vw, 390px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+          />
+          <span className="absolute bottom-2.5 left-3 rounded-full border border-white/15 bg-[#0b0e15]/90 px-2.5 py-1 font-mono text-[11px] font-semibold text-[#f5a623]">
+            {project.featuredTag}
+          </span>
+        </div>
+      )}
 
       {/* Card Narrative & Actions */}
       <div className="relative z-10 flex flex-1 flex-col justify-between gap-3.5 p-4 sm:p-5">
         <div className="space-y-2">
           <div>
             <h3 className="font-heading text-base font-bold leading-snug text-foreground sm:text-lg">
-              {project.title}
+              {hasFullCaseStudy ? (
+                <Link
+                  href={caseStudyHref}
+                  className="hover:text-primary"
+                >
+                  {project.title}
+                </Link>
+              ) : (
+                project.title
+              )}
             </h3>
             <p className="mt-0.5 truncate font-mono text-[11px] text-muted">
               {project.subtitle}
@@ -169,14 +205,26 @@ function FeaturedProjectCard({
 
         {/* Tactile Ripple Action Row */}
         <div className="flex items-center gap-2.5 pt-1">
-          <RippleButton
-            onClick={() => onInspect(project)}
-            className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
-          >
-            <Layers className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Inspect</span>
-            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </RippleButton>
+          {hasFullCaseStudy ? (
+            <Link
+              href={caseStudyHref}
+              data-case-study-link={project.id}
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+            >
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Case Study</span>
+              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          ) : (
+            <RippleButton
+              onClick={() => onInspect(project)}
+              className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+            >
+              <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Inspect</span>
+              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </RippleButton>
+          )}
 
           {primaryLink ? (
             <RippleLink
@@ -531,22 +579,16 @@ export function WorkSection({ onInspectProject }: WorkSectionProps) {
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <RippleButton
-                onClick={() => {
-                  const top =
-                    filteredProjects[clampedActiveIndex] ??
-                    filteredProjects[0] ??
-                    FEATURED_PROJECTS[0];
-                  if (top) onInspectProject(top);
-                }}
-                className="cta-glow group inline-flex min-h-12 cursor-pointer items-center gap-2.5 rounded-full bg-primary px-6 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:text-sm"
+              <Link
+                href="/projects/buildflow-erp"
+                className="cta-glow group inline-flex min-h-12 items-center gap-2.5 rounded-full bg-primary px-6 py-3 font-mono text-xs font-semibold text-primary-foreground hover:bg-primary-hover sm:text-sm"
               >
-                <span>Inspect Flagship Case Study</span>
+                <span>Explore BuildFlow ERP Case Study</span>
                 <ArrowRight
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
                   aria-hidden="true"
                 />
-              </RippleButton>
+              </Link>
 
               <RippleLink
                 href="#film"
